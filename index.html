@@ -73,11 +73,10 @@ tailwind.config={
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 
 <script>
-// Đặt nền sáng/tối trước khi trang vẽ, tránh chớp trắng
+// Mặc định NỀN SÁNG. Cố ý không theo cài đặt của máy: máy để tối thì trang
+// vẫn sáng. Chỉ chuyển sang tối khi người dùng tự bấm nút.
 (function(){try{
-  var t=localStorage.getItem("sr-theme");
-  var d=t?t==="dark":window.matchMedia("(prefers-color-scheme:dark)").matches;
-  if(d)document.documentElement.classList.add("dark");
+  if(localStorage.getItem("sr-theme")==="dark")document.documentElement.classList.add("dark");
 }catch(e){}})();
 </script>
 
@@ -90,13 +89,60 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
 .mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
 .tnum{font-variant-numeric:tabular-nums}
 
-/* Màu nghiệp vụ: dải độc trên nhãn thuốc BVTV + trạng thái cách ly.
-   Tách riêng khỏi màu chủ đề vì chúng mang nghĩa, không phải trang trí. */
-:root{--ok:#15803d; --ok-bg:#dcfce7; --wait:#a16207; --wait-bg:#fef3c7;
-      --bad:#b91c1c; --bad-bg:#fee2e2; --inf:#1d4ed8; --inf-bg:#dbeafe;
-      --page:hsl(var(--background));}
-.dark{--ok:#4ade80; --ok-bg:#0c2c17; --wait:#fbbf24; --wait-bg:#2e2410;
-      --bad:#f87171; --bad-bg:#2f1516; --inf:#60a5fa; --inf-bg:#122036;}
+/* ===== BẢNG MÀU =====
+   Khối này KHÔNG nằm trong @layer nên thắng token của Franken UI.
+   Cố ý: Franken lo phần component (uk-btn, uk-card…), còn màu thì mình nắm,
+   để bản nền sáng ra đúng ý chứ không phải trắng trơn mặc định.
+   Nền là trắng ngả xanh bạc hà, thẻ trắng tinh nổi lên trên — sáng nhưng
+   không chói, và vẫn giữ được chất đồng ruộng. */
+:root{
+  --background:140 26% 95.5%;    /* nền trang: bạc hà nhạt — đủ đậm để thẻ trắng nổi lên */
+  --foreground:158 32% 13%;      /* mực: xanh rất đậm, không phải đen */
+  --card:0 0% 100%;              /* thẻ: trắng tinh, nổi lên nền */
+  --card-foreground:158 32% 13%;
+  --muted:145 22% 95%;
+  --muted-foreground:158 12% 42%;
+  --primary:142 70% 33%;         /* xanh lúa tươi */
+  --primary-foreground:0 0% 100%;
+  --accent:145 38% 93%;
+  --accent-foreground:158 38% 18%;
+  --border:145 20% 88%;
+  --input:145 20% 88%;
+  --ring:142 70% 33%;
+
+  /* Màu nghiệp vụ: dải độc trên nhãn thuốc BVTV + trạng thái cách ly.
+     Tách khỏi màu chủ đề vì chúng mang nghĩa, không phải trang trí. */
+  --ok:#15803d;   --ok-bg:#d8f5e3;
+  --wait:#c2700a; --wait-bg:#fdefd0;   /* hổ phách ấm, không để ngả nâu đất */
+  --bad:#dc2626;  --bad-bg:#fee2e2;
+  --inf:#2563eb;  --inf-bg:#dbeafe;
+  --page:hsl(var(--background));
+}
+.dark{
+  --background:158 20% 7%;
+  --foreground:150 12% 92%;
+  --card:158 16% 11%;
+  --card-foreground:150 12% 92%;
+  --muted:158 12% 16%;
+  --muted-foreground:150 8% 62%;
+  --primary:142 65% 55%;
+  --primary-foreground:158 45% 8%;
+  --accent:158 14% 17%;
+  --accent-foreground:150 12% 92%;
+  --border:158 12% 19%;
+  --input:158 12% 19%;
+
+  --ok:#4ade80;   --ok-bg:#0c2c17;
+  --wait:#fbbf24; --wait-bg:#2e2410;
+  --bad:#f87171;  --bad-bg:#2f1516;
+  --inf:#60a5fa;  --inf-bg:#122036;
+}
+
+/* Nền sáng: thẻ trắng cần chút bóng mới tách khỏi nền, nếu không sẽ phẳng lì.
+   Nền tối thì bóng vô nghĩa nên bỏ. */
+:root:not(.dark) .uk-card{
+  box-shadow:0 1px 2px rgba(16,44,30,.04), 0 8px 22px -14px rgba(16,44,30,.18);
+}
 .c-ok{color:var(--ok)} .c-wait{color:var(--wait)} .c-bad{color:var(--bad)} .c-inf{color:var(--inf)}
 .b-ok{background:var(--ok)} .b-wait{background:var(--wait)} .b-bad{background:var(--bad)} .b-inf{background:var(--inf)}
 .tag{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600;
@@ -481,8 +527,13 @@ function pTong(){
  if(ok)L+='<div class="c-ok text-3xl font-extrabold tracking-tight md:text-4xl">Mọi thửa gặt được</div>'
   +'<p class="mt-4 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Đã qua thời gian cách ly của tất cả các lần xịt trong vụ.</p>';
  else{
-  L+='<div class="flex flex-wrap items-baseline gap-4"><span class="c-wait text-[4.5rem] font-extrabold leading-[0.85] tracking-tighter md:text-[5.5rem]">'
-   +xau.con+'</span><span class="text-base font-semibold leading-snug">ngày nữa mới được gặt<span class="block text-sm font-normal" style="color:'+V.mf+'">thửa '+esc(xt.ten)+"</span></span></div>";
+  // Số ngày nằm trong một khối hổ phách. Đây là thứ duy nhất trên trang cần
+  // nhìn thấy từ xa, nên cho nó một mảng màu thật chứ không chỉ đổi màu chữ.
+  L+='<div class="flex flex-wrap items-center gap-5">'
+   +'<span class="inline-grid shrink-0 place-items-center rounded-2xl px-7 py-2" style="background:var(--wait-bg)">'
+   +'<span class="c-wait text-[4.5rem] font-extrabold leading-[1.05] tracking-tighter md:text-[5rem]">'+xau.con+"</span></span>"
+   +'<span class="text-lg font-semibold leading-snug">ngày nữa mới được gặt'
+   +'<span class="block text-sm font-normal" style="color:'+V.mf+'">thửa '+esc(xt.ten)+"</span></span></div>";
   L+='<p class="mt-5 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Sớm nhất là <b style="color:hsl(var(--foreground))">'
    +dmy(xau.het)+"</b>. Vì ngày "+dmy(new Date(xau.ng.ngay))+' đã xịt <b style="color:hsl(var(--foreground))">'+esc(xau.ng.thuoc)+"</b>, thời gian cách ly "+xau.ng.phi+" ngày.</p>"}
  L+="</div>";
