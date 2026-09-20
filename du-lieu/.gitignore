@@ -1,4 +1,8 @@
-# File gốc tải từ chinhphu.vn — 6,7 MB, tải lại được bất cứ lúc nào
+# File gốc tải từ chinhphu.vn và cổng tỉnh — tải lại được bất cứ lúc nào
 *.pdf
-# Bản trích chữ thô — sinh lại được từ PDF, chỉ dùng để soi lỗi
+# Bản trích chữ thô, chỉ dùng để dò cấu trúc
 thong-tu-*.txt
+tt28.txt
+# Rác của Python
+__pycache__/
+*.pyc
