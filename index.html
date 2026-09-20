@@ -20,8 +20,39 @@
 }
 </style>
 
+<!-- Franken UI: token màu kiểu shadcn + component thật (uk-btn, uk-card, uk-table…) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0/dist/css/core.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0/dist/css/utilities.min.css">
+
+<!-- KHÔNG dùng utilities.min.css của Franken: đó là bản dựng sẵn tĩnh, không có
+     class giá trị tuỳ ý (text-[4.5rem], grid-cols-[minmax(…)]) lẫn truncate.
+     Tailwind Play sinh class lúc chạy nên có đủ. preflight tắt để khỏi đè
+     lên phần base của Franken. -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={
+  darkMode:"class",
+  corePlugins:{preflight:false},
+  theme:{extend:{
+    colors:{
+      background:"var(--background)", foreground:"var(--foreground)",
+      card:"var(--card)", "card-foreground":"var(--card-foreground)",
+      muted:"var(--muted)", "muted-foreground":"var(--muted-foreground)",
+      primary:"var(--primary)", "primary-foreground":"var(--primary-foreground)",
+      accent:"var(--accent)", "accent-foreground":"var(--accent-foreground)",
+      border:"var(--border)",
+      ok:"var(--ok)", wait:"var(--wait)", bad:"var(--bad)", inf:"var(--inf)",
+      "ok-bg":"var(--ok-bg)", "wait-bg":"var(--wait-bg)",
+      "bad-bg":"var(--bad-bg)", "inf-bg":"var(--inf-bg)",
+      page:"var(--page)"
+    },
+    fontFamily:{
+      sans:['"Be Vietnam Pro"',"system-ui","sans-serif"],
+      mono:['"IBM Plex Mono"',"ui-monospace","monospace"]
+    }
+  }}
+};
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -123,10 +154,8 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
           <p id="pgSub" class="truncate text-xs" style="color:var(--muted-foreground)">Vụ mùa 2026</p>
         </div>
         <div class="ml-auto flex flex-wrap items-center gap-2">
-          <button type="button" class="rounded-md border px-3 py-1.5 text-xs font-medium"
-            style="border-color:var(--border);color:var(--muted-foreground)">Vụ mùa 2026 ▾</button>
-          <button type="button" data-go="benh" class="rounded-md px-3.5 py-1.5 text-xs font-semibold"
-            style="background:var(--primary);color:var(--primary-foreground)">Ghi việc mới</button>
+          <button type="button" class="uk-btn uk-btn-sm uk-btn-ghost">Vụ mùa 2026 ▾</button>
+          <button type="button" data-go="benh" class="uk-btn uk-btn-sm uk-btn-primary">Ghi việc mới</button>
         </div>
       </div>
     </header>
@@ -244,19 +273,19 @@ function tt(id){var het=null,ng=null;
 
 /* ======================= MẢNH GIAO DIỆN ======================= */
 function card(inner,extra){
- return '<div class="rounded-xl border '+(extra||"")+'" style="border-color:'+V.bd+';background:'+V.cd+'">'+inner+"</div>"}
+ return '<div class="uk-card rounded-xl border border-border bg-card '+(extra||"")+'">'+inner+"</div>"}
 function sec(lb,body,act){
  return '<section class="mt-8"><div class="mb-4 flex items-center gap-3">'
-  +'<h2 class="m-0 shrink-0 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">'+lb+"</h2>"
-  +'<span class="h-px flex-1" style="background:'+V.bd+'"></span>'
+  +'<h2 class="m-0 shrink-0 text-[0.7rem] font-bold uppercase tracking-[0.13em] text-muted-foreground">'+lb+"</h2>"
+  +'<span class="h-px flex-1 bg-border"></span>'
   +(act?'<div class="flex shrink-0 gap-2">'+act+"</div>":"")+"</div>"+body+"</section>"}
 function btn(txt,attrs,pri){
- return "<button type=\"button\" "+attrs+' class="rounded-md px-3 py-1.5 text-xs font-semibold '
-  +(pri?"":"border")+'" style="'+(pri?"background:"+V.pr+";color:"+V.pf:"border-color:"+V.bd)+'">'+txt+"</button>"}
+ return "<button type=\"button\" "+attrs+' class="uk-btn uk-btn-sm '
+  +(pri?"uk-btn-primary":"uk-btn-default")+'">'+txt+"</button>"}
 function tag(txt,k){return '<span class="tag tag-'+k+'">'+txt+"</span>"}
 function rowBtn(inner,attrs,on){
- return "<button type=\"button\" "+attrs+' class="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors"'
-  +' style="border-color:'+(on?V.pr:V.bd)+';background:'+(on?"var(--accent)":V.cd)+'">'+inner+"</button>"}
+ return "<button type=\"button\" "+attrs+' class="flex w-full items-center gap-3 rounded-lg border p-3 text-left'
+  +' transition-colors hover:border-primary '+(on?"border-primary bg-accent":"border-border bg-card")+'">'+inner+"</button>"}
 
 /* ======================= SƠ ĐỒ BỆNH ======================= */
 function hinh(id){
@@ -505,14 +534,14 @@ function pThua(){
 function tbl(cols,rows){
  var th="",i;
  for(i=0;i<cols.length;i++){var c=cols[i],n=c&&c.n;
-  th+='<th class="whitespace-nowrap border-b pb-2.5 pr-4 text-[0.65rem] font-bold uppercase tracking-[0.1em]'
-   +(n?" text-right":" text-left")+'" style="border-color:'+V.bd+';color:'+V.mf+'">'+(n||c)+"</th>"}
- return '<div class="overflow-x-auto"><table class="w-full min-w-[620px] border-collapse text-[0.85rem]"><thead><tr>'
-  +th+"</tr></thead><tbody>"+rows+"</tbody></table></div>"}
+  th+='<th class="whitespace-nowrap border-b border-border pb-2.5 pr-4 text-[0.65rem] font-bold uppercase'
+   +' tracking-[0.1em] text-muted-foreground'+(n?" text-right":" text-left")+'">'+(n||c)+"</th>"}
+ return '<div class="overflow-x-auto"><table class="uk-table uk-table-sm w-full min-w-[620px] border-collapse text-[0.85rem]">'
+  +"<thead><tr>"+th+"</tr></thead><tbody>"+rows+"</tbody></table></div>"}
 function tr(cells){
  var h="",i;
  for(i=0;i<cells.length;i++){var c=cells[i],n=c&&c.n!==undefined;
-  h+='<td class="border-b py-2.5 pr-4 align-top'+(n?" text-right tnum":"")+'" style="border-color:'+V.bd+'">'+(n?c.n:c)+"</td>"}
+  h+='<td class="border-b border-border py-2.5 pr-4 align-top'+(n?" text-right tnum":"")+'">'+(n?c.n:c)+"</td>"}
  return "<tr>"+h+"</tr>"}
 
 function pBenh(){

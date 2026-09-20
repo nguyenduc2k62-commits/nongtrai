@@ -54,7 +54,8 @@ JavaScript thuần, một file, **không cần bước build**.
 
 | Thành phần | Dùng gì |
 |---|---|
-| Giao diện | [Franken UI 2.1](https://franken-ui.dev) qua CDN — bản HTML-first của shadcn/ui, dựng trên UIkit 3 + Tailwind |
+| Giao diện | [Franken UI 2.1](https://franken-ui.dev) `core.min.css` — token màu kiểu shadcn + component `uk-btn`, `uk-card`, `uk-table` |
+| Class tiện ích | Tailwind Play CDN (sinh lúc chạy), `preflight` tắt để khỏi đè base của Franken |
 | Chủ đề | `uk-theme-green`, nền tối bật bằng class `dark` trên thẻ `<html>` |
 | Phông chữ | Be Vietnam Pro + IBM Plex Mono (Google Fonts) |
 | Biểu đồ | SVG tự vẽ, không dùng thư viện |
@@ -66,3 +67,14 @@ riêng trong `<style>`, tách khỏi màu chủ đề — vì chúng mang nghĩa
 
 Có một khối `<style>` dự phòng đặt **trước** link CDN: nếu CDN hỏng thì trang vẫn
 đọc được thay vì trắng bệch.
+
+### Vì sao không dùng `utilities.min.css` của Franken UI
+
+Đó là bản Tailwind **dựng sẵn tĩnh**. Kiểm tra trực tiếp trong file: không có
+class giá trị tuỳ ý (`text-[4.5rem]`, `grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]`,
+`min-w-[145px]`) và cũng không có `truncate`. Dùng nó thì số lớn co về cỡ chữ
+thường và mọi bố cục hai cột dồn thành một cột.
+
+Tailwind Play sinh class lúc chạy nên có đủ. Đổi lại nó in một cảnh báo ra
+console và không nên dùng cho bản chạy thật — khi nào lên thật thì chuyển sang
+Tailwind CLI build ra một file CSS tĩnh.
