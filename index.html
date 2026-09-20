@@ -87,6 +87,9 @@ html,body{height:100%}
 body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
   -webkit-font-smoothing:antialiased;margin:0}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+/* .hint — ghi chú nhỏ dưới mỗi khối. Bị mất lúc viết lại CSS sang Franken
+   nên mọi ghi chú trong app đang hiện cỡ chữ thường. */
+.hint{font-size:.72rem;line-height:1.6;margin:.7rem 0 0;color:hsl(var(--muted-foreground))}
 .tnum{font-variant-numeric:tabular-nums}
 
 /* ===== Danh sách kiểm trước khi giao, lấy từ skill ui-ux-pro-max (MIT).
@@ -258,9 +261,12 @@ button,a{transition:background-color .18s ease,border-color .18s ease,
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
           <path d="M12 9v4M12 17h.01"/></svg>
-        <p class="m-0"><b class="c-wait">Bản mẫu, số liệu chưa thẩm định.</b> Thời gian cách ly, danh mục thuốc,
-        giá cả và điểm bán là dữ liệu dựng để demo, chưa đối chiếu Thông tư 75/2025/TT-BNNMT.
-        Không dùng để quyết định ngoài đồng.</p>
+        <p class="m-0"><b class="c-wait">Bản mẫu.</b>
+        <b>Danh mục thuốc, danh mục cấm và ngưỡng dư lượng là dữ liệu thật</b> từ Thông tư 75/2025,
+        28/2026 và 50/2016 — nhưng chưa có ai thẩm định lại bản parse.
+        <b>Thời gian cách ly do bạn tự nhập từ nhãn thuốc.</b>
+        Giá cả, điểm bán và ảnh bệnh vẫn là dữ liệu dựng để demo.
+        Chưa dùng để quyết định ngoài đồng.</p>
       </div>
       <main id="page"></main>
     </div>
@@ -272,52 +278,83 @@ button,a{transition:background-color .18s ease,border-color .18s ease,
 "use strict";
 
 /* ======================= DỮ LIỆU ======================= */
+// Mỗi thửa gắn với MỘT loại cây — app không còn chỉ cho lúa.
 var THUA=[
- {id:"db",ten:"Đồng Bưng",dt:3,giong:"Bắc thơm 7",gd:"Làm đòng",ngaycay:38},
- {id:"rt",ten:"Ruộng Trên",dt:5,giong:"Khang dân 18",gd:"Đẻ nhánh",ngaycay:24}];
+ {id:"db",ten:"Đồng Bưng",dt:3,cay:"lúa",giong:"Bắc thơm 7",gd:"Làm đòng",ngaycay:38},
+ {id:"rt",ten:"Ruộng Trên",dt:5,cay:"lúa",giong:"Khang dân 18",gd:"Đẻ nhánh",ngaycay:24},
+ {id:"vc",ten:"Vườn Cà phê",dt:12,cay:"cà phê",giong:"Robusta TR4",gd:"Nuôi quả",ngaycay:1240}];
 
-var THUOC=[
- {id:"tri",ten:"Tricyclazole 75WP",tru:"Trừ nấm — đạo ôn",phi:14,band:"wait",nhom:["hoahoc"],lieu:"15 g / bình 16 L"},
- {id:"iso",ten:"Isoprothiolane 40EC",tru:"Trừ nấm — đạo ôn",phi:14,band:"wait",nhom:["hoahoc"],lieu:"25 ml / bình 16 L"},
- {id:"val",ten:"Validamycin 5SL",tru:"Trừ nấm — khô vằn",phi:7,band:"ok",nhom:["visinh"],lieu:"30 ml / bình 16 L"},
- {id:"hex",ten:"Hexaconazole 5SC",tru:"Trừ nấm — khô vằn",phi:14,band:"inf",nhom:["hoahoc"],lieu:"25 ml / bình 16 L"},
- {id:"kas",ten:"Kasugamycin 2SL",tru:"Kháng sinh — bạc lá",phi:7,band:"ok",nhom:["khangsinh"],lieu:"40 ml / bình 16 L"},
- {id:"cu",ten:"Đồng oxyclorua 30WP",tru:"Gốc đồng — bạc lá",phi:7,band:"inf",nhom:["dong"],lieu:"50 g / bình 16 L"},
- {id:"pym",ten:"Pymetrozine 50WG",tru:"Trừ rầy nâu",phi:7,band:"inf",nhom:["hoahoc"],lieu:"8 g / bình 16 L"},
- {id:"chl",ten:"Chlorantraniliprole 200SC",tru:"Trừ sâu cuốn lá",phi:7,band:"inf",nhom:["hoahoc"],lieu:"5 ml / bình 16 L"},
- {id:"dau",ten:"Dầu khoáng DS 98.8EC",tru:"Dầu khoáng — phụ trợ",phi:5,band:"ok",nhom:["dau"],lieu:"40 ml / bình 16 L"}];
+/* ===== DỮ LIỆU THẬT =====
+   Nạp du-lieu-app.json lúc chạy: 5.914 thuốc, 800 cây, 546 dịch hại,
+   4.322 ngưỡng MRL, 33 hoạt chất cấm. 808 KB, nén gzip còn 162 KB.
+   Dựng từ Thông tư 75/2025 + 28/2026 + 50/2016 — xem du-lieu/. */
+var D=null;
+
+function cayId(ten){return D?D.bang.cay.indexOf(ten):-1}
+
+// Dịch hại đã ĐĂNG KÝ trên đúng cây này. Không lấy chung, vì một thuốc
+// đăng ký trị sâu A trên cây X không có nghĩa dùng được trên cây Y.
+function dichHaiCuaCay(ci){
+ var s={},i,j;
+ if(!D||ci<0)return [];
+ for(i=0;i<D.thuoc.length;i++){var p=D.thuoc[i].p;
+  for(j=0;j<p.length;j++)if(p[j][1]===ci)s[p[j][0]]=(s[p[j][0]]||0)+1}
+ return Object.keys(s).map(Number)
+   .map(function(k){return{id:k,ten:D.bang.dich_hai[k],n:s[k]}})
+   .sort(function(a,b){return b.n-a.n});
+}
+
+function thuocCho(ci,dh){
+ var ra=[],i,j;
+ if(!D)return ra;
+ for(i=0;i<D.thuoc.length;i++){var t=D.thuoc[i];
+  for(j=0;j<t.p.length;j++)if(t.p[j][1]===ci&&t.p[j][0]===dh){ra.push(t);break}}
+ return ra;
+}
+
+function chuanHC(s){
+ if(!s)return "";
+ s=s.replace(/\([^)]*\)/g," ").replace(/\d+(?:[.,]\d+)?\s*%/g," ");
+ return s.toLowerCase().replace(/[^0-9a-z]/g,"");
+}
+
+// Hoạt chất bị CẤM. Phải chặn chứ không im lặng bỏ qua.
+function laCam(hc){
+ if(!D||!hc)return null;
+ var ks=hc.split("+").map(chuanHC),i,j;
+ for(i=0;i<D.cam.length;i++){var k=chuanHC(D.cam[i]);
+  if(!k)continue;
+  for(j=0;j<ks.length;j++)if(ks[j]&&(ks[j]===k||ks[j].indexOf(k)===0))return D.cam[i]}
+ return null;
+}
+
+/* Ngưỡng dư lượng cho (hoạt chất, cây).
+   Trả về null khi KHÔNG có ngưỡng — app phải nói "chưa có", không được đoán.
+   Tên cây khác tên thực phẩm nên phải qua bảng ánh xạ tay: dò chuỗi thì
+   "lúa" khớp nhầm "lúa mì" là wheat, ngưỡng khác hẳn. */
+function mrlCho(hc,cay){
+ if(!D||!hc)return null;
+ var mon=D.anh_xa_cay_thuc_pham[cay];
+ if(!mon||!mon.length)return {chua_co:true,ly_do:"cay"};
+ var ks=hc.split("+").map(chuanHC),ra=[],i,j,k;
+ for(i=0;i<ks.length;i++){var m=D.mrl[ks[i]];
+  if(!m)continue;
+  for(j=0;j<m.muc.length;j++)for(k=0;k<mon.length;k++)
+   if(m.muc[j][0]===mon[k])ra.push({hc:m.ten,mon:m.muc[j][0],mrl:m.muc[j][1]})}
+ return ra.length?{muc:ra}:{chua_co:true,ly_do:"hoat_chat"};
+}
+
+// PHI không có trong văn bản nào — người dùng đọc trên nhãn và nhập.
+// Nhập rồi thì nhớ lại cho lần sau.
+var PHI_KEY="so-ruong-phi";
+var PHI=(function(){try{return JSON.parse(localStorage.getItem(PHI_KEY))||{}}catch(e){return{}}})();
+function luuPhi(){try{localStorage.setItem(PHI_KEY,JSON.stringify(PHI))}catch(e){}}
 
 var KY=[
  {a:"dong",b:"visinh",ly:"Ion đồng diệt vi sinh vật có ích trong chế phẩm sinh học. Đổ chung thì thuốc sinh học mất tác dụng, coi như đổ bỏ."},
  {a:"dong",b:"khangsinh",ly:"Gốc đồng làm kết tủa và phá hoạt tính kháng sinh. Nên xịt cách nhau ít nhất 5–7 ngày."},
  {a:"dong",b:"dau",ly:"Đồng gặp dầu khoáng dễ gây cháy lá, nhất là khi trời nắng gắt hoặc cây đang ra lá non."},
  {a:"visinh",b:"hoahoc",ly:"Thuốc trừ nấm hoá học giết luôn vi sinh vật trong chế phẩm sinh học. Nếu cần cả hai thì xịt cách nhau vài ngày."}];
-
-var BENH=[
- {id:"daoon",bp:"la",tc:["dom"],ten:"Đạo ôn lá",sci:"Pyricularia oryzae",
-  mo:"Vết hình thoi như mắt én, tâm xám trắng, viền nâu đậm. Nặng thì các vết nối nhau làm cháy cả lá.",thuoc:["tri","iso"]},
- {id:"khovan",bp:"be",tc:["loang"],ten:"Khô vằn",sci:"Rhizoctonia solani",
-  mo:"Vết loang lổ như da hổ ở bẹ lá sát mặt nước, viền nâu, giữa xám bạc. Lan dần lên lá đòng.",thuoc:["val","hex"]},
- {id:"bacla",bp:"la",tc:["chay-mep"],ten:"Bạc lá",sci:"Xanthomonas oryzae",
-  mo:"Cháy từ chóp và mép lá lan xuống, đường ranh gợn sóng. Sáng sớm có giọt dịch vàng đục trên vết.",thuoc:["kas","cu"]},
- {id:"lemlep",bp:"bong",tc:["hat-den"],ten:"Lem lép hạt",sci:"nhiều tác nhân",
-  mo:"Vỏ trấu có vệt nâu đen loang lổ, hạt lép hoặc chắc không đều. Thường nặng khi trổ gặp mưa.",thuoc:["hex","tri"]},
- {id:"raynau",bp:"contrung",tc:["contrung"],ten:"Rầy nâu",sci:"Nilaparvata lugens",
-  mo:"Rầy bám gốc lúa sát mặt nước, vạch khóm ra thấy chúng nhảy. Nặng thì cháy rầy thành từng chòm.",thuoc:["pym"]},
- {id:"cuonla",bp:"la",tc:["cuon"],ten:"Sâu cuốn lá nhỏ",sci:"Cnaphalocrocis medinalis",
-  mo:"Lá bị cuốn dọc thành ống, mở ra thấy sâu non và vệt trắng do sâu ăn phần thịt lá.",thuoc:["chl"]}];
-
-var BOPHAN=[
- {id:"la",ten:"Lá",mo:"Lá đổi màu, có đốm, cháy mép hoặc bị cuốn lại"},
- {id:"be",ten:"Bẹ và thân",mo:"Vết ở phần sát mặt nước, thân mềm hoặc đổi màu"},
- {id:"bong",ten:"Bông và hạt",mo:"Hạt lép, vỏ trấu đen, bông không vào chắc"},
- {id:"contrung",ten:"Thấy rõ con vật",mo:"Nhìn thấy rầy, sâu, bọ trên cây"}];
-var TCH={la:[{id:"dom",ten:"Đốm rời rạc trên phiến lá",mo:"Từng vết riêng, có tâm và viền rõ"},
-   {id:"chay-mep",ten:"Cháy từ chóp hoặc mép lá",mo:"Khô vàng lan dần vào trong"},
-   {id:"cuon",ten:"Lá bị cuốn thành ống",mo:"Lá gập dọc, bên trong có vệt trắng"}],
- be:[{id:"loang",ten:"Vết loang lổ ở bẹ lá",mo:"Như da hổ, sát mặt nước"}],
- bong:[{id:"hat-den",ten:"Hạt đen, lép",mo:"Vỏ trấu có vệt nâu đen"}],
- contrung:[{id:"contrung",ten:"Có con bám ở gốc hoặc trên lá",mo:"Vạch khóm ra thấy chúng di chuyển"}]};
 
 var DIEM=[
  {id:1,ten:"Đại lý vật tư Ba Hùng",loai:"Vật tư",x:180,y:212,xa:"Xã Đồng Tiến",dc:"Chợ Đồng Tiến, cạnh UBND xã",sdt:"0912 xxx 431"},
@@ -382,35 +419,9 @@ function rowBtn(inner,attrs,on){
   +' transition-colors hover:border-primary '+(on?"border-primary bg-accent":"border-border bg-card")+'">'+inner+"</button>"}
 
 /* ======================= SƠ ĐỒ BỆNH ======================= */
-function hinh(id){
- var lf='<path d="M38 6C22 16 13 34 13 62c0 6 1 10 2 12 3-2 6-6 9-12 8-16 13-36 14-56Z" fill="var(--ok-bg)" stroke="var(--ok)" stroke-width="1.3"/>';
- var s='<svg viewBox="0 0 76 76" width="100%" height="100%" aria-hidden="true">',i;
- if(id==="daoon"){s+=lf;
-  s+='<ellipse cx="26" cy="32" rx="7" ry="3.4" transform="rotate(-58 26 32)" fill="hsl(var(--card))" stroke="var(--bad)" stroke-width="1.4"/>';
-  s+='<ellipse cx="21" cy="47" rx="6" ry="3" transform="rotate(-62 21 47)" fill="hsl(var(--card))" stroke="var(--bad)" stroke-width="1.4"/>';
-  s+='<ellipse cx="30" cy="19" rx="4.6" ry="2.4" transform="rotate(-52 30 19)" fill="hsl(var(--card))" stroke="var(--bad)" stroke-width="1.4"/>';
- }else if(id==="bacla"){s+=lf;
-  s+='<path d="M38 6C30 11 24 19 20 30c4 1 8-1 11-5 4-6 6-13 7-19Z" fill="var(--wait-bg)" stroke="var(--wait)" stroke-width="1.4"/>';
- }else if(id==="cuonla"){
-  s+='<path d="M40 8c-9 12-13 30-11 54 6-4 11-14 13-28 2-12 1-20-2-26Z" fill="var(--ok-bg)" stroke="var(--ok)" stroke-width="1.3"/>';
-  s+='<path d="M34 22c-3 12-4 24-3 34" stroke="var(--wait)" stroke-width="2.4" stroke-linecap="round" fill="none"/>';
- }else if(id==="khovan"){
-  s+='<path d="M30 68V16M44 68V22" stroke="var(--ok)" stroke-width="2.4" stroke-linecap="round"/>';
-  s+='<path d="M24 52c6-4 12-3 16 1s2 10-4 11-14-3-15-7 1-4 3-5Z" fill="var(--wait-bg)" stroke="var(--wait)" stroke-width="1.4"/>';
-  s+='<path d="M38 34c5-2 9 1 9 5s-5 6-9 4-3-8 0-9Z" fill="var(--wait-bg)" stroke="var(--wait)" stroke-width="1.4"/>';
-  s+='<path d="M8 68h60" stroke="var(--inf)" stroke-width="1.6" stroke-dasharray="4 3"/>';
- }else if(id==="lemlep"){
-  s+='<path d="M38 10v50" stroke="var(--ok)" stroke-width="2" stroke-linecap="round"/>';
-  var h=[[28,24],[47,28],[27,38],[48,42],[29,52],[46,55]];
-  for(i=0;i<h.length;i++){var f=i%2?"var(--ok-bg)":"var(--bad-bg)",st=i%2?"var(--ok)":"var(--bad)";
-   s+='<ellipse cx="'+h[i][0]+'" cy="'+h[i][1]+'" rx="7" ry="3.6" transform="rotate('+(i%2?30:-30)+' '+h[i][0]+' '+h[i][1]+')" fill="'+f+'" stroke="'+st+'" stroke-width="1.3"/>'}
- }else{
-  s+='<path d="M26 70V28M38 70V20M50 70V30" stroke="var(--ok)" stroke-width="2.2" stroke-linecap="round"/>';
-  s+='<path d="M8 70h60" stroke="var(--inf)" stroke-width="1.6" stroke-dasharray="4 3"/>';
-  var b=[[31,56],[44,60],[35,63],[47,52]];
-  for(i=0;i<b.length;i++)s+='<ellipse cx="'+b[i][0]+'" cy="'+b[i][1]+'" rx="4" ry="2.6" fill="var(--bad-bg)" stroke="var(--bad)" stroke-width="1.2"/>';
- }
- return s+"</svg>"}
+/* Sơ đồ bệnh vẽ tay đã bỏ: trước chỉ có 6 bệnh trên lúa nên vẽ được,
+   giờ dữ liệu có 546 dịch hại trên 800 cây. Ảnh thật sẽ lấy từ PlantDoc
+   (CC BY 4.0) và Bugwood — xem VIEC-CAN-LAM.md mục 2.3. */
 
 /* ======================= ĐIỀU HƯỚNG ======================= */
 var IC={tongquan:'<path d="M3 12 12 4l9 8v7a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-7Z"/>',
@@ -549,7 +560,7 @@ function veMap(){
  return s+"</svg>"}
 
 /* ======================= CÁC TRANG ======================= */
-var bw={bp:null,tc:null,benh:null,thua:"db"},chonPha=[];
+var bw={cay:null,dh:null,thuoc:null,thua:"db"},chonPha=[];
 
 function ve(){
  var h="";
@@ -681,64 +692,137 @@ function tr(cells){
  return "<tr>"+h+"</tr>"}
 
 function pBenh(){
- var L="",i,ten=["Bộ phận","Triệu chứng","Đối chiếu","Ghi sổ"],bn=bw.benh?3:bw.tc?2:bw.bp?1:0;
- L+='<div class="mb-5 flex border-b" style="border-color:'+V.bd+'">';
+ if(!D)return sec("Tra bệnh",card('<p class="p-8 text-center text-sm" style="color:'+V.mf+'">Đang nạp danh mục thuốc…</p>'));
+ var i,L="",ten=["Cây trồng","Dịch hại","Chọn thuốc","Ghi sổ"];
+ var bn=bw.thuoc?3:(bw.dh!=null?2:(bw.cay?1:0));
+
+ L+='<div class="mb-5 flex flex-wrap border-b" style="border-color:'+V.bd+'">';
  for(i=0;i<4;i++)L+='<span class="relative pb-2.5 pr-5 text-[0.68rem] font-bold uppercase tracking-[0.1em]" style="color:'
   +(i===bn?V.pr:V.mf)+'">'+(i+1)+". "+ten[i]
   +(i===bn?'<span class="absolute -bottom-px left-0 right-5 h-0.5" style="background:'+V.pr+'"></span>':"")+"</span>";
  L+="</div>";
 
- if(!bw.bp){
-  L+='<div class="flex flex-col gap-2">';
-  for(i=0;i<BOPHAN.length;i++)L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'
-   +esc(BOPHAN[i].ten)+'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(BOPHAN[i].mo)
-   +'</span></span>'+ARROW,'data-bp="'+BOPHAN[i].id+'"');
-  L+="</div>";
- }else if(!bw.tc){
-  L+=back("bp","Chọn lại bộ phận")+'<div class="flex flex-col gap-2">';
-  var ds=TCH[bw.bp]||[];
-  for(i=0;i<ds.length;i++)L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'
-   +esc(ds[i].ten)+'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(ds[i].mo)
-   +'</span></span>'+ARROW,'data-tc="'+ds[i].id+'"');
-  L+="</div>";
- }else if(!bw.benh){
-  L+=back("tc","Chọn lại triệu chứng");
-  L+='<p class="mb-3.5 max-w-[58ch] text-sm" style="color:'+V.mf+'">Ứng dụng không tự kết luận — bạn nhìn và chọn. Nếu không cái nào giống, chụp ảnh gửi cán bộ khuyến nông.</p>';
-  L+='<div class="flex flex-col gap-2">';
-  var co=BENH.filter(function(x){return x.bp===bw.bp&&x.tc.indexOf(bw.tc)>=0});
-  if(!co.length)co=BENH.filter(function(x){return x.bp===bw.bp});
-  for(i=0;i<co.length;i++)L+=rowBtn(dzInner(co[i],1),'data-benh="'+co[i].id+'"');
-  L+='</div><p class="mt-3 text-xs" style="color:'+V.mf+'">Bản thật thay sơ đồ này bằng ảnh chụp ngoài đồng lấy từ PlantDoc (CC BY 4.0) và Bugwood.</p>';
- }else{
-  var b=byId(BENH,bw.benh);
-  L+=back("benh","Chọn lại bệnh");
-  L+='<div class="text-lg font-bold tracking-tight">'+esc(b.ten)+"</div>";
-  L+='<div class="mb-2 text-xs italic" style="color:'+V.mf+'">'+esc(b.sci)+"</div>";
-  L+='<p class="max-w-[58ch] text-sm" style="color:'+V.mf+'">'+esc(b.mo)+"</p>";
-  L+=lbl("Thuốc được phép dùng trên lúa")+'<div class="flex flex-col gap-2">';
-  for(i=0;i<b.thuoc.length;i++){var t=byId(THUOC,b.thuoc[i]);
-   L+=rowBtn('<span class="b-'+t.band+' h-9 w-[3px] shrink-0 rounded-sm"></span>'
-    +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.ten)
-    +'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(t.lieu)+"</span></span>"
-    +'<span class="shrink-0 text-right"><span class="mono c-'+t.band+' block text-base font-semibold leading-none">'+t.phi
-    +'</span><span class="block text-[0.58rem] uppercase tracking-wider" style="color:'+V.mf+'">ngày CL</span></span>','data-chon="'+t.id+'"')}
-  L+="</div>"+lbl("Xịt cho thửa nào")+'<div class="flex flex-col gap-2">';
-  for(i=0;i<THUA.length;i++)L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'
-   +esc(THUA[i].ten)+'</span><span class="block text-xs" style="color:'+V.mf+'">'+THUA[i].dt+" sào · "+esc(THUA[i].giong)
-   +"</span></span>",'data-thua="'+THUA[i].id+'"',bw.thua===THUA[i].id);
-  L+='</div><p class="mt-3 text-xs" style="color:'+V.mf+'">Bấm vào tên thuốc để ghi vào sổ. Đồng hồ cách ly sẽ tự tính lại.</p>';
- }
- var R=lbl("Bệnh thường gặp trên lúa",1)+'<div class="flex flex-col gap-2">';
- for(i=0;i<BENH.length;i++)R+=rowBtn(dzInner(BENH[i],0),'data-nhay="'+BENH[i].id+'"');
- R+="</div>";
- return sec("Tra theo triệu chứng",
-  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"><div>'+L+"</div><div>"+R+"</div></div>")}
+ /* BƯỚC 1 — cây trồng. Gợi ý cây đang có thửa trước, rồi mới tới ô tìm
+    trong toàn bộ danh mục. */
+ if(!bw.cay){
+  L+='<p class="mb-3 max-w-[56ch] text-sm" style="color:'+V.mf+'">Chọn cây đang bị hại. Danh mục phủ '
+   +D.bang.cay.length+' loại cây.</p><div class="mb-4 flex flex-col gap-2">';
+  var daCo={};
+  for(i=0;i<THUA.length;i++){
+   if(daCo[THUA[i].cay])continue; daCo[THUA[i].cay]=1;
+   var ci0=cayId(THUA[i].cay),sl=ci0<0?0:dichHaiCuaCay(ci0).length;
+   L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(THUA[i].cay)
+    +'</span><span class="block text-xs" style="color:'+V.mf+'">thửa '+esc(THUA[i].ten)+' · '+sl
+    +' dịch hại có thuốc đăng ký</span></span>'+ARROW,'data-cay="'+esc(THUA[i].cay)+'"');
+  }
+  L+='</div><label for="timCay" class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.13em]" style="color:'
+   +V.mf+'">Hoặc tìm cây khác</label>'
+   +'<input id="timCay" type="search" placeholder="gõ tên cây: sầu riêng, hồ tiêu, cao su…" autocomplete="off"'
+   +' class="w-full rounded-lg border px-3 py-2 text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'
+   +'<div id="kqCay" class="mt-2 flex flex-col gap-1.5"></div>';
 
-function dzInner(b,full){
- return '<span class="h-[66px] w-[66px] shrink-0 overflow-hidden rounded-md border" style="border-color:'+V.bd+';background:'+V.mu+'">'
-  +hinh(b.id)+'</span><span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(b.ten)
-  +'</span><span class="block text-xs italic" style="color:'+V.mf+'">'+esc(b.sci)+"</span>"
-  +(full?'<span class="mt-1 block text-xs leading-relaxed" style="color:'+V.mf+'">'+esc(b.mo)+"</span>":"")+"</span>"}
+ /* BƯỚC 2 — dịch hại đã đăng ký trên ĐÚNG cây đó */
+ }else if(bw.dh==null){
+  var ci=cayId(bw.cay),ds=dichHaiCuaCay(ci);
+  L+=back("cay","Chọn lại cây")
+   +'<p class="mb-3 max-w-[58ch] text-sm" style="color:'+V.mf+'"><b style="color:hsl(var(--foreground))">'+esc(bw.cay)
+   +'</b> có '+ds.length+' dịch hại được đăng ký thuốc. Số bên phải là số thuốc đăng ký cho dịch hại đó.</p>'
+   +'<div class="scroll-thin flex max-h-[30rem] flex-col gap-1.5 overflow-y-auto pr-1">';
+  for(i=0;i<ds.length;i++)
+   L+=rowBtn('<span class="min-w-0 flex-1 text-sm font-semibold">'+esc(ds[i].ten)+'</span>'
+    +'<span class="mono shrink-0 text-xs" style="color:'+V.mf+'">'+ds[i].n+'</span>','data-dh="'+ds[i].id+'"');
+  L+='</div><p class="hint">Tên dịch hại lấy nguyên từ Thông tư. App chưa có ảnh đối chiếu — đó là việc còn phải làm.</p>';
+
+ /* BƯỚC 3 — thuốc đăng ký cho đúng cặp (cây, dịch hại) */
+ }else if(!bw.thuoc){
+  var ci2=cayId(bw.cay),ds2=thuocCho(ci2,bw.dh);
+  L+=back("dh","Chọn lại dịch hại")
+   +'<p class="mb-3 max-w-[58ch] text-sm" style="color:'+V.mf+'"><b style="color:hsl(var(--foreground))">'
+   +esc(D.bang.dich_hai[bw.dh])+'</b> trên <b style="color:hsl(var(--foreground))">'+esc(bw.cay)+'</b> — '
+   +ds2.length+' thuốc được phép dùng.</p>'
+   +'<div class="scroll-thin flex max-h-[30rem] flex-col gap-2 overflow-y-auto pr-1">';
+  for(i=0;i<Math.min(ds2.length,120);i++){
+   var t=ds2[i],hc=D.bang.hoat_chat[t.h],cm=laCam(hc);
+   L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.t)+'</span>'
+    +'<span class="block text-xs" style="color:'+V.mf+'">'+esc(hc)+'</span>'
+    +(cm?'<span class="tag tag-bad mt-1">HOẠT CHẤT CẤM</span>':'')+'</span>'
+    +'<span class="shrink-0 text-[0.68rem]" style="color:'+V.mf+'">'
+    +esc((D.nhom[t.n]||"").replace("Thuốc ",""))+'</span>','data-thuoc="'+esc(t.t)+'"');
+  }
+  if(!ds2.length)L+='<div class="rounded-lg border border-dashed p-5 text-center text-sm" style="border-color:'+V.bd
+   +';color:'+V.mf+'">Không có thuốc nào đăng ký cho cặp này trong Thông tư 75/2025.<br>'
+   +'Nghĩa là <b style="color:hsl(var(--foreground))">chưa được phép dùng</b> — không phải app thiếu dữ liệu.</div>';
+  if(ds2.length>120)L+='<p class="py-2 text-center text-xs" style="color:'+V.mf+'">… và '+(ds2.length-120)+' thuốc nữa</p>';
+  L+='</div>';
+
+ /* BƯỚC 4 — cảnh báo cấm + ngưỡng MRL + nhập PHI + ghi sổ */
+ }else{
+  var t2=null;
+  for(i=0;i<D.thuoc.length;i++)if(D.thuoc[i].t===bw.thuoc){t2=D.thuoc[i];break}
+  var hc2=t2?D.bang.hoat_chat[t2.h]:"",cm2=laCam(hc2);
+  L+=back("thuoc","Chọn lại thuốc")
+   +'<div class="text-lg font-bold tracking-tight">'+esc(bw.thuoc)+'</div>'
+   +'<div class="mb-1 text-xs" style="color:'+V.mf+'">'+esc(hc2)+'</div>';
+  if(t2)L+='<div class="mb-3 text-xs" style="color:'+V.mf+'">Đăng ký bởi '+esc(D.bang.cong_ty[t2.y])+'</div>';
+  if(cm2)L+=alertBox("bad",ICO_X,"Hoạt chất bị cấm sử dụng","<b>"+esc(cm2)
+   +"</b> nằm trong Danh mục cấm (Phụ lục II Thông tư 75/2025). Không dùng.");
+
+  var mr=mrlCho(hc2,bw.cay);
+  L+=lbl("Ngưỡng dư lượng tối đa (MRL)");
+  if(mr&&mr.muc){
+   L+='<div class="flex flex-col gap-1.5">';
+   for(i=0;i<mr.muc.length;i++)
+    L+='<div class="flex items-center gap-3 rounded-lg border p-2.5" style="border-color:'+V.bd+'">'
+     +'<span class="min-w-0 flex-1 text-sm">'+esc(mr.muc[i].mon)+'</span>'
+     +'<span class="mono text-sm font-semibold">'+mr.muc[i].mrl
+     +' <span class="text-xs font-normal" style="color:'+V.mf+'">mg/kg</span></span></div>';
+   L+='</div><p class="hint">Theo Thông tư 50/2016/TT-BYT. Hàng xuất khẩu phải theo ngưỡng của nước nhập.</p>';
+  }else{
+   L+='<div class="rounded-lg border border-dashed p-3 text-sm" style="border-color:'+V.bd+';color:'+V.mf+'">'
+    +'<b>Chưa có ngưỡng trong luật Việt Nam.</b> '
+    +((mr&&mr.ly_do==="cay")
+       ?'Thông tư 50/2016 không có ngưỡng riêng cho '+esc(bw.cay)+'.'
+       :'Hoạt chất này không nằm trong Thông tư 50/2016 — văn bản đó chỉ phủ 165 hoạt chất lấy từ CODEX 2016.')
+    +' Nếu xuất khẩu, tra ngưỡng của nước nhập.</div>';
+  }
+
+  var cu=PHI[bw.thuoc];
+  L+=lbl("Thời gian cách ly (PHI)")
+   +'<div class="rounded-lg border p-3.5" style="border-color:'+V.bd+'">'
+   +'<p class="mb-2.5 text-sm" style="color:'+V.mf+'">Số ngày này <b style="color:hsl(var(--foreground))">in trên nhãn chai thuốc</b>, '
+   +'không có trong Thông tư nào. Xem nhãn rồi nhập vào đây — app sẽ nhớ cho lần sau.</p>'
+   +'<div class="flex flex-wrap items-center gap-2">'
+   +'<input id="phiIn" type="number" min="0" max="120" value="'+(cu!=null?cu:"")+'" placeholder="số ngày"'
+   +' class="w-28 rounded-lg border px-3 py-2 text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'
+   +'<span class="text-sm" style="color:'+V.mf+'">ngày</span>'
+   +(cu!=null?'<span class="tag tag-ok">đã nhớ từ lần trước</span>':'')+'</div>'
+   +'<div id="phiLoi" class="mt-2 text-xs"></div>'
+   +'<p class="mt-2 text-xs" style="color:'+V.mf+'">Bỏ trống cũng ghi được — chỉ là thửa đó không có đồng hồ đếm ngược. '
+   +'Thà thiếu còn hơn bịa một con số.</p></div>';
+
+  L+=lbl("Xịt cho thửa nào")+'<div class="flex flex-col gap-2">';
+  for(i=0;i<THUA.length;i++){
+   var th=THUA[i],hop=th.cay===bw.cay;
+   L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(th.ten)+'</span>'
+    +'<span class="block text-xs" style="color:'+V.mf+'">'+th.dt+' sào · '+esc(th.cay)+' · '+esc(th.giong)+'</span></span>'
+    +(hop?'':'<span class="tag tag-wait shrink-0">khác cây</span>'),'data-thua="'+th.id+'"',bw.thua===th.id);
+  }
+  L+='</div><button type="button" id="btnGhi" class="uk-btn uk-btn-primary mt-4 w-full">Ghi vào nhật ký</button>';
+ }
+
+ var R=lbl("Dữ liệu đang dùng",1)
+  +'<div class="rounded-lg border p-3.5 text-xs leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">'
+  +'<div class="mb-2"><b class="mono" style="color:hsl(var(--foreground))">'+D.thuoc.length
+  +'</b> thuốc · <b class="mono" style="color:hsl(var(--foreground))">'+D.bang.cay.length
+  +'</b> cây · <b class="mono" style="color:hsl(var(--foreground))">'+D.bang.dich_hai.length+'</b> dịch hại</div>'
+  +'Thông tư 75/2025 + sửa đổi 28/2026 — danh mục thuốc<br>'
+  +'Thông tư 50/2016 — ngưỡng dư lượng<br>'
+  +'Phụ lục II Thông tư 75/2025 — '+D.cam.length+' hoạt chất cấm</div>'
+  +'<p class="hint">Thiếu: thời gian cách ly và ảnh bệnh. PHI phải đọc trên nhãn; ảnh sẽ lấy từ PlantDoc và Bugwood.</p>';
+
+ return sec("Tra theo cây và dịch hại",
+  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]"><div>'+L+'</div><div>'+R+'</div></div>');
+}
 function back(k,t){return '<button type="button" data-back="'+k+'" class="mb-3 text-xs font-semibold" style="color:'+V.mf+'">‹ '+t+"</button>"}
 function lbl(t,first){return '<div class="'+(first?"mb-2.5":"mb-2.5 mt-6")+' text-[0.68rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">'+t+"</div>"}
 
@@ -760,39 +844,89 @@ function pSo(){
  return h}
 
 function pPha(){
- var L='<p class="mb-4 max-w-[56ch] text-sm" style="color:'+V.mf+'">Chọn hai loại định đổ chung một bình. Dải màu bên trái mỗi dòng là nhóm độc ghi trên nhãn thuốc.</p><div class="flex flex-col gap-2">',i;
- for(i=0;i<THUOC.length;i++){var t=THUOC[i],on=chonPha.indexOf(t.id)>=0;
-  L+=rowBtn('<span class="b-'+t.band+' h-9 w-[3px] shrink-0 rounded-sm"></span>'
-   +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.ten)
-   +'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(t.tru)+"</span></span>"
-   +'<span class="shrink-0 text-right"><span class="mono c-'+t.band+' block text-base font-semibold leading-none">'+t.phi
-   +'</span><span class="block text-[0.58rem] uppercase tracking-wider" style="color:'+V.mf+'">ngày CL</span></span>','data-pha="'+t.id+'"',on)}
- L+="</div>";
+ if(!D)return sec("Pha thuốc",card('<p class="p-8 text-center text-sm" style="color:'+V.mf+'">Đang nạp danh mục thuốc…</p>'));
+ var i,L='<p class="mb-3 max-w-[58ch] text-sm" style="color:'+V.mf+'">'
+  +'Tìm hai thuốc định đổ chung một bình. Gõ tên thương phẩm hoặc hoạt chất.</p>'
+  +'<input id="timThuoc" type="search" placeholder="ví dụ: Tervigo, Abamectin, đồng…" autocomplete="off"'
+  +' class="w-full rounded-lg border px-3 py-2 text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'
+  +'<div id="kqThuoc" class="scroll-thin mt-2 flex max-h-72 flex-col gap-1.5 overflow-y-auto pr-1"></div>';
 
- var R="";
- if(chonPha.length<2)R+=card('<p class="py-9 text-center text-sm" style="color:'+V.mf+'">Chọn đủ hai loại để kiểm tra.</p>');
- else{var a=byId(THUOC,chonPha[0]),b=byId(THUOC,chonPha[1]),va=null;
-  for(i=0;i<KY.length;i++){var k=KY[i];
-   if((a.nhom.indexOf(k.a)>=0&&b.nhom.indexOf(k.b)>=0)||(a.nhom.indexOf(k.b)>=0&&b.nhom.indexOf(k.a)>=0))va=k}
-  if(va)R+=alertBox("bad",ICO_X,"Đừng đổ chung một bình","<b>"+esc(a.ten)+"</b> và <b>"+esc(b.ten)+"</b> kỵ nhau.<br>"+esc(va.ly));
-  else R+=alertBox("ok",ICO_OK,"Pha chung được","Không có tương kỵ đã biết giữa <b>"+esc(a.ten)+"</b> và <b>"+esc(b.ten)
-   +"</b>.<br>Lấy thời gian cách ly dài hơn: <b>"+Math.max(a.phi,b.phi)+" ngày</b>. Vẫn nên thử một ít trước khi pha cả bình.")}
- R+=lbl("Quy tắc đang áp dụng")+'<div class="flex flex-col gap-2">';
- for(i=0;i<KY.length;i++)R+='<div class="flex items-start gap-3 rounded-lg border p-3" style="border-color:'+V.bd+';background:'+V.cd+'">'
-  +'<span class="b-bad mt-0.5 h-8 w-[3px] shrink-0 rounded-sm"></span><span class="min-w-0">'
-  +'<span class="block text-sm font-semibold">'+nt(KY[i].a)+" + "+nt(KY[i].b)+"</span>"
-  +'<span class="mt-0.5 block text-xs leading-relaxed" style="color:'+V.mf+'">'+esc(KY[i].ly)+"</span></span></div>";
- R+="</div>";
+ // Hai thuốc đang chọn
+ L+=lbl("Đang chọn");
+ if(!chonPha.length){
+  L+='<p class="rounded-lg border border-dashed p-3 text-sm" style="border-color:'+V.bd+';color:'+V.mf
+   +'">Chưa chọn thuốc nào.</p>';
+ }else{
+  L+='<div class="flex flex-col gap-2">';
+  for(i=0;i<chonPha.length;i++){
+   var t=timThuocTen(chonPha[i]);
+   if(!t)continue;
+   L+='<div class="flex items-center gap-3 rounded-lg border p-3" style="border-color:hsl(var(--primary));background:var(--accent)">'
+    +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.t)+'</span>'
+    +'<span class="block text-xs" style="color:'+V.mf+'">'+esc(D.bang.hoat_chat[t.h])+'</span></span>'
+    +'<button type="button" data-bo="'+esc(t.t)+'" class="uk-btn uk-btn-sm uk-btn-default shrink-0">Bỏ</button></div>';
+  }
+  L+='</div>';
+ }
+
+ var R='';
+ if(chonPha.length<2){
+  R+=card('<p class="py-9 text-center text-sm" style="color:'+V.mf+'">Chọn đủ hai thuốc để kiểm tra.</p>');
+ }else{
+  var a=timThuocTen(chonPha[0]),b=timThuocTen(chonPha[1]),va=null;
+  if(a&&b){
+   for(i=0;i<KY.length;i++){
+    var k=KY[i];
+    if((a.g.indexOf(k.a)>=0&&b.g.indexOf(k.b)>=0)||(a.g.indexOf(k.b)>=0&&b.g.indexOf(k.a)>=0))va=k;
+   }
+   if(va)R+=alertBox("bad",ICO_X,"Đừng đổ chung một bình",
+     '<b>'+esc(a.t)+'</b> ('+esc(D.bang.hoat_chat[a.h])+')<br><b>'+esc(b.t)+'</b> ('
+     +esc(D.bang.hoat_chat[b.h])+')<br><br>'+esc(va.ly));
+   else R+=alertBox("ok",ICO_OK,"Không thấy tương kỵ đã biết",
+     'Giữa <b>'+esc(a.t)+'</b> và <b>'+esc(b.t)+'</b> không khớp quy tắc tương kỵ nào trong '
+     +KY.length+' quy tắc app đang có. Vẫn nên thử một ít trước khi pha cả bình.');
+  }
+ }
+
+ /* Phải nói rõ giới hạn: nhóm hoạt chất ở đây là SUY RA TỪ TÊN, và bốn quy
+    tắc là nguyên lý chung chứ không phải bảng tương kỵ chính thức. Người
+    dùng cần biết mức tin cậy của thứ họ đang đọc. */
+ R+='<div class="mt-4 rounded-lg border border-dashed p-3 text-xs leading-relaxed" style="border-color:var(--wait);color:'
+  +V.mf+'"><b class="c-wait">Mức tin cậy.</b> App phân nhóm hoạt chất bằng cách đọc TÊN hoạt chất '
+  +'(thấy "đồng" thì xếp nhóm đồng, thấy "Bacillus" thì xếp nhóm sinh học…), không phải theo phân loại chính thức. '
+  +'Bốn quy tắc dưới đây là nguyên lý chung, không phải bảng tương kỵ của nhà sản xuất. '
+  +'Không có cảnh báo KHÔNG có nghĩa là chắc chắn pha được.</div>';
+
+ R+=lbl("Bốn quy tắc đang áp dụng")+'<div class="flex flex-col gap-2">';
+ for(i=0;i<KY.length;i++)
+  R+='<div class="flex items-start gap-3 rounded-lg border p-3" style="border-color:'+V.bd+';background:'+V.cd+'">'
+   +'<span class="b-bad mt-0.5 h-8 w-[3px] shrink-0 rounded-sm"></span><span class="min-w-0">'
+   +'<span class="block text-sm font-semibold">'+nt(KY[i].a)+' + '+nt(KY[i].b)+'</span>'
+   +'<span class="mt-0.5 block text-xs leading-relaxed" style="color:'+V.mf+'">'+esc(KY[i].ly)+'</span></span></div>';
+ R+='</div>';
+
  return sec("Kiểm tra pha chung",
-  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"><div>'+L+"</div><div>"+R+"</div></div>")}
-var ARROW="<svg class='ic shrink-0' style='width:1.15em;height:1.15em;color:hsl(var(--muted-foreground))' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>";
-var ICO_OK="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg>";
-var ICO_X="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M18 6 6 18M6 6l12 12'/></svg>";
-function alertBox(k,ic,t,b){
- return '<div class="flex items-start gap-3 rounded-lg border p-4" style="border-color:var(--'+k+');background:var(--'+k+'-bg)">'
-  +'<span class="text-base leading-snug c-'+k+'" aria-hidden="true">'+ic+"</span><div>"
-  +'<div class="mb-1 text-sm font-bold c-'+k+'">'+t+'</div><div class="text-[0.82rem] leading-relaxed">'+b+"</div></div></div>"}
-function nt(k){return{dong:"Gốc đồng",visinh:"Chế phẩm sinh học",khangsinh:"Kháng sinh",hoahoc:"Trừ nấm hoá học",dau:"Dầu khoáng"}[k]||k}
+  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"><div>'+L+'</div><div>'+R+'</div></div>');
+}
+
+function timThuocTen(ten){
+ if(!D)return null;
+ for(var i=0;i<D.thuoc.length;i++)if(D.thuoc[i].t===ten)return D.thuoc[i];
+ return null;
+}
+
+/* Tìm trong 5.914 thuốc. Lọc tuyến tính là đủ nhanh ở quy mô này và tránh
+   phải dựng chỉ mục — nhưng chỉ chạy khi đã gõ từ 2 ký tự trở lên. */
+function locThuoc(tu,gioi){
+ var ra=[],q=(tu||"").toLowerCase().trim();
+ if(!D||q.length<2)return ra;
+ for(var i=0;i<D.thuoc.length&&ra.length<(gioi||40);i++){
+  var t=D.thuoc[i];
+  if(t.t.toLowerCase().indexOf(q)>=0||D.bang.hoat_chat[t.h].toLowerCase().indexOf(q)>=0)ra.push(t);
+ }
+ return ra;
+}
+function nt(k){return{dong:"Gốc đồng",visinh:"Chế phẩm sinh học",khangsinh:"Kháng sinh",hoahoc:"Hoá học",dau:"Dầu khoáng",luuhuynh:"Lưu huỳnh"}[k]||k}
 
 function pMap(){
  var R='<div class="flex flex-col gap-2">',i;
@@ -1074,34 +1208,52 @@ function ganTip(){
 /* ======================= SỰ KIỆN ======================= */
 document.addEventListener("click",function(ev){
  if(ev.target&&ev.target.id==="btnHoSo"){hoSo();return}
- var S="[data-nav],[data-go],[data-bp],[data-tc],[data-benh],[data-chon],[data-thua],[data-back],[data-pha],[data-diem],[data-gia],[data-tool],[data-nhay]";
+ var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool]";
  var el=ev.target.closest?ev.target.closest(S):null;if(!el)return;
  var v;
  if((v=el.getAttribute("data-nav"))){di(v);return}
  if((v=el.getAttribute("data-go"))){bw={bp:null,tc:null,benh:null,thua:bw.thua};di(v);return}
- if((v=el.getAttribute("data-bp"))){bw.bp=v;ve();return}
- if((v=el.getAttribute("data-tc"))){bw.tc=v;ve();return}
- if((v=el.getAttribute("data-benh"))){bw.benh=v;ve();return}
+ if((v=el.getAttribute("data-cay"))){bw.cay=v;bw.dh=null;bw.thuoc=null;ve();return}
+ if((v=el.getAttribute("data-dh"))){bw.dh=+v;bw.thuoc=null;ve();return}
+ if((v=el.getAttribute("data-thuoc"))){bw.thuoc=v;ve();return}
  if((v=el.getAttribute("data-thua"))){bw.thua=v;ve();return}
- if((v=el.getAttribute("data-chon"))){ghi(v);return}
- if((v=el.getAttribute("data-nhay"))){var b=byId(BENH,v);bw.bp=b.bp;bw.tc=b.tc[0];bw.benh=b.id;ve();return}
  if((v=el.getAttribute("data-back"))){
-  if(v==="bp"){bw.bp=null;bw.tc=null;bw.benh=null}
-  if(v==="tc"){bw.tc=null;bw.benh=null}
-  if(v==="benh")bw.benh=null;
+  if(v==="cay"){bw.cay=null;bw.dh=null;bw.thuoc=null}
+  if(v==="dh"){bw.dh=null;bw.thuoc=null}
+  if(v==="thuoc")bw.thuoc=null;
   ve();return}
  if((v=el.getAttribute("data-pha"))){var ix=chonPha.indexOf(v);
   if(ix>=0)chonPha.splice(ix,1);else{chonPha.push(v);if(chonPha.length>2)chonPha.shift()}
   ve();return}
+ if((v=el.getAttribute("data-bo"))){var ib=chonPha.indexOf(v);if(ib>=0)chonPha.splice(ib,1);ve();return}
  if((v=el.getAttribute("data-diem"))){diemCur=diemCur===+v?null:+v;ve();return}
  if((v=el.getAttribute("data-gia"))){giaCur=v;ve();return}
  if((v=el.getAttribute("data-tool"))&&SIM){SIM.tool=+v;veTools();return}});
 
-function ghi(tid){
- var t=byId(THUOC,tid),b=byId(BENH,bw.benh);
+/* Ghi vào nhật ký. PHI KHÔNG có trong dữ liệu — người dùng đọc trên nhãn
+   và nhập. Không có PHI thì vẫn ghi được, chỉ là thửa đó không có đồng hồ
+   đếm ngược; thà thiếu còn hơn bịa một con số. */
+function ghi(){
+ if(!bw.thuoc)return;
+ var el=document.getElementById("phiIn"),loi=document.getElementById("phiLoi");
+ var v=el?el.value.trim():"",phi=v===""?null:parseInt(v,10);
+ if(v!==""&&(isNaN(phi)||phi<0||phi>120)){
+  if(loi)loi.innerHTML='<span class="c-bad">Số ngày phải từ 0 đến 120.</span>';
+  if(el)el.focus();
+  return;
+ }
+ if(phi!=null){PHI[bw.thuoc]=phi;luuPhi()}
+
+ var t=timThuocTen(bw.thuoc),th=byId(THUA,bw.thua);
  so.unshift({id:"e"+Date.now(),thua:bw.thua,ngay:NAY.getTime(),
-  viec:"Xịt trừ "+b.ten.toLowerCase(),thuoc:t.ten,lieu:t.lieu,phi:t.phi});
- luu();bw={bp:null,tc:null,benh:null,thua:bw.thua};di("tongquan")}
+  viec:"Xịt trừ "+(D?D.bang.dich_hai[bw.dh]:""),
+  thuoc:bw.thuoc,
+  lieu:(t?D.bang.hoat_chat[t.h]:"")+(th?" · "+th.cay:""),
+  phi:phi||0});
+ luu();
+ bw={cay:bw.cay,dh:null,thuoc:null,thua:bw.thua};
+ di("tongquan");
+}
 
 document.getElementById("tbtn").addEventListener("click",function(){
  var r=document.documentElement,d=r.classList.toggle("dark");
@@ -1111,7 +1263,58 @@ document.getElementById("tbtn").addEventListener("click",function(){
 document.getElementById("mbtn").addEventListener("click",function(){
  document.getElementById("side").classList.toggle("hidden")});
 
+document.addEventListener("input",function(ev){
+ var id=ev.target&&ev.target.id;
+ if(id==="timCay"){
+  var q=ev.target.value.toLowerCase().trim(),o=document.getElementById("kqCay"),h2="";
+  if(o){
+   if(q.length>=2){
+    for(var i=0,n=0;i<D.bang.cay.length&&n<25;i++){
+     var c=D.bang.cay[i];
+     if(c.toLowerCase().indexOf(q)>=0){
+      h2+='<button type="button" data-cay="'+esc(c)+'" class="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'+esc(c)+"</button>";
+      n++;
+     }
+    }
+    if(!h2)h2='<p class="p-2 text-sm" style="color:'+V.mf+'">Không thấy cây nào khớp.</p>';
+   }
+   o.innerHTML=h2;
+  }
+ }
+ if(id==="timThuoc"){
+  var ds=locThuoc(ev.target.value,40),o2=document.getElementById("kqThuoc"),h3="";
+  if(o2){
+   for(var k=0;k<ds.length;k++){
+    var t=ds[k],on=chonPha.indexOf(t.t)>=0;
+    h3+='<button type="button" data-pha="'+esc(t.t)+'" class="flex w-full items-center gap-3 rounded-lg border p-2.5 text-left" style="border-color:'+(on?"hsl(var(--primary))":V.bd)+';background:'+(on?"var(--accent)":V.cd)+'">'
+      +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.t)+"</span>"
+      +'<span class="block text-xs" style="color:'+V.mf+'">'+esc(D.bang.hoat_chat[t.h])+"</span></span></button>";
+   }
+   if(!h3&&ev.target.value.trim().length>=2)h3='<p class="p-2 text-sm" style="color:'+V.mf+'">Không thấy thuốc nào khớp.</p>';
+   o2.innerHTML=h3;
+  }
+ }
+});
+
+document.addEventListener("click",function(ev){
+ if(ev.target&&ev.target.id==="btnGhi")ghi();
+});
+
+/* Nạp dữ liệu thật rồi vẽ lại. Vẽ trước một lần để trang không trắng
+   trong lúc chờ — các trang không cần dữ liệu (Tổng quan, Nhật ký, Mô
+   phỏng) chạy được ngay. */
 veNav();ve();
+fetch("du-lieu-app.json")
+ .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
+ .then(function(j){D=j;veNav();ve()})
+ .catch(function(e){
+  D=null;
+  var el=document.getElementById("page");
+  if(el&&(cur==="benh"||cur==="pha"))el.innerHTML=sec("Lỗi",
+   '<div class="alert"><span class="leading-none">'+ICO_X+'</span><div>'
+   +'<span class="hh">Không nạp được danh mục thuốc</span>'
+   +'<div class="bb">'+esc(String(e.message||e))+'. Trang cần chạy qua http:// chứ không phải mở thẳng file.</div></div></div>');
+ });
 })();
 </script>
 </body>
