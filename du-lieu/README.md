@@ -75,9 +75,38 @@ thuốc. Phải gom riêng. Đây vẫn là việc chặn cứng của dự án.
 **2. Phân bón.** Do hệ thống khác quản lý, theo Thông tư 07/2026/TT-BNNMT
 (hiệu lực 23/01/2026). Tra ở https://www.masophanbon.com/
 
+## Đã gộp sửa đổi 2026
+
+`gop-sua-doi.py` gộp thêm hai nguồn:
+
+**Phụ lục II Thông tư 75/2025 — DANH MỤC CẤM** → `danh-muc-cam.json`
+33 hoạt chất bị cấm (25 trừ sâu/bảo quản lâm sản, 6 trừ bệnh, 1 trừ chuột,
+1 trừ cỏ). App phải chặn, không được im lặng bỏ qua.
+
+**Phụ lục Thông tư 28/2026** (hiệu lực 15/08/2026) → `danh-muc-thuoc-2026.json`
+
+| Mục | Đọc được | Áp được |
+|---|---|---|
+| Đổi tổ chức đăng ký | 20 | **19** |
+| Đổi thông tin hoạt chất | 2 | 1 |
+| Tự nguyện rút khỏi danh mục | 5 | 4 |
+| Bổ sung mới | 345 | 282 |
+
+Con số 19 khớp đúng bản tóm tắt chính thức của Thông tư. Phần đọc được nhiều
+hơn áp được là do tên thương phẩm không khớp bản ghi nào trong danh mục gốc,
+hoặc trùng tên đã có.
+
+**Tổng sau khi gộp: 5.929 bản ghi**, 15 bản (0,25%) không tách được cây trồng.
+
+Hai lỗi đã sửa trong lúc làm, ghi lại để khỏi lặp:
+1. Mốc cột của Thông tư 28 tôi *đoán* thay vì *đo* → lệch đúng một cột, khớp
+   được 0 bản ghi. Phải đo phân bố x của chính file đó.
+2. Gán mục theo TRANG → trang 2 chứa cả tiêu đề mục 2 lẫn mục 3, nên các thuốc
+   *đổi hoạt chất* bị tính nhầm thành *đã rút khỏi danh mục*. Rút nghĩa là xoá,
+   nên lỗi này nguy hiểm. Phải gán theo vị trí dọc của từng hàng.
+
 ## Việc còn lại
 
-- [ ] Gộp sửa đổi từ Thông tư 28/2026/TT-BNNMT
 - [ ] Chuẩn hoá tên cây trồng ("cải bắp" vs "bắp cải", "lúa" vs "lúa gieo thẳng")
 - [ ] Lọc bỏ ~1% từ chỉ dịch hại lọt sang cột cây trồng
 - [ ] Gom PHI cho nhóm thuốc phổ biến nhất
