@@ -383,6 +383,20 @@ function dm(d){return p2(d.getDate())+"/"+p2(d.getMonth()+1)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function vnd(n){return n.toLocaleString("vi-VN")}
 function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
+/* Biểu tượng SVG dùng chung. Khai báo ở ĐÂY, cạnh các hằng số khác, vì ba
+   biến này từng nằm lẫn trong khối mã bị xoá lúc thay trang — mất khai báo
+   mà không ai biết, tới lúc chạy mới ném ReferenceError và nuốt luôn cả
+   lần vẽ lại. */
+var ARROW="<svg class='ic shrink-0' style='width:1.15em;height:1.15em;color:hsl(var(--muted-foreground))'"
+ +" viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'"
+ +" stroke-linejoin='round' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>";
+var ICO_OK="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none'"
+ +" stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'"
+ +" aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg>";
+var ICO_X="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none'"
+ +" stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'"
+ +" aria-hidden='true'><path d='M18 6 6 18M6 6l12 12'/></svg>";
+
 var V={bd:"hsl(var(--border))",cd:"hsl(var(--card))",mu:"hsl(var(--muted))",mf:"hsl(var(--muted-foreground))",
        pr:"hsl(var(--primary))",pf:"hsl(var(--primary-foreground))"};
 
@@ -572,62 +586,98 @@ function ve(){
  if(cur==="mophong")simInit();
  ganTip()}
 
+/* Trang Tổng quan trả lời đúng một câu: HÔM NAY CẦN LÀM GÌ.
+
+   Bản trước hỏng ba chỗ:
+   - Số lớn chỉ hiện MỘT thửa (thửa chờ lâu nhất). Có 3 thửa mà chỉ thấy 1,
+     hai thửa kia coi như vô hình.
+   - Khối "Các thửa" lặp lại đúng trang Thửa ruộng.
+   - Dãy "20 sào / 2 lần / 5 việc" không dẫn tới quyết định nào. Biết 20 sào
+     thì làm gì tiếp? Không làm gì cả.
+
+   Giờ: một danh sách việc cần chú ý, rồi trạng thái TỪNG thửa, rồi lịch. */
 function pTong(){
- var xau=null,xt=null,i;
- for(i=0;i<THUA.length;i++){var s=tt(THUA[i].id);if(!xau||s.con>xau.con){xau=s;xt=THUA[i]}}
- var xit=0,dt=0;
- for(i=0;i<so.length;i++)if(so[i].phi)xit++;
- for(i=0;i<THUA.length;i++)dt+=THUA[i].dt;
- var ok=xau.con===0;
+ var i,ok=0,cho=0,dt=0;
+ for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++;else ok++}
 
- var L='<div class="flex-1 min-w-0">';
- if(ok)L+='<div class="c-ok text-3xl font-extrabold tracking-tight md:text-4xl">Mọi thửa gặt được</div>'
-  +'<p class="mt-4 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Đã qua thời gian cách ly của tất cả các lần xịt trong vụ.</p>';
- else{
-  // Số ngày nằm trong một khối hổ phách. Đây là thứ duy nhất trên trang cần
-  // nhìn thấy từ xa, nên cho nó một mảng màu thật chứ không chỉ đổi màu chữ.
-  L+='<div class="flex flex-wrap items-center gap-4">'
-   +'<span class="inline-grid shrink-0 place-items-center rounded-xl px-5 py-1" style="background:var(--wait-bg)">'
-   +'<span style="color:var(--wait-solid)" class="text-[3.6rem] font-extrabold leading-[1.15] tracking-tighter">'+xau.con+"</span></span>"
-   +'<span class="text-lg font-semibold leading-snug">ngày nữa mới được gặt'
-   +'<span class="block text-sm font-normal" style="color:'+V.mf+'">thửa '+esc(xt.ten)+"</span></span></div>";
-  L+='<p class="mt-5 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Sớm nhất là <b style="color:hsl(var(--foreground))">'
-   +dmy(xau.het)+"</b>. Vì ngày "+dmy(new Date(xau.ng.ngay))+' đã xịt <b style="color:hsl(var(--foreground))">'+esc(xau.ng.thuoc)+"</b>, thời gian cách ly "+xau.ng.phi+" ngày.</p>"}
- L+="</div>";
+ /* ---- Việc cần chú ý, xếp theo mức gấp ---- */
+ var viec=[];
+ for(i=0;i<THUA.length;i++){
+  var th=THUA[i],s=tt(th.id);
+  if(s.con>0)viec.push({uu:s.con,mau:"wait",ic:"cho",
+    tieu:esc(th.ten)+" — còn "+s.con+" ngày mới được gặt",
+    phu:"Sớm nhất "+dmy(s.het)+". Vì ngày "+dmy(new Date(s.ng.ngay))+" đã xịt <b>"
+        +esc(s.ng.thuoc)+"</b>, cách ly "+s.ng.phi+" ngày."});
+  else viec.push({uu:900,mau:"ok",ic:"xong",
+    tieu:esc(th.ten)+" — gặt được",
+    phu:"Đã qua thời gian cách ly của mọi lần xịt trên thửa này."});
+ }
+ viec.push({uu:2,mau:"inf",ic:"lich",tieu:"Bón đón đòng — Ruộng Trên",
+   phu:"Đến hạn "+dm(addD(NAY,2))+"."});
+ viec.sort(function(a,b){return a.uu-b.uu});
 
- var R='<div><h3 class="m-0 mb-1 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Việc sắp tới</h3>';
- R+=nx("b-inf","Bón đón đòng","Ruộng Trên · "+dm(addD(NAY,2)));
- R+=nx(ok?"b-ok":"b-wait",ok?"Gặt được":"Hết thời gian cách ly",esc(xt.ten)+" · "+(ok?"ngay bây giờ":dm(xau.het)));
- R+="</div>";
+ var dsViec="";
+ for(i=0;i<viec.length;i++){
+  var v=viec[i];
+  dsViec+='<div class="flex gap-3.5 border-t p-4" style="border-color:'+V.bd+'">'
+   +'<span class="b-'+v.mau+' mt-1 h-2 w-2 shrink-0 rounded-full"></span>'
+   +'<div class="min-w-0"><div class="text-[0.95rem] font-semibold leading-snug">'+v.tieu+'</div>'
+   +'<div class="mt-0.5 text-[0.82rem] leading-relaxed" style="color:'+V.mf+'">'+v.phu+'</div></div></div>';
+ }
 
- // Dãy chỉ số nằm trong cùng thẻ với phần số ngày, ngăn bằng một đường kẻ
- // ngang — không viền trên dưới nữa vì thẻ đã lo phần khung.
- var fig='<div class="flex flex-wrap border-t" style="border-color:'+V.bd+'">'
-  +fg(dt+" sào",THUA.length+" thửa đang quản lý",1)
-  +fg(xit,"lần dùng thuốc BVTV")
-  +fg(so.length,"việc đã ghi vào sổ")
-  +fg(tag(ok?"Đạt":"Chưa đạt",ok?"ok":"wait"),"hồ sơ cách ly toàn vụ")+"</div>";
+ var dau='<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 p-4 pb-3">'
+  +'<span class="text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Hôm nay</span>'
+  +'<span class="text-[0.95rem]">'
+  +(cho?'<b class="c-wait">'+cho+' thửa</b> đang chờ cách ly':'')
+  +(cho&&ok?' · ':'')
+  +(ok?'<b class="c-ok">'+ok+' thửa</b> gặt được':'')
+  +'</span></div>';
 
- // ===== BỐ CỤC: cột chính + cột phải =====
- // Trước đây mọi khối đều kéo hết chiều ngang nên màn hình rộng thì thừa
- // một khoảng trống lớn ở giữa, còn nội dung thì bị dàn mỏng. Giờ chia
- // thành cột chính (số ngày + biểu đồ) và cột phải hẹp giữ các khối ngắn
- // (việc sắp tới, danh sách thửa) — đúng kiểu dashboard thật.
- var pl="";for(i=0;i<THUA.length;i++)pl+=cThuaGon(THUA[i]);
+ var h=sec("Cần chú ý",card(dau+dsViec));
 
- var chinh=card('<div class="p-6 pb-5">'+L+"</div>"+fig)
-  +'<div class="mt-5">'+card('<div class="p-6"><div class="mb-4 flex flex-wrap items-baseline gap-2">'
-   +'<h3 class="m-0 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Lịch cách ly theo thửa</h3>'
-   +'<span class="text-xs" style="color:'+V.mf+'">— đường đứt nét là hôm nay</span></div>'+chLich()+"</div>")+"</div>";
+ /* ---- Trạng thái TỪNG thửa, mỗi thửa một đồng hồ riêng ---- */
+ var oThua="";
+ for(i=0;i<THUA.length;i++){
+  var t2=THUA[i],s2=tt(t2.id),w=s2.con>0;
+  oThua+='<div class="uk-card rounded-xl border border-border bg-card p-5">'
+   +'<div class="flex items-center gap-3">'
+   +'<span class="inline-grid shrink-0 place-items-center rounded-xl px-4 py-1.5" style="background:var(--'
+   +(w?'wait':'ok')+'-bg)">'
+   +(w?'<span style="color:var(--wait-solid)" class="text-[2.6rem] font-extrabold leading-[1.15] tracking-tighter">'+s2.con+'</span>'
+      :'<span class="c-ok text-[1.35rem] font-bold leading-[2.2]">gặt được</span>')
+   +'</span>'
+   +'<span class="min-w-0"><span class="block text-[0.95rem] font-bold leading-tight">'+esc(t2.ten)+'</span>'
+   +'<span class="block text-xs" style="color:'+V.mf+'">'+t2.dt+' sào · '+esc(t2.cay)+'</span>'
+   +(w?'<span class="mt-1 block text-xs" style="color:'+V.mf+'">gặt từ '+dm(s2.het)+'</span>':'')
+   +'</span></div>'
+   +'<div class="mt-3.5 flex border-t pt-3" style="border-color:'+V.bd+'">'
+   +'<div class="flex-1"><b class="mono block text-sm font-semibold">'+t2.ngaycay+'</b>'
+   +'<span class="block text-[0.66rem]" style="color:'+V.mf+'">ngày sau trồng</span></div>'
+   +'<div class="flex-1 border-l pl-3" style="border-color:'+V.bd+'"><b class="block text-sm font-semibold">'+esc(t2.gd)+'</b>'
+   +'<span class="block text-[0.66rem]" style="color:'+V.mf+'">giai đoạn</span></div>'
+   +'</div></div>';
+ }
+ h+=sec("Từng thửa",'<div class="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">'+oThua+'</div>',
+   '<span class="text-xs" style="color:'+V.mf+'">'+THUA.length+' thửa · '+dt+' sào</span>');
 
- var phai=card('<div class="p-5">'+R+"</div>")
-  +'<div class="mt-5">'+card('<div class="p-5"><h3 class="m-0 mb-3 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'
-   +V.mf+'">Các thửa</h3><div class="flex flex-col gap-2.5">'+pl+"</div></div>")+"</div>";
+ /* ---- Hồ sơ: câu hỏi duy nhất đáng hỏi là GIAO HÀNG ĐƯỢC CHƯA ---- */
+ var an=cho===0;
+ h+=sec("Hồ sơ cách ly toàn vụ",
+   card('<div class="flex flex-wrap items-center gap-4 p-5">'
+    +'<span class="tag tag-'+(an?'ok':'wait')+'" style="font-size:0.85rem;padding:0.3rem 0.8rem">'
+    +(an?'Đạt — giao hàng được':'Chưa đạt — chưa nên giao hàng')+'</span>'
+    +'<span class="min-w-0 flex-1 text-sm" style="color:'+V.mf+'">'
+    +(an?'Mọi thửa đã qua thời gian cách ly.'
+        :'Còn '+cho+' thửa trong thời gian cách ly. Gặt và giao bây giờ thì có nguy cơ dư lượng vượt ngưỡng.')
+    +'</span>'
+    +'<button type="button" data-go="so" class="uk-btn uk-btn-sm uk-btn-default shrink-0">Mở nhật ký</button></div>'));
 
- return '<section class="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">'
-  +"<div>"+chinh+"</div><div>"+phai+"</div></section>"}
-
-// Thẻ thửa bản gọn cho cột phải: một dòng tên + trạng thái, một dòng phụ
+ h+=sec("Lịch cách ly",
+  card('<div class="p-6"><p class="mb-4 max-w-[62ch] text-sm" style="color:'+V.mf
+   +'">Mỗi thanh là một lần dùng thuốc và khoảng phải chờ sau đó. Đường đứt nét là hôm nay.</p>'
+   +chLich()+'</div>'));
+ return h;
+}
 function cThuaGon(t){
  var s=tt(t.id),w=s.con>0;
  return '<div class="rounded-lg border p-3" style="border-color:'+V.bd+'">'
