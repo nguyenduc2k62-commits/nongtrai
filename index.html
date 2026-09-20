@@ -209,7 +209,10 @@ button,a{transition:background-color .18s ease,border-color .18s ease,
         <div class="truncate text-[0.7rem]" style="color:hsl(var(--muted-foreground))">HTX Đồng Tiến</div>
       </div>
     </div>
-    <nav id="nav" class="flex-1 px-3 py-3"></nav>
+    <nav id="nav" class="px-3 py-3"></nav>
+    <!-- Khối tóm tắt vụ lấp khoảng trống dưới thanh bên, đồng thời cho biết
+         đang xem vụ nào mà không phải lên đầu trang nhìn lại. -->
+    <div class="mt-auto px-4 pb-4 pt-6" id="navTomTat"></div>
     <div class="flex items-center gap-2.5 border-t px-4 py-3" style="border-color:hsl(var(--border))">
       <div class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[0.7rem] font-bold"
            style="background:hsl(var(--muted));color:hsl(var(--muted-foreground))">TĐ</div>
@@ -442,7 +445,19 @@ function veNav(){
     +'<svg viewBox="0 0 24 24" class="h-[18px] w-[18px] shrink-0" fill="none" stroke="'+(on?V.pr:"currentColor")
     +'" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">'+IC[p.id]+"</svg>"
     +esc(p.ten)+pl+"</button>"}}
- document.getElementById("nav").innerHTML=h}
+ document.getElementById("nav").innerHTML=h;
+
+ // Tóm tắt vụ ở đáy thanh bên
+ var dt=0,cho=0;
+ for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++}
+ var el=document.getElementById("navTomTat");
+ if(el)el.innerHTML='<div class="rounded-lg border p-3" style="border-color:hsl(var(--border));background:hsl(var(--muted))">'
+  +'<div class="text-[0.62rem] font-bold uppercase tracking-[0.14em]" style="color:hsl(var(--muted-foreground))">Vụ mùa 2026</div>'
+  +'<div class="mt-1.5 flex items-baseline gap-1.5"><span class="mono text-xl font-bold leading-none">'+dt+"</span>"
+  +'<span class="text-xs" style="color:hsl(var(--muted-foreground))">sào · '+THUA.length+" thửa</span></div>"
+  +'<div class="mt-2 text-xs" style="color:hsl(var(--muted-foreground))">'
+  +(cho?'<span class="c-wait font-semibold">'+cho+" thửa</span> đang chờ cách ly":'<span class="c-ok font-semibold">Tất cả</span> đã đạt cách ly')
+  +"</div></div>"}
 
 function di(id){cur=id;var p=byId(PAGES,id);
  document.getElementById("pgTitle").textContent=p.ten;
@@ -560,16 +575,16 @@ function pTong(){
  else{
   // Số ngày nằm trong một khối hổ phách. Đây là thứ duy nhất trên trang cần
   // nhìn thấy từ xa, nên cho nó một mảng màu thật chứ không chỉ đổi màu chữ.
-  L+='<div class="flex flex-wrap items-center gap-5">'
-   +'<span class="inline-grid shrink-0 place-items-center rounded-2xl px-7 py-2" style="background:var(--wait-bg)">'
-   +'<span style="color:var(--wait-solid)" class="text-[4.5rem] font-extrabold leading-[1.05] tracking-tighter md:text-[5rem]">'+xau.con+"</span></span>"
+  L+='<div class="flex flex-wrap items-center gap-4">'
+   +'<span class="inline-grid shrink-0 place-items-center rounded-xl px-5 py-1" style="background:var(--wait-bg)">'
+   +'<span style="color:var(--wait-solid)" class="text-[3.6rem] font-extrabold leading-[1.15] tracking-tighter">'+xau.con+"</span></span>"
    +'<span class="text-lg font-semibold leading-snug">ngày nữa mới được gặt'
    +'<span class="block text-sm font-normal" style="color:'+V.mf+'">thửa '+esc(xt.ten)+"</span></span></div>";
   L+='<p class="mt-5 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Sớm nhất là <b style="color:hsl(var(--foreground))">'
    +dmy(xau.het)+"</b>. Vì ngày "+dmy(new Date(xau.ng.ngay))+' đã xịt <b style="color:hsl(var(--foreground))">'+esc(xau.ng.thuoc)+"</b>, thời gian cách ly "+xau.ng.phi+" ngày.</p>"}
  L+="</div>";
 
- var R='<div class="w-full shrink-0 md:w-64"><div class="mb-1 text-[0.68rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Việc sắp tới</div>';
+ var R='<div><h3 class="m-0 mb-1 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Việc sắp tới</h3>';
  R+=nx("b-inf","Bón đón đòng","Ruộng Trên · "+dm(addD(NAY,2)));
  R+=nx(ok?"b-ok":"b-wait",ok?"Gặt được":"Hết thời gian cách ly",esc(xt.ten)+" · "+(ok?"ngay bây giờ":dm(xau.het)));
  R+="</div>";
@@ -582,17 +597,36 @@ function pTong(){
   +fg(so.length,"việc đã ghi vào sổ")
   +fg(tag(ok?"Đạt":"Chưa đạt",ok?"ok":"wait"),"hồ sơ cách ly toàn vụ")+"</div>";
 
- // Nội dung nằm trong thẻ trắng nổi trên nền bạc hà — đây mới là thứ làm
- // bậc nền/thẻ nhìn thấy được. Trước đó mọi thứ nằm trần trên nền nên
- // không có gì để so sánh, thành ra nhìn vẫn ra trắng tinh.
- var h=sec("Thời gian cách ly trước thu hoạch",
-  card('<div class="flex flex-wrap items-start gap-8 p-6">'+L+R+"</div>"+fig));
- h+=sec("Lịch cách ly theo thửa",
-  card('<div class="p-6"><p class="mb-4 max-w-[62ch] text-sm" style="color:'+V.mf
-   +'">Mỗi thanh là một lần dùng thuốc và khoảng phải chờ sau đó. Đường đứt nét là hôm nay.</p>'+chLich()+"</div>"));
- var pl="";for(i=0;i<THUA.length;i++)pl+=cThua(THUA[i]);
- h+=sec("Các thửa",'<div class="grid gap-3.5 sm:grid-cols-2">'+pl+"</div>");
- return h}
+ // ===== BỐ CỤC: cột chính + cột phải =====
+ // Trước đây mọi khối đều kéo hết chiều ngang nên màn hình rộng thì thừa
+ // một khoảng trống lớn ở giữa, còn nội dung thì bị dàn mỏng. Giờ chia
+ // thành cột chính (số ngày + biểu đồ) và cột phải hẹp giữ các khối ngắn
+ // (việc sắp tới, danh sách thửa) — đúng kiểu dashboard thật.
+ var pl="";for(i=0;i<THUA.length;i++)pl+=cThuaGon(THUA[i]);
+
+ var chinh=card('<div class="p-6 pb-5">'+L+"</div>"+fig)
+  +'<div class="mt-5">'+card('<div class="p-6"><div class="mb-4 flex flex-wrap items-baseline gap-2">'
+   +'<h3 class="m-0 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Lịch cách ly theo thửa</h3>'
+   +'<span class="text-xs" style="color:'+V.mf+'">— đường đứt nét là hôm nay</span></div>'+chLich()+"</div>")+"</div>";
+
+ var phai=card('<div class="p-5">'+R+"</div>")
+  +'<div class="mt-5">'+card('<div class="p-5"><h3 class="m-0 mb-3 text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'
+   +V.mf+'">Các thửa</h3><div class="flex flex-col gap-2.5">'+pl+"</div></div>")+"</div>";
+
+ return '<section class="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">'
+  +"<div>"+chinh+"</div><div>"+phai+"</div></section>"}
+
+// Thẻ thửa bản gọn cho cột phải: một dòng tên + trạng thái, một dòng phụ
+function cThuaGon(t){
+ var s=tt(t.id),w=s.con>0;
+ return '<div class="rounded-lg border p-3" style="border-color:'+V.bd+'">'
+  +'<div class="flex items-start gap-2"><div class="min-w-0 flex-1">'
+  +'<div class="truncate text-sm font-semibold">'+esc(t.ten)+"</div>"
+  +'<div class="truncate text-xs" style="color:'+V.mf+'">'+t.dt+" sào · "+esc(t.giong)+"</div></div>"
+  +tag(w?"chờ "+s.con+" ngày":"gặt được",w?"wait":"ok")+"</div>"
+  +'<div class="mt-2.5 flex gap-4 border-t pt-2" style="border-color:'+V.bd+'">'
+  +'<span class="text-xs" style="color:'+V.mf+'"><b class="mono" style="color:hsl(var(--foreground))">'+t.ngaycay+"</b> ngày sau cấy</span>"
+  +'<span class="text-xs" style="color:'+V.mf+'">'+esc(t.gd)+"</span></div></div>"}
 
 function nx(dot,t,s){
  return '<div class="flex gap-3 border-t py-2.5" style="border-color:'+V.bd+'">'
