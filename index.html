@@ -89,6 +89,16 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
 .mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
 .tnum{font-variant-numeric:tabular-nums}
 
+/* ===== Danh sách kiểm trước khi giao, lấy từ skill ui-ux-pro-max (MIT).
+   Đây là phần giá trị nhất của nó: các mục cụ thể, kiểm được, không phải
+   lời khuyên chung chung. ===== */
+button,[role="button"],a[href],summary,label[for]{cursor:pointer}
+button,a{transition:background-color .18s ease,border-color .18s ease,
+  color .18s ease,box-shadow .18s ease,opacity .18s ease}
+:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px;border-radius:6px}
+/* Không dùng ký tự làm biểu tượng — đã thay hết bằng SVG */
+.ic{width:1em;height:1em;flex:none;display:inline-block;vertical-align:-.125em}
+
 /* ===== BẢNG MÀU =====
    Khối này KHÔNG nằm trong @layer nên thắng token của Franken UI.
    Cố ý: Franken lo phần component (uk-btn, uk-card…), còn màu thì mình nắm,
@@ -229,7 +239,10 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
           <p id="pgSub" class="truncate text-xs" style="color:hsl(var(--muted-foreground))">Vụ mùa 2026</p>
         </div>
         <div class="ml-auto flex flex-wrap items-center gap-2">
-          <button type="button" class="uk-btn uk-btn-sm uk-btn-ghost">Vụ mùa 2026 ▾</button>
+          <button type="button" class="uk-btn uk-btn-sm uk-btn-ghost">Vụ mùa 2026
+            <svg class="ic ml-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
           <button type="button" data-go="benh" class="uk-btn uk-btn-sm uk-btn-primary">Ghi việc mới</button>
         </div>
       </div>
@@ -238,7 +251,10 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
     <div class="mx-auto w-full max-w-[1260px] px-5 pb-24 md:px-8">
       <div class="mt-4 flex items-start gap-2.5 rounded-lg border px-3.5 py-2.5 text-[0.78rem] leading-relaxed"
            style="border-color:var(--wait);background:var(--wait-bg);color:hsl(var(--foreground))">
-        <span class="c-wait mt-px" aria-hidden="true">▲</span>
+        <svg class="ic c-wait mt-0.5" style="width:1.05em;height:1.05em" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+          <path d="M12 9v4M12 17h.01"/></svg>
         <p class="m-0"><b class="c-wait">Bản mẫu, số liệu chưa thẩm định.</b> Thời gian cách ly, danh mục thuốc,
         giá cả và điểm bán là dữ liệu dựng để demo, chưa đối chiếu Thông tư 75/2025/TT-BNNMT.
         Không dùng để quyết định ngoài đồng.</p>
@@ -642,14 +658,14 @@ function pBenh(){
   L+='<div class="flex flex-col gap-2">';
   for(i=0;i<BOPHAN.length;i++)L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'
    +esc(BOPHAN[i].ten)+'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(BOPHAN[i].mo)
-   +'</span></span><span class="shrink-0 text-lg" style="color:'+V.mf+'">›</span>','data-bp="'+BOPHAN[i].id+'"');
+   +'</span></span>'+ARROW,'data-bp="'+BOPHAN[i].id+'"');
   L+="</div>";
  }else if(!bw.tc){
   L+=back("bp","Chọn lại bộ phận")+'<div class="flex flex-col gap-2">';
   var ds=TCH[bw.bp]||[];
   for(i=0;i<ds.length;i++)L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'
    +esc(ds[i].ten)+'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(ds[i].mo)
-   +'</span></span><span class="shrink-0 text-lg" style="color:'+V.mf+'">›</span>','data-tc="'+ds[i].id+'"');
+   +'</span></span>'+ARROW,'data-tc="'+ds[i].id+'"');
   L+="</div>";
  }else if(!bw.benh){
   L+=back("tc","Chọn lại triệu chứng");
@@ -724,8 +740,8 @@ function pPha(){
  else{var a=byId(THUOC,chonPha[0]),b=byId(THUOC,chonPha[1]),va=null;
   for(i=0;i<KY.length;i++){var k=KY[i];
    if((a.nhom.indexOf(k.a)>=0&&b.nhom.indexOf(k.b)>=0)||(a.nhom.indexOf(k.b)>=0&&b.nhom.indexOf(k.a)>=0))va=k}
-  if(va)R+=alertBox("bad","✕","Đừng đổ chung một bình","<b>"+esc(a.ten)+"</b> và <b>"+esc(b.ten)+"</b> kỵ nhau.<br>"+esc(va.ly));
-  else R+=alertBox("ok","✓","Pha chung được","Không có tương kỵ đã biết giữa <b>"+esc(a.ten)+"</b> và <b>"+esc(b.ten)
+  if(va)R+=alertBox("bad",ICO_X,"Đừng đổ chung một bình","<b>"+esc(a.ten)+"</b> và <b>"+esc(b.ten)+"</b> kỵ nhau.<br>"+esc(va.ly));
+  else R+=alertBox("ok",ICO_OK,"Pha chung được","Không có tương kỵ đã biết giữa <b>"+esc(a.ten)+"</b> và <b>"+esc(b.ten)
    +"</b>.<br>Lấy thời gian cách ly dài hơn: <b>"+Math.max(a.phi,b.phi)+" ngày</b>. Vẫn nên thử một ít trước khi pha cả bình.")}
  R+=lbl("Quy tắc đang áp dụng")+'<div class="flex flex-col gap-2">';
  for(i=0;i<KY.length;i++)R+='<div class="flex items-start gap-3 rounded-lg border p-3" style="border-color:'+V.bd+';background:'+V.cd+'">'
@@ -735,6 +751,9 @@ function pPha(){
  R+="</div>";
  return sec("Kiểm tra pha chung",
   '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"><div>'+L+"</div><div>"+R+"</div></div>")}
+var ARROW="<svg class='ic shrink-0' style='width:1.15em;height:1.15em;color:hsl(var(--muted-foreground))' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>";
+var ICO_OK="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M20 6 9 17l-5-5'/></svg>";
+var ICO_X="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M18 6 6 18M6 6l12 12'/></svg>";
 function alertBox(k,ic,t,b){
  return '<div class="flex items-start gap-3 rounded-lg border p-4" style="border-color:var(--'+k+');background:var(--'+k+'-bg)">'
   +'<span class="text-base leading-snug c-'+k+'" aria-hidden="true">'+ic+"</span><div>"
