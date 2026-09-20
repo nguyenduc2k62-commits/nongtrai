@@ -6,17 +6,32 @@
 <title>Sổ Ruộng — nhật ký canh tác</title>
 <meta name="description" content="Ghi một dòng vào sổ, biết ngay ngày sớm nhất được gặt.">
 
-<!-- Dự phòng: nếu CDN hỏng thì trang vẫn đọc được, không trắng bệch.
-     Phải đặt TRƯỚC link của Franken UI để Franken ghi đè lên được. -->
+<!-- Dự phòng khi CDN hỏng.
+     BẮT BUỘC nằm trong @layer: Franken UI đặt toàn bộ CSS của nó trong
+     @layer, mà theo quy tắc CSS thì rule KHÔNG có layer luôn thắng rule
+     có layer — bất kể thứ tự file. Để trần thì khối này đè chết token
+     của Franken, chữ thành đen trên nền đen.
+     Khai báo @layer fallback ở đây, trước Franken, nên nó thành layer
+     đầu tiên = ưu tiên thấp nhất. Franken thắng như mong muốn.
+     Giá trị viết theo dạng ba thành phần HSL cho khớp quy ước shadcn. -->
 <style>
-:root{
-  --background:#ffffff; --foreground:#0a0a0a;
-  --card:#ffffff; --card-foreground:#0a0a0a;
-  --muted:#f4f4f5; --muted-foreground:#71717a;
-  --primary:#16a34a; --primary-foreground:#fafafa;
-  --accent:#f4f4f5; --accent-foreground:#18181b;
-  --border:#e4e4e7; --input:#e4e4e7; --ring:#16a34a;
-  --radius:0.6rem;
+@layer fallback {
+  :root{
+    --background:0 0% 100%; --foreground:0 0% 4%;
+    --card:0 0% 100%; --card-foreground:0 0% 4%;
+    --muted:240 5% 96%; --muted-foreground:240 4% 46%;
+    --primary:142 71% 35%; --primary-foreground:0 0% 98%;
+    --accent:240 5% 96%; --accent-foreground:240 6% 10%;
+    --border:240 6% 90%; --input:240 6% 90%; --ring:142 71% 35%;
+  }
+  .dark{
+    --background:0 0% 4%; --foreground:0 0% 98%;
+    --card:150 8% 8%; --card-foreground:0 0% 98%;
+    --muted:150 6% 14%; --muted-foreground:240 5% 65%;
+    --primary:142 69% 58%; --primary-foreground:150 80% 6%;
+    --accent:150 6% 14%; --accent-foreground:0 0% 98%;
+    --border:150 8% 16%; --input:150 8% 16%;
+  }
 }
 </style>
 
@@ -34,12 +49,12 @@ tailwind.config={
   corePlugins:{preflight:false},
   theme:{extend:{
     colors:{
-      background:"var(--background)", foreground:"var(--foreground)",
-      card:"var(--card)", "card-foreground":"var(--card-foreground)",
-      muted:"var(--muted)", "muted-foreground":"var(--muted-foreground)",
-      primary:"var(--primary)", "primary-foreground":"var(--primary-foreground)",
-      accent:"var(--accent)", "accent-foreground":"var(--accent-foreground)",
-      border:"var(--border)",
+      background:"hsl(var(--background))", foreground:"hsl(var(--foreground))",
+      card:"hsl(var(--card))", "card-foreground":"hsl(var(--card-foreground))",
+      muted:"hsl(var(--muted))", "muted-foreground":"hsl(var(--muted-foreground))",
+      primary:"hsl(var(--primary))", "primary-foreground":"hsl(var(--primary-foreground))",
+      accent:"hsl(var(--accent))", "accent-foreground":"hsl(var(--accent-foreground))",
+      border:"hsl(var(--border))",
       ok:"var(--ok)", wait:"var(--wait)", bad:"var(--bad)", inf:"var(--inf)",
       "ok-bg":"var(--ok-bg)", "wait-bg":"var(--wait-bg)",
       "bad-bg":"var(--bad-bg)", "inf-bg":"var(--inf-bg)",
@@ -79,10 +94,9 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
    Tách riêng khỏi màu chủ đề vì chúng mang nghĩa, không phải trang trí. */
 :root{--ok:#15803d; --ok-bg:#dcfce7; --wait:#a16207; --wait-bg:#fef3c7;
       --bad:#b91c1c; --bad-bg:#fee2e2; --inf:#1d4ed8; --inf-bg:#dbeafe;
-      --page:#fafafa;}
+      --page:hsl(var(--background));}
 .dark{--ok:#4ade80; --ok-bg:#0c2c17; --wait:#fbbf24; --wait-bg:#2e2410;
-      --bad:#f87171; --bad-bg:#2f1516; --inf:#60a5fa; --inf-bg:#122036;
-      --page:#0a0a0a;}
+      --bad:#f87171; --bad-bg:#2f1516; --inf:#60a5fa; --inf-bg:#122036;}
 .c-ok{color:var(--ok)} .c-wait{color:var(--wait)} .c-bad{color:var(--bad)} .c-inf{color:var(--inf)}
 .b-ok{background:var(--ok)} .b-wait{background:var(--wait)} .b-bad{background:var(--bad)} .b-inf{background:var(--inf)}
 .tag{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600;
@@ -90,11 +104,11 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
 .tag-ok{background:var(--ok-bg);color:var(--ok)}
 .tag-wait{background:var(--wait-bg);color:var(--wait)}
 .tag-bad{background:var(--bad-bg);color:var(--bad)}
-.tag-mut{background:var(--muted);color:var(--muted-foreground)}
+.tag-mut{background:hsl(var(--muted));color:hsl(var(--muted-foreground))}
 
 .chart{position:relative}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
-.tip{position:absolute;pointer-events:none;z-index:20;background:var(--foreground);color:var(--background);
+.tip{position:absolute;pointer-events:none;z-index:20;background:hsl(var(--foreground));color:hsl(var(--background));
   border-radius:.4rem;padding:.35rem .6rem;font-size:.75rem;white-space:nowrap;
   transform:translate(-50%,-120%);font-variant-numeric:tabular-nums}
 .halo{paint-order:stroke;stroke:var(--page);stroke-width:2.5px;stroke-linejoin:round}
@@ -103,55 +117,55 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
   cursor:crosshair;touch-action:none}
 
 .scroll-thin::-webkit-scrollbar{width:8px;height:8px}
-.scroll-thin::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.scroll-thin::-webkit-scrollbar-thumb{background:hsl(var(--border));border-radius:4px}
 .scroll-thin::-webkit-scrollbar-track{background:transparent}
 
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
 </style>
 </head>
 
-<body style="background:var(--page);color:var(--foreground)">
+<body style="background:var(--page);color:hsl(var(--foreground))">
 
 <div class="flex min-h-screen">
   <!-- ==================== SIDEBAR ==================== -->
   <aside id="side" class="scroll-thin sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto border-r md:flex"
-         style="border-color:var(--border);background:var(--card)">
-    <div class="flex items-center gap-3 border-b px-5 py-4" style="border-color:var(--border)">
+         style="border-color:hsl(var(--border));background:hsl(var(--card))">
+    <div class="flex items-center gap-3 border-b px-5 py-4" style="border-color:hsl(var(--border))">
       <div class="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-bold"
-           style="background:var(--primary);color:var(--primary-foreground)">SR</div>
+           style="background:hsl(var(--primary));color:hsl(var(--primary-foreground))">SR</div>
       <div class="min-w-0">
         <div class="truncate text-[0.95rem] font-bold leading-tight">Sổ Ruộng</div>
-        <div class="truncate text-[0.7rem]" style="color:var(--muted-foreground)">HTX Đồng Tiến</div>
+        <div class="truncate text-[0.7rem]" style="color:hsl(var(--muted-foreground))">HTX Đồng Tiến</div>
       </div>
     </div>
     <nav id="nav" class="flex-1 px-3 py-3"></nav>
-    <div class="flex items-center gap-2.5 border-t px-4 py-3" style="border-color:var(--border)">
+    <div class="flex items-center gap-2.5 border-t px-4 py-3" style="border-color:hsl(var(--border))">
       <div class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[0.7rem] font-bold"
-           style="background:var(--muted);color:var(--muted-foreground)">TĐ</div>
+           style="background:hsl(var(--muted));color:hsl(var(--muted-foreground))">TĐ</div>
       <div class="min-w-0 flex-1">
         <div class="truncate text-xs font-semibold leading-tight">Trần Văn Đức</div>
-        <div class="truncate text-[0.68rem]" style="color:var(--muted-foreground)">Hộ sản xuất · 8 sào</div>
+        <div class="truncate text-[0.68rem]" style="color:hsl(var(--muted-foreground))">Hộ sản xuất · 8 sào</div>
       </div>
       <button id="tbtn" type="button" aria-label="Đổi nền sáng tối"
         class="grid h-8 w-8 shrink-0 place-items-center rounded-md border text-sm"
-        style="border-color:var(--border);color:var(--muted-foreground)">◐</button>
+        style="border-color:hsl(var(--border));color:hsl(var(--muted-foreground))">◐</button>
     </div>
   </aside>
 
   <!-- ==================== MAIN ==================== -->
   <div class="flex min-w-0 flex-1 flex-col">
     <header class="sticky top-0 z-30 border-b px-5 py-3 md:px-8"
-            style="border-color:var(--border);background:var(--page)">
+            style="border-color:hsl(var(--border));background:var(--page)">
       <div class="flex flex-wrap items-end gap-4">
         <button id="mbtn" type="button" aria-label="Mở menu"
           class="grid h-9 w-9 shrink-0 place-items-center rounded-md border md:hidden"
-          style="border-color:var(--border)">
+          style="border-color:hsl(var(--border))">
           <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
         <div class="min-w-0">
           <h1 id="pgTitle" class="truncate text-xl font-bold tracking-tight md:text-2xl">Tổng quan</h1>
-          <p id="pgSub" class="truncate text-xs" style="color:var(--muted-foreground)">Vụ mùa 2026</p>
+          <p id="pgSub" class="truncate text-xs" style="color:hsl(var(--muted-foreground))">Vụ mùa 2026</p>
         </div>
         <div class="ml-auto flex flex-wrap items-center gap-2">
           <button type="button" class="uk-btn uk-btn-sm uk-btn-ghost">Vụ mùa 2026 ▾</button>
@@ -162,7 +176,7 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
 
     <div class="mx-auto w-full max-w-[1260px] px-5 pb-24 md:px-8">
       <div class="mt-4 flex items-start gap-2.5 rounded-lg border px-3.5 py-2.5 text-[0.78rem] leading-relaxed"
-           style="border-color:var(--wait);background:var(--wait-bg);color:var(--foreground)">
+           style="border-color:var(--wait);background:var(--wait-bg);color:hsl(var(--foreground))">
         <span class="c-wait mt-px" aria-hidden="true">▲</span>
         <p class="m-0"><b class="c-wait">Bản mẫu, số liệu chưa thẩm định.</b> Thời gian cách ly, danh mục thuốc,
         giá cả và điểm bán là dữ liệu dựng để demo, chưa đối chiếu Thông tư 75/2025/TT-BNNMT.
@@ -252,8 +266,8 @@ function dm(d){return p2(d.getDate())+"/"+p2(d.getMonth()+1)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function vnd(n){return n.toLocaleString("vi-VN")}
 function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
-var V={bd:"var(--border)",cd:"var(--card)",mu:"var(--muted)",mf:"var(--muted-foreground)",
-       pr:"var(--primary)",pf:"var(--primary-foreground)"};
+var V={bd:"hsl(var(--border))",cd:"hsl(var(--card))",mu:"hsl(var(--muted))",mf:"hsl(var(--muted-foreground))",
+       pr:"hsl(var(--primary))",pf:"hsl(var(--primary-foreground))"};
 
 var KEY="so-ruong-v3";
 function mdinh(){return[
@@ -292,9 +306,9 @@ function hinh(id){
  var lf='<path d="M38 6C22 16 13 34 13 62c0 6 1 10 2 12 3-2 6-6 9-12 8-16 13-36 14-56Z" fill="var(--ok-bg)" stroke="var(--ok)" stroke-width="1.3"/>';
  var s='<svg viewBox="0 0 76 76" width="100%" height="100%" aria-hidden="true">',i;
  if(id==="daoon"){s+=lf;
-  s+='<ellipse cx="26" cy="32" rx="7" ry="3.4" transform="rotate(-58 26 32)" fill="var(--card)" stroke="var(--bad)" stroke-width="1.4"/>';
-  s+='<ellipse cx="21" cy="47" rx="6" ry="3" transform="rotate(-62 21 47)" fill="var(--card)" stroke="var(--bad)" stroke-width="1.4"/>';
-  s+='<ellipse cx="30" cy="19" rx="4.6" ry="2.4" transform="rotate(-52 30 19)" fill="var(--card)" stroke="var(--bad)" stroke-width="1.4"/>';
+  s+='<ellipse cx="26" cy="32" rx="7" ry="3.4" transform="rotate(-58 26 32)" fill="hsl(var(--card))" stroke="var(--bad)" stroke-width="1.4"/>';
+  s+='<ellipse cx="21" cy="47" rx="6" ry="3" transform="rotate(-62 21 47)" fill="hsl(var(--card))" stroke="var(--bad)" stroke-width="1.4"/>';
+  s+='<ellipse cx="30" cy="19" rx="4.6" ry="2.4" transform="rotate(-52 30 19)" fill="hsl(var(--card))" stroke="var(--bad)" stroke-width="1.4"/>';
  }else if(id==="bacla"){s+=lf;
   s+='<path d="M38 6C30 11 24 19 20 30c4 1 8-1 11-5 4-6 6-13 7-19Z" fill="var(--wait-bg)" stroke="var(--wait)" stroke-width="1.4"/>';
  }else if(id==="cuonla"){
@@ -347,7 +361,7 @@ function veNav(){
    if(p.id==="tongquan"){var n=0;for(k=0;k<THUA.length;k++)if(tt(THUA[k].id).con>0)n++;
     if(n)pl='<span class="ml-auto grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[0.62rem] font-bold" style="background:var(--wait);color:var(--page)">'+n+"</span>"}
    h+='<button type="button" data-nav="'+p.id+'" class="mb-0.5 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[0.84rem] font-medium"'
-    +' style="'+(on?"background:var(--accent);color:var(--accent-foreground);font-weight:600":"color:"+V.mf)+'">'
+    +' style="'+(on?"background:hsl(var(--accent));color:hsl(var(--accent-foreground));font-weight:600":"color:"+V.mf)+'">'
     +'<svg viewBox="0 0 24 24" class="h-[18px] w-[18px] shrink-0" fill="none" stroke="'+(on?V.pr:"currentColor")
     +'" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">'+IC[p.id]+"</svg>"
     +esc(p.ten)+pl+"</button>"}}
@@ -370,11 +384,11 @@ function chLich(){
  function X(d){return pL+dif(t0,d)/tg*pw}
  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Lịch thời gian cách ly từng thửa">';
  for(var d=0;d<=tg;d+=7){var x=pL+d/tg*pw;
-  s+='<line x1="'+x.toFixed(1)+'" y1="'+pT+'" x2="'+x.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="var(--border)" stroke-width="1"/>';
-  s+='<text x="'+x.toFixed(1)+'" y="'+(pT+THUA.length*rh+17)+'" text-anchor="middle" font-size="10.5" fill="var(--muted-foreground)">'+dm(addD(t0,d))+"</text>"}
+  s+='<line x1="'+x.toFixed(1)+'" y1="'+pT+'" x2="'+x.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="hsl(var(--border))" stroke-width="1"/>';
+  s+='<text x="'+x.toFixed(1)+'" y="'+(pT+THUA.length*rh+17)+'" text-anchor="middle" font-size="10.5" fill="hsl(var(--muted-foreground))">'+dm(addD(t0,d))+"</text>"}
  for(var r=0;r<THUA.length;r++){var th=THUA[r],cy=pT+r*rh+rh/2;
-  s+='<text x="'+(pL-14)+'" y="'+(cy+4)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--foreground)">'+esc(th.ten)+"</text>";
-  s+='<line x1="'+pL+'" y1="'+cy+'" x2="'+(W-pR)+'" y2="'+cy+'" stroke="var(--border)" stroke-width="1"/>';
+  s+='<text x="'+(pL-14)+'" y="'+(cy+4)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="hsl(var(--foreground))">'+esc(th.ten)+"</text>";
+  s+='<line x1="'+pL+'" y1="'+cy+'" x2="'+(W-pR)+'" y2="'+cy+'" stroke="hsl(var(--border))" stroke-width="1"/>';
   for(var m=0;m<moc.length;m++){var o=moc[m];if(o.thua!==th.id)continue;
    var x1=X(o.bd),x2=X(o.kt),con=dif(NAY,o.kt),c=con>0?"var(--wait)":"var(--ok)";
    s+='<rect x="'+x1.toFixed(1)+'" y="'+(cy-5)+'" width="'+Math.max(4,x2-x1).toFixed(1)+'" height="10" rx="5" fill="'+c+'"'
@@ -382,8 +396,8 @@ function chLich(){
     +'" data-tx="'+((x1+x2)/2).toFixed(1)+'" data-ty="'+(cy-8)+'"/>';
    if(con>0)s+='<text class="halo" x="'+(x2+9).toFixed(1)+'" y="'+(cy+4)+'" font-size="11" font-weight="600" fill="var(--wait)">gặt '+dm(o.kt)+"</text>"}}
  var xh=X(NAY);
- s+='<line x1="'+xh.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xh.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="3 3"/>';
- s+='<text class="halo" x="'+xh.toFixed(1)+'" y="'+(pT-10)+'" text-anchor="middle" font-size="10" font-weight="700" fill="var(--primary)" letter-spacing=".08em">HÔM NAY</text>';
+ s+='<line x1="'+xh.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xh.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="hsl(var(--primary))" stroke-width="1.5" stroke-dasharray="3 3"/>';
+ s+='<text class="halo" x="'+xh.toFixed(1)+'" y="'+(pT-10)+'" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(var(--primary))" letter-spacing=".08em">HÔM NAY</text>';
  s+="</svg>";
  return '<div class="chart">'+s+'</div><div class="mt-3 flex flex-wrap gap-4 text-[0.72rem]" style="color:'+V.mf+'">'
   +'<span><i class="b-wait mr-1.5 inline-block h-[3px] w-2.5 rounded-sm align-middle"></i>Đang phải chờ cách ly</span>'
@@ -400,18 +414,18 @@ function chGia(){
  function Y(v){return pT+ph-(v-y0)/(y1-y0)*ph}
  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Giá '+esc(g.ten)+' theo tuần">';
  for(var v=y0;v<=y1;v+=st*2){var y=Y(v);
-  s+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>';
-  s+='<text x="'+(pL-11)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="var(--muted-foreground)">'+vnd(v)+"</text>"}
- for(i=0;i<d.length;i++)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="10.5" fill="var(--muted-foreground)">'+TUAN[i]+"</text>";
+  s+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="hsl(var(--border))" stroke-width="1"/>';
+  s+='<text x="'+(pL-11)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="hsl(var(--muted-foreground))">'+vnd(v)+"</text>"}
+ for(i=0;i<d.length;i++)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="10.5" fill="hsl(var(--muted-foreground))">'+TUAN[i]+"</text>";
  var ln="M"+X(0).toFixed(1)+" "+Y(d[0]).toFixed(1);
  for(i=1;i<d.length;i++)ln+=" L"+X(i).toFixed(1)+" "+Y(d[i]).toFixed(1);
- s+='<path d="'+ln+" L"+X(d.length-1).toFixed(1)+" "+(pT+ph)+" L"+X(0).toFixed(1)+" "+(pT+ph)+' Z" fill="var(--primary)" opacity=".1"/>';
- s+='<path d="'+ln+'" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+ s+='<path d="'+ln+" L"+X(d.length-1).toFixed(1)+" "+(pT+ph)+" L"+X(0).toFixed(1)+" "+(pT+ph)+' Z" fill="hsl(var(--primary))" opacity=".1"/>';
+ s+='<path d="'+ln+'" fill="none" stroke="hsl(var(--primary))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
  for(i=0;i<d.length;i++)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(d[i]).toFixed(1)+'" r="14" fill="transparent" data-tip="'
   +TUAN[i]+" · "+vnd(d[i])+' đ/kg" data-tx="'+X(i).toFixed(1)+'" data-ty="'+(Y(d[i])-7).toFixed(1)+'"/>';
  var lx=X(d.length-1),ly=Y(d[d.length-1]);
- s+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="4.5" fill="var(--primary)" stroke="var(--card)" stroke-width="2"/>';
- s+='<text x="'+(lx+12).toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" font-size="13" font-weight="700" fill="var(--foreground)">'+vnd(d[d.length-1])+"</text>";
+ s+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="4.5" fill="hsl(var(--primary))" stroke="hsl(var(--card))" stroke-width="2"/>';
+ s+='<text x="'+(lx+12).toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" font-size="13" font-weight="700" fill="hsl(var(--foreground))">'+vnd(d[d.length-1])+"</text>";
  s+="</svg>";
  return '<div class="chart">'+s+"</div>"}
 
@@ -419,26 +433,26 @@ function chGia(){
 var diemCur=null;
 function veMap(){
  var s='<svg viewBox="0 0 640 470" role="img" aria-label="Sơ đồ điểm bán quanh vùng">';
- s+='<rect width="640" height="470" fill="var(--muted)"/>';
- s+='<path d="M20 20h270v200H20Z" fill="var(--ok)" opacity=".08" stroke="var(--border)"/>';
- s+='<path d="M290 20h330v230H290Z" fill="var(--inf)" opacity=".08" stroke="var(--border)"/>';
- s+='<path d="M20 220h270v230H20Z" fill="var(--wait)" opacity=".08" stroke="var(--border)"/>';
- s+='<path d="M290 250h330v200H290Z" fill="var(--muted-foreground)" opacity=".08" stroke="var(--border)"/>';
+ s+='<rect width="640" height="470" fill="hsl(var(--muted))"/>';
+ s+='<path d="M20 20h270v200H20Z" fill="var(--ok)" opacity=".08" stroke="hsl(var(--border))"/>';
+ s+='<path d="M290 20h330v230H290Z" fill="var(--inf)" opacity=".08" stroke="hsl(var(--border))"/>';
+ s+='<path d="M20 220h270v230H20Z" fill="var(--wait)" opacity=".08" stroke="hsl(var(--border))"/>';
+ s+='<path d="M290 250h330v200H290Z" fill="hsl(var(--muted-foreground))" opacity=".08" stroke="hsl(var(--border))"/>';
  var lb=[[34,42,"XÃ ĐỒNG TIẾN"],[304,42,"XÃ TÂN LẬP"],[34,242,"VÙNG LÚA HTX"],[304,272,"XÃ HOÀ BÌNH"]];
- for(var q=0;q<lb.length;q++)s+='<text x="'+lb[q][0]+'" y="'+lb[q][1]+'" font-size="10.5" font-weight="600" letter-spacing=".1em" fill="var(--muted-foreground)">'+lb[q][2]+"</text>";
+ for(var q=0;q<lb.length;q++)s+='<text x="'+lb[q][0]+'" y="'+lb[q][1]+'" font-size="10.5" font-weight="600" letter-spacing=".1em" fill="hsl(var(--muted-foreground))">'+lb[q][2]+"</text>";
  s+='<path d="M0 300c90-30 150 30 240 10s150-70 250-40 110 60 150 50" fill="none" stroke="var(--inf)" stroke-width="8" opacity=".35" stroke-linecap="round"/>';
- s+='<path d="M120 0v470M0 190h640" fill="none" stroke="var(--border)" stroke-width="2.5"/>';
- s+='<text x="127" y="464" font-size="10" fill="var(--muted-foreground)">ĐT-702</text>';
- s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="var(--primary)" opacity=".2"/>';
- s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="none" stroke="var(--primary)" stroke-width="2"/>';
- s+='<text x="185" y="276" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--primary)">RUỘNG NHÀ</text>';
+ s+='<path d="M120 0v470M0 190h640" fill="none" stroke="hsl(var(--border))" stroke-width="2.5"/>';
+ s+='<text x="127" y="464" font-size="10" fill="hsl(var(--muted-foreground))">ĐT-702</text>';
+ s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="hsl(var(--primary))" opacity=".2"/>';
+ s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="none" stroke="hsl(var(--primary))" stroke-width="2"/>';
+ s+='<text x="185" y="276" text-anchor="middle" font-size="10.5" font-weight="700" fill="hsl(var(--primary))">RUỘNG NHÀ</text>';
  for(var i=0;i<DIEM.length;i++){var d=DIEM[i];
   var c=d.loai==="Cây giống"?"var(--ok)":d.loai==="Vật tư"?"var(--inf)":"var(--wait)",on=diemCur===d.id;
   s+='<g style="cursor:pointer" data-diem="'+d.id+'">';
   if(on)s+='<circle cx="'+d.x+'" cy="'+d.y+'" r="17" fill="'+c+'" opacity=".22"/>';
-  s+='<circle cx="'+d.x+'" cy="'+d.y+'" r="9" fill="'+c+'" stroke="var(--muted)" stroke-width="2"/>';
-  s+='<text x="'+d.x+'" y="'+(d.y+3.6)+'" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">'+d.id+"</text>";
-  s+='<text x="'+d.x+'" y="'+(d.y-16)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--foreground)" style="paint-order:stroke;stroke:var(--muted);stroke-width:3px">'
+  s+='<circle cx="'+d.x+'" cy="'+d.y+'" r="9" fill="'+c+'" stroke="hsl(var(--muted))" stroke-width="2"/>';
+  s+='<text x="'+d.x+'" y="'+(d.y+3.6)+'" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(var(--muted))">'+d.id+"</text>";
+  s+='<text x="'+d.x+'" y="'+(d.y-16)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="hsl(var(--foreground))" style="paint-order:stroke;stroke:hsl(var(--muted));stroke-width:3px">'
    +esc(d.ten.split(" ").slice(-2).join(" "))+"</text></g>"}
  return s+"</svg>"}
 
@@ -469,8 +483,8 @@ function pTong(){
  else{
   L+='<div class="flex flex-wrap items-baseline gap-4"><span class="c-wait text-[4.5rem] font-extrabold leading-[0.85] tracking-tighter md:text-[5.5rem]">'
    +xau.con+'</span><span class="text-base font-semibold leading-snug">ngày nữa mới được gặt<span class="block text-sm font-normal" style="color:'+V.mf+'">thửa '+esc(xt.ten)+"</span></span></div>";
-  L+='<p class="mt-5 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Sớm nhất là <b style="color:var(--foreground)">'
-   +dmy(xau.het)+"</b>. Vì ngày "+dmy(new Date(xau.ng.ngay))+' đã xịt <b style="color:var(--foreground)">'+esc(xau.ng.thuoc)+"</b>, thời gian cách ly "+xau.ng.phi+" ngày.</p>"}
+  L+='<p class="mt-5 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Sớm nhất là <b style="color:hsl(var(--foreground))">'
+   +dmy(xau.het)+"</b>. Vì ngày "+dmy(new Date(xau.ng.ngay))+' đã xịt <b style="color:hsl(var(--foreground))">'+esc(xau.ng.thuoc)+"</b>, thời gian cách ly "+xau.ng.phi+" ngày.</p>"}
  L+="</div>";
 
  var R='<div class="w-full shrink-0 md:w-64"><div class="mb-1 text-[0.68rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Việc sắp tới</div>';
@@ -872,7 +886,7 @@ function veTools(){
  var h="",el=document.getElementById("simTools");if(!el)return;
  for(var i=0;i<TOOLS.length;i++){var t=TOOLS[i],on=SIM.tool===t.id;
   h+='<button type="button" data-tool="'+t.id+'" class="flex flex-col items-center gap-1.5 rounded-lg border px-1.5 py-2 text-[0.72rem] font-semibold leading-tight"'
-   +' style="border-color:'+(on?V.pr:V.bd)+';background:'+(on?"var(--accent)":V.cd)+'">'
+   +' style="border-color:'+(on?V.pr:V.bd)+';background:'+(on?"hsl(var(--accent))":V.cd)+'">'
    +'<i class="block h-[15px] w-[15px] rounded" style="background:'+t.c+'"></i>'+esc(t.ten)+"</button>"}
  el.innerHTML=h}
 
@@ -885,7 +899,7 @@ function veMtr(){
   else if(t[i]===FUNG)bn++}
  function mt(l,v,c,tx){
   return '<div class="mb-2.5"><div class="mb-1 flex justify-between text-[0.72rem]" style="color:'+V.mf+'">'
-   +"<span>"+l+'</span><b class="tnum font-semibold" style="color:var(--foreground)">'+(tx||Math.round(v)+"%")+"</b></div>"
+   +"<span>"+l+'</span><b class="tnum font-semibold" style="color:hsl(var(--foreground))">'+(tx||Math.round(v)+"%")+"</b></div>"
    +'<div class="h-[5px] overflow-hidden rounded-full" style="background:'+V.mu+'">'
    +'<div class="h-full rounded-full" style="width:'+Math.max(2,Math.min(100,v))+"%;background:"+c+'"></div></div></div>'}
  el.innerHTML=mt("Độ ẩm đất",sc?sm/(sc*4)*100:0,"var(--inf)")
