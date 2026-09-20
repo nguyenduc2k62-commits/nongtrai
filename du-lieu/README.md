@@ -160,3 +160,60 @@ Ví dụ: sầu riêng 28 loại (xì mủ, thán thư, rệp sáp, thối quả
 thối rễ…), hồ tiêu 54 loại (chết nhanh, chết chậm, tuyến trùng…), cà phê 68
 loại (rỉ sắt, rệp sáp, nấm hồng…), cao su 29 loại (nấm hồng, loét sọc mặt cạo,
 vàng rụng lá…).
+
+---
+
+# MRL — Thông tư 50/2016/TT-BYT (đã parse)
+
+`parse-mrl.py` → `mrl.json` · `mrl-theo-hoat-chat.json` · `bao-cao-mrl.txt`
+
+**4.322 dòng ngưỡng · 165 hoạt chất · 455 loại thực phẩm**
+
+Mỗi dòng: hoạt chất | mã Codex | ADI | định nghĩa dư lượng | thực phẩm |
+**MRL (mg/kg)** | ghi chú.
+
+## Hai giới hạn phải biết trước khi dùng
+
+### 1. Chỉ phủ 26% số thuốc trong danh mục
+
+1.543 / 5.929 thuốc tra được MRL. Thông tư 50 lấy giá trị từ CODEX và ASEAN
+thời điểm 2016, chỉ có 165 hoạt chất — trong khi danh mục BVTV Việt Nam có
+2.181 hoạt chất.
+
+Thiếu cả những hoạt chất **dùng nhiều nhất ở Việt Nam**:
+
+| Hoạt chất | Số thuốc | Có MRL? |
+|---|---|---|
+| Emamectin benzoate | 114 | có |
+| Abamectin | 105 | **không** |
+| Hexaconazole | 75 | **không** |
+| Tricyclazole | 57 | **không** |
+| Validamycin | — | **không** |
+| Kasugamycin | — | **không** |
+
+Nghĩa là: app nói được ngưỡng cho một phần, phần còn lại phải nói thẳng
+"chưa có ngưỡng trong luật Việt Nam" chứ không được bịa.
+
+### 2. Tên cây ≠ tên thực phẩm
+
+Danh mục BVTV nói về **cây đang trồng** ("lúa"), Thông tư 50 nói về **nông sản
+đem ăn** ("Gạo"). Dò theo chuỗi thì `lúa` khớp nhầm `lúa mì` — **lúa mì là
+wheat, ngưỡng khác hẳn**. Lỗi im lặng: app vẫn hiện ra một con số, chỉ là con
+số của cây khác.
+
+→ `anh-xa-cay-thuc-pham.json` làm tay. Cây không có trong bảng thì phải nói
+"chưa có ngưỡng", tuyệt đối không đoán.
+
+**Sầu riêng và thanh long chưa có ngưỡng nội địa** dù là cây xuất khẩu chủ lực.
+Hàng xuất khẩu phải theo ngưỡng của nước nhập.
+
+Cao su, hoa cảnh không có MRL là đúng bản chất — không phải thực phẩm.
+
+## Lỗi đã sửa khi parse
+
+PDF ngắt dòng giữa từ ở cột hoá chất ("Aminocyclopyrac" + "hlor"). Nối bằng
+khoảng trắng thì sai tên. Nhưng quy tắc nối liền lại **hỏng với tiếng Việt**,
+vì tiếng Việt ngắt ở ranh giới từ — "Sữa nguyên liệu" thành "Sữanguyênliệu".
+Phải áp riêng cho cột hoá chất Latin.
+
+Nguồn cũng có lỗi chính tả sẵn, ví dụ "Carbendazini" (đúng ra là Carbendazim).

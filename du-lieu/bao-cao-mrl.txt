@@ -1,0 +1,48 @@
+TỔNG SỐ DÒNG MRL: 4322
+Số hoạt chất có MRL: 165
+Dòng không đọc được trị số MRL: 87
+
+--- 30 THỰC PHẨM CÓ NHIỀU NGƯỠNG NHẤT ---
+Sữa nguyên liệu                               127
+Trứng                                         117
+Thịt động vật có vú, trừ động vật có vú ở bi  116
+Thịt gia cầm                                  116
+Nội tạng ăn được của động vật có vú           108
+Nội tạng ăn được của gia cầm                  100
+Các loại nho                                   85
+Ớt ta khô                                      76
+Cà chua                                        76
+Quả dạng táo                                   70
+Khoai tây                                      69
+Quả có múi thuộc họ cam quýt                   59
+Lúa mì                                         59
+Hạt cây bông                                   58
+Dâu tây                                        57
+Củ hành                                        49
+Các loại rau bầu bí                            47
+Ngô                                            46
+Củ cải đường                                   46
+Đậu tương (khô)                                45
+Dưa chuột                                      45
+Nho khô (gồm cả quả lý chua khô và nho khô k   44
+Hạt cải dầu                                    43
+Các loại quả hạch                              42
+Lúa mạch                                       39
+Rau xà lách                                    39
+Chuối                                          37
+Các loại quả có hạt                            36
+Quả đào                                        36
+Mỡ gia cầm                                     34
+
+Tổng số loại thực phẩm khác nhau: 455
+
+--- NỐI VỚI DANH MỤC THUỐC BVTV ---
+Thuốc tra được MRL:       1543
+Thuốc CHƯA tra được MRL:  4386
+Tỉ lệ phủ: 26.0%
+
+  Abazateha 20SC (Bifenazate) — cây: lạc — 26 ngưỡng MRL
+  Banazat 20SC (Bifenazate) — cây: sắn — 26 ngưỡng MRL
+  Getsau 10EW (Chlorfenapyr) — cây: đậu xanh — 1 ngưỡng MRL
+  Cyrotat 31SC (Cyromazine) — cây: cam — 27 ngưỡng MRL
+  Globalhuk 31SC (Cyromazine) — cây: đậu tương — 27 ngưỡng MRL
