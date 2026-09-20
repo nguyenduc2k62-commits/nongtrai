@@ -110,3 +110,53 @@ Hai lỗi đã sửa trong lúc làm, ghi lại để khỏi lặp:
 - [ ] Chuẩn hoá tên cây trồng ("cải bắp" vs "bắp cải", "lúa" vs "lúa gieo thẳng")
 - [ ] Lọc bỏ ~1% từ chỉ dịch hại lọt sang cột cây trồng
 - [ ] Gom PHI cho nhóm thuốc phổ biến nhất
+
+---
+
+# Các nguồn dữ liệu khác
+
+## ĐÃ TẢI — chưa parse
+
+### Thông tư 50/2016/TT-BYT — Giới hạn dư lượng tối đa (MRL)
+
+`thong-tu-50-2016-mrl.pdf` · 183 trang · tải từ cổng Sở NN Lào Cai
+(datafiles.chinhphu.vn không có, congbao.chinhphu.vn trả về HTML)
+
+**Đây là con số quyết định lô hàng bị trả về hay không**, đơn vị mg/kg.
+PHI chỉ là cách vận hành để dư lượng tụt xuống dưới MRL — MRL mới là ngưỡng
+thật. Giá trị tham chiếu từ CODEX và ASEAN tại thời điểm 2016.
+
+Cấu trúc: hoạt chất | ADI | định nghĩa dư lượng | rồi lặp (thực phẩm | MRL |
+ghi chú). Khổ dọc A4, cột hẹp, chữ xuống dòng nhiều — parse được nhưng khó
+hơn danh mục BVTV.
+
+## CHƯA LẤY — lấy được miễn phí
+
+| Nguồn | Nội dung | Ghi chú |
+|---|---|---|
+| [Open-Meteo](https://open-meteo.com/) | Thời tiết, dự báo + lịch sử từ 1940 | Không cần khoá, 10.000 lượt/ngày miễn phí. Dùng để tính tích ôn → dự đoán giai đoạn cây, và cảnh báo nguy cơ bệnh theo độ ẩm |
+| [SoilGrids](https://soilgrids.org) (ISRIC) | pH, hữu cơ, sét/cát/limon, CEC, đạm tổng — lưới 250m toàn cầu | **API REST đang tạm dừng**, phải tải raster về tự tra |
+| [PlantDoc](https://github.com/pratikkayal/PlantDoc-Dataset) | 2.598 ảnh bệnh chụp ngoài đồng | CC BY 4.0 |
+| [Bugwood](https://www.bugwood.org) | Ảnh sâu bệnh, nhãn do chuyên gia đặt | Free cho giáo dục |
+| [Codex MRL](https://www.fao.org/fao-who-codexalimentarius/codex-texts/dbs/pestres/en) | MRL quốc tế | Cần cho hàng xuất khẩu — EU, Nhật, Trung Quốc mỗi nơi một ngưỡng |
+
+## CHƯA LẤY — khó hoặc phải xin
+
+| Nguồn | Vướng ở đâu |
+|---|---|
+| Danh mục phân bón | [masophanbon.com](https://www.masophanbon.com/) chỉ tra từng mã, không có bản tải hàng loạt, chứng chỉ SSL hết hạn. Đường đúng là gửi văn bản xin Cục Trồng trọt và BVTV |
+| PHI (thời gian cách ly) | Không nằm trong Thông tư nào — in trên nhãn từng thuốc. Phải gom tay từ nhãn hoặc trang đại lý |
+| Mã số vùng trồng (PUC) | Cục BVTV quản lý, cần cho hàng xuất khẩu |
+| Bảng tương kỵ khi pha | Nhà sản xuất công bố rời rạc, chưa có nguồn gộp |
+| Nhóm độc GHS/WHO, mã kháng thuốc FRAC/IRAC/HRAC | [danhmuc.thuocbvtv.com](https://danhmuc.thuocbvtv.com/) có, nhưng không có API |
+
+## ĐÃ CÓ SẴN trong dữ liệu — dễ bỏ sót
+
+Danh mục BVTV đã parse chứa **546 tên sâu bệnh tiếng Việt gắn với cây trồng**,
+lấy được miễn phí, phủ mọi cây chứ không riêng lúa. Đây là bộ từ vựng nền cho
+phần tra bệnh, không cần đi tìm ở đâu khác.
+
+Ví dụ: sầu riêng 28 loại (xì mủ, thán thư, rệp sáp, thối quả, nứt thân xì mủ,
+thối rễ…), hồ tiêu 54 loại (chết nhanh, chết chậm, tuyến trùng…), cà phê 68
+loại (rỉ sắt, rệp sáp, nấm hồng…), cao su 29 loại (nấm hồng, loét sọc mặt cạo,
+vàng rụng lá…).
