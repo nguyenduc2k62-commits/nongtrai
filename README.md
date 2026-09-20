@@ -50,6 +50,19 @@ kiểm chứng. Dùng để dạy và demo.
 
 ## Kỹ thuật
 
-HTML/CSS/JavaScript thuần, một file, không phụ thuộc thư viện ngoài.
-Font từ Google Fonts (Be Vietnam Pro, Oswald, IBM Plex Mono).
-Dữ liệu người dùng nhập lưu trong `localStorage` của trình duyệt.
+JavaScript thuần, một file, **không cần bước build**.
+
+| Thành phần | Dùng gì |
+|---|---|
+| Giao diện | [Franken UI 2.1](https://franken-ui.dev) qua CDN — bản HTML-first của shadcn/ui, dựng trên UIkit 3 + Tailwind |
+| Chủ đề | `uk-theme-green`, nền tối bật bằng class `dark` trên thẻ `<html>` |
+| Phông chữ | Be Vietnam Pro + IBM Plex Mono (Google Fonts) |
+| Biểu đồ | SVG tự vẽ, không dùng thư viện |
+| Mô phỏng | Canvas + cellular automata tự viết |
+| Lưu dữ liệu | `localStorage` của trình duyệt |
+
+Màu nghiệp vụ (dải độc trên nhãn thuốc BVTV, trạng thái cách ly) được định nghĩa
+riêng trong `<style>`, tách khỏi màu chủ đề — vì chúng mang nghĩa chứ không phải trang trí.
+
+Có một khối `<style>` dự phòng đặt **trước** link CDN: nếu CDN hỏng thì trang vẫn
+đọc được thay vì trắng bệch.
