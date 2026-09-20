@@ -1,4 +1,4 @@
-# File gốc tải từ chinhphu.vn — 6,7 MB, tải lại được bất cứ lúc nào, không commit
+# File gốc tải từ chinhphu.vn — 6,7 MB, tải lại được bất cứ lúc nào
 *.pdf
-# Bản trích chữ thô — sinh lại được từ PDF
-*.txt
+# Bản trích chữ thô — sinh lại được từ PDF, chỉ dùng để soi lỗi
+thong-tu-*.txt

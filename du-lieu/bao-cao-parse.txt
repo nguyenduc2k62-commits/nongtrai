@@ -1,0 +1,113 @@
+TỔNG SỐ BẢN GHI: 5651
+Không tách được cây trồng: 15 (0.3%)
+Tên cây còn dính dấu '/': 0 (0.0%)
+
+--- THEO NHÓM ---
+Thuốc trừ sâu                       2200
+Thuốc trừ bệnh                      1968
+Thuốc trừ cỏ                        1012
+Thuốc điều hoà sinh trưởng           222
+Thuốc trừ ốc                         166
+(không rõ)                            44
+Thuốc trừ chuột                       39
+
+--- 80 CÂY TRỒNG NHIỀU SẢN PHẨM NHẤT ---
+lúa                             2573
+cà phê                           869
+lạc                              672
+ngô                              415
+cam                              406
+lúa gieo thẳng                   393
+đậu tương                        391
+bắp cải                          375
+cà chua                          337
+hồ tiêu                          307
+hoa hồng                         300
+cao su                           269
+chè                              263
+dưa hấu                          261
+xoài                             260
+điều                             186
+dưa chuột                        171
+khoai tây                        162
+mía                              131
+vải                              130
+sắn                              125
+thuốc lá                         113
+ớt                               113
+nho                              104
+thanh long                       101
+cải bắp                           89
+hành                              82
+rệp                               80
+hoa cúc                           78
+sâu                               71
+cải xanh                          67
+nhãn                              66
+bông vải                          65
+bọ                                62
+sầu riêng                         61
+đậu xanh                          59
+thán                              59
+đốm                               57
+sâu cuốn                          54
+nhện                              50
+rỉ                                49
+lúa cấy                           46
+đồng ruộng                        44
+rầy                               41
+rau cải                           36
+khoai lang                        34
+bọ xít                            31
+sương                             31
+lem lép                           29
+chết                              28
+bí xanh                           26
+sâu đục                           25
+bưởi                              25
+công trình xây dựng               25
+quýt                              24
+thối                              24
+sâu xanh da                       23
+phấn                              23
+nấm                               23
+ca cao                            17
+đạo                               17
+cà rốt                            17
+đậu côve                          15
+bầu bí                            15
+bạc                               15
+cải thảo                          14
+dâu tây                           14
+súp lơ                            13
+sâu vẽ                            13
+đậu đũa                           13
+khô                               13
+mốc                               13
+phong lan                         13
+cây có múi                        12
+vàng rụng                         12
+lở cổ                             12
+rầy nâu                           11
+xì                                11
+loét sọc mặt                      11
+nhện lông                          9
+
+--- TỔNG SỐ TÊN CÂY KHÁC NHAU: 797 ---
+
+--- 25 BẢN GHI KHÔNG RA CÂY (để soi lỗi) ---
+  Oncol 5GR, 20EC, 25WP | Thuốc trừ sâu
+  100WP, 250SC, 400WG | Thuốc trừ sâu
+  25WP | Thuốc trừ sâu
+  Japa vil 110SC | Thuốc trừ bệnh
+  400EC, 400WP | Thuốc trừ bệnh
+  3SL | Thuốc trừ bệnh
+  72WP | Thuốc trừ bệnh
+  500EC | Thuốc trừ cỏ
+  Acroots 10SL | Thuốc điều hoà sinh trưởng
+  HQ-301 Fructonic 1%SL | Thuốc điều hoà sinh trưởng
+  Viprom 5SP | Thuốc điều hoà sinh trưởng
+  Rocten 748SL | 
+  Enomil 30SL | 
+  Dầu trừ mối M-4 1.2SL | 
+  56% Plate | Thuốc trừ sâu

@@ -48,7 +48,20 @@ trang. Chưa có tài khoản, chưa có máy chủ.
 Ba việc này là **chặn cứng**. Chưa xong thì băng cảnh báo "số liệu chưa thẩm
 định" phải giữ nguyên trên mọi trang.
 
-### 2.1 Thay dữ liệu thuốc giả bằng dữ liệu thật — ưu tiên cao nhất
+### 2.1 Thay dữ liệu thuốc giả bằng dữ liệu thật — ĐANG LÀM
+
+**Đã xong phần danh mục.** Xem `du-lieu/` — 5.651 sản phẩm parse từ Phụ lục I
+Thông tư 75/2025, gồm hoạt chất, tên thương phẩm, cây trồng, dịch hại, công ty
+đăng ký. Đủ cho lúa, cà phê, hồ tiêu, cao su, điều, sầu riêng, đậu và hơn 100
+cây khác.
+
+**Chưa xong phần PHI** — thời gian cách ly không nằm trong Thông tư, in trên
+nhãn từng thuốc. Đây mới là thứ đồng hồ đếm ngược cần. Vẫn phải gom tay.
+
+Còn lại: gộp sửa đổi từ Thông tư 28/2026, chuẩn hoá tên cây, nối JSON vào app
+thay dữ liệu mẫu.
+
+<details><summary>Ghi chú gốc</summary>
 
 Nguồn: **Thông tư 75/2025/TT-BNNMT** (hiệu lực 10/02/2026) và **Thông tư
 28/2026/TT-BNNMT** (hiệu lực 15/08/2026, sửa Phụ lục I).
@@ -61,6 +74,7 @@ tay. Bắt đầu bằng ~30 thuốc phổ biến nhất trên lúa, không cầ
 
 Ước lượng: 2–3 ngày parse + 3–5 ngày gom PHI.
 **Đây là phần không copy được từ đâu, nên cũng là phần đáng giá nhất.**
+</details>
 
 ### 2.2 Cơ chế cập nhật khi Thông tư đổi
 
