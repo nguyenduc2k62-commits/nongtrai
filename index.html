@@ -96,7 +96,10 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
    Nền là trắng ngả xanh bạc hà, thẻ trắng tinh nổi lên trên — sáng nhưng
    không chói, và vẫn giữ được chất đồng ruộng. */
 :root{
-  --background:140 26% 95.5%;    /* nền trang: bạc hà nhạt — đủ đậm để thẻ trắng nổi lên */
+  /* Quy ước canvas/surface của Primer: nền trang là bề mặt CHÌM, thẻ là bề
+     mặt NỔI. Trước tôi để 95.5% nên nhìn vẫn ra trắng tinh — hạ xuống 93.5%
+     để bậc chênh giữa nền và thẻ trắng thấy được rõ. */
+  --background:146 24% 93.5%;    /* nền trang: bạc hà nhạt */
   --foreground:158 32% 13%;      /* mực: xanh rất đậm, không phải đen */
   --card:0 0% 100%;              /* thẻ: trắng tinh, nổi lên nền */
   --card-foreground:158 32% 13%;
@@ -112,10 +115,18 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
 
   /* Màu nghiệp vụ: dải độc trên nhãn thuốc BVTV + trạng thái cách ly.
      Tách khỏi màu chủ đề vì chúng mang nghĩa, không phải trang trí. */
-  --ok:#15803d;   --ok-bg:#d8f5e3;
-  --wait:#c2700a; --wait-bg:#fdefd0;   /* hổ phách ấm, không để ngả nâu đất */
-  --bad:#dc2626;  --bad-bg:#fee2e2;
-  --inf:#2563eb;  --inf-bg:#dbeafe;
+  /* Màu chức năng theo cấu trúc của GitHub Primer: mỗi vai trò có BỐN biến
+     thể chứ không phải một mã dùng chung.
+       -bg      nền nhạt   (Primer bgColor-muted   ≈ Radix bậc 3)
+       -bd      viền       (borderColor-muted      ≈ Radix bậc 6–7)
+       -solid   màu đặc    (bgColor-emphasis       ≈ Radix bậc 9)
+       (không hậu tố) chữ  (fgColor                ≈ Radix bậc 11)
+     Trước đây tôi dùng một mã cho cả chữ lẫn thanh biểu đồ — nên chữ thì
+     nhợt mà thanh thì đục. Giá trị neo theo Primer vì đã kiểm tương phản. */
+  --ok:#1a7f37;   --ok-bg:#dafbe1;   --ok-bd:#aceebb;   --ok-solid:#1f883d;
+  --wait:#9a6700; --wait-bg:#fff8c5; --wait-bd:#eac54f; --wait-solid:#bf8700;
+  --bad:#cf222e;  --bad-bg:#ffebe9;  --bad-bd:#ffc1bc;  --bad-solid:#d1242f;
+  --inf:#0969da;  --inf-bg:#ddf4ff;  --inf-bd:#b6e3ff;  --inf-solid:#0969da;
   --page:hsl(var(--background));
 }
 .dark{
@@ -132,10 +143,11 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
   --border:158 12% 19%;
   --input:158 12% 19%;
 
-  --ok:#4ade80;   --ok-bg:#0c2c17;
-  --wait:#fbbf24; --wait-bg:#2e2410;
-  --bad:#f87171;  --bad-bg:#2f1516;
-  --inf:#60a5fa;  --inf-bg:#122036;
+  /* Nền tối: lấy theo bộ tối của Primer — chữ sáng hơn, nền chìm hơn */
+  --ok:#3fb950;   --ok-bg:#12261a;   --ok-bd:#1f6f2e;   --ok-solid:#238636;
+  --wait:#d29922; --wait-bg:#2b2413; --wait-bd:#7d5e16; --wait-solid:#9e6a03;
+  --bad:#f85149;  --bad-bg:#2d1618;  --bad-bd:#7d2a2a;  --bad-solid:#da3633;
+  --inf:#58a6ff;  --inf-bg:#10243e;  --inf-bd:#1f4d80;  --inf-solid:#1f6feb;
 }
 
 /* Nền sáng: thẻ trắng cần chút bóng mới tách khỏi nền, nếu không sẽ phẳng lì.
@@ -144,20 +156,23 @@ body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
   box-shadow:0 1px 2px rgba(16,44,30,.04), 0 8px 22px -14px rgba(16,44,30,.18);
 }
 .c-ok{color:var(--ok)} .c-wait{color:var(--wait)} .c-bad{color:var(--bad)} .c-inf{color:var(--inf)}
-.b-ok{background:var(--ok)} .b-wait{background:var(--wait)} .b-bad{background:var(--bad)} .b-inf{background:var(--inf)}
+.b-ok{background:var(--ok-solid)} .b-wait{background:var(--wait-solid)} .b-bad{background:var(--bad-solid)} .b-inf{background:var(--inf-solid)}
+/* Nhãn trạng thái: nền nhạt + VIỀN cùng tông + chữ đậm màu.
+   Đây là cách Primer làm — có viền thì nhãn mới ra hình khối, không bị
+   trôi vào nền như bản trước. */
 .tag{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600;
-  padding:.15rem .5rem;border-radius:.35rem;white-space:nowrap}
-.tag-ok{background:var(--ok-bg);color:var(--ok)}
-.tag-wait{background:var(--wait-bg);color:var(--wait)}
-.tag-bad{background:var(--bad-bg);color:var(--bad)}
-.tag-mut{background:hsl(var(--muted));color:hsl(var(--muted-foreground))}
+  padding:.15rem .5rem;border-radius:.35rem;white-space:nowrap;border:1px solid transparent}
+.tag-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.tag-wait{background:var(--wait-bg);color:var(--wait);border-color:var(--wait-bd)}
+.tag-bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-bd)}
+.tag-mut{background:hsl(var(--muted));color:hsl(var(--muted-foreground));border-color:hsl(var(--border))}
 
 .chart{position:relative}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
 .tip{position:absolute;pointer-events:none;z-index:20;background:hsl(var(--foreground));color:hsl(var(--background));
   border-radius:.4rem;padding:.35rem .6rem;font-size:.75rem;white-space:nowrap;
   transform:translate(-50%,-120%);font-variant-numeric:tabular-nums}
-.halo{paint-order:stroke;stroke:var(--page);stroke-width:2.5px;stroke-linejoin:round}
+.halo{paint-order:stroke;stroke:hsl(var(--card));stroke-width:2.5px;stroke-linejoin:round}
 
 #simCv{display:block;width:100%;height:auto;border-radius:.5rem;image-rendering:pixelated;
   cursor:crosshair;touch-action:none}
@@ -436,7 +451,7 @@ function chLich(){
   s+='<text x="'+(pL-14)+'" y="'+(cy+4)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="hsl(var(--foreground))">'+esc(th.ten)+"</text>";
   s+='<line x1="'+pL+'" y1="'+cy+'" x2="'+(W-pR)+'" y2="'+cy+'" stroke="hsl(var(--border))" stroke-width="1"/>';
   for(var m=0;m<moc.length;m++){var o=moc[m];if(o.thua!==th.id)continue;
-   var x1=X(o.bd),x2=X(o.kt),con=dif(NAY,o.kt),c=con>0?"var(--wait)":"var(--ok)";
+   var x1=X(o.bd),x2=X(o.kt),con=dif(NAY,o.kt),c=con>0?"var(--wait-solid)":"var(--ok-solid)";
    s+='<rect x="'+x1.toFixed(1)+'" y="'+(cy-5)+'" width="'+Math.max(4,x2-x1).toFixed(1)+'" height="10" rx="5" fill="'+c+'"'
     +(con>0?"":' opacity=".45"')+' data-tip="'+esc(o.thuoc)+" · cách ly "+o.phi+" ngày · "+dm(o.bd)+" → "+dm(o.kt)
     +'" data-tx="'+((x1+x2)/2).toFixed(1)+'" data-ty="'+(cy-8)+'"/>';
@@ -531,7 +546,7 @@ function pTong(){
   // nhìn thấy từ xa, nên cho nó một mảng màu thật chứ không chỉ đổi màu chữ.
   L+='<div class="flex flex-wrap items-center gap-5">'
    +'<span class="inline-grid shrink-0 place-items-center rounded-2xl px-7 py-2" style="background:var(--wait-bg)">'
-   +'<span class="c-wait text-[4.5rem] font-extrabold leading-[1.05] tracking-tighter md:text-[5rem]">'+xau.con+"</span></span>"
+   +'<span style="color:var(--wait-solid)" class="text-[4.5rem] font-extrabold leading-[1.05] tracking-tighter md:text-[5rem]">'+xau.con+"</span></span>"
    +'<span class="text-lg font-semibold leading-snug">ngày nữa mới được gặt'
    +'<span class="block text-sm font-normal" style="color:'+V.mf+'">thửa '+esc(xt.ten)+"</span></span></div>";
   L+='<p class="mt-5 border-l-2 pl-4 text-sm leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">Sớm nhất là <b style="color:hsl(var(--foreground))">'
@@ -543,16 +558,22 @@ function pTong(){
  R+=nx(ok?"b-ok":"b-wait",ok?"Gặt được":"Hết thời gian cách ly",esc(xt.ten)+" · "+(ok?"ngay bây giờ":dm(xau.het)));
  R+="</div>";
 
- var fig='<div class="mt-7 flex flex-wrap border-y" style="border-color:'+V.bd+'">'
+ // Dãy chỉ số nằm trong cùng thẻ với phần số ngày, ngăn bằng một đường kẻ
+ // ngang — không viền trên dưới nữa vì thẻ đã lo phần khung.
+ var fig='<div class="flex flex-wrap border-t" style="border-color:'+V.bd+'">'
   +fg(dt+" sào",THUA.length+" thửa đang quản lý",1)
   +fg(xit,"lần dùng thuốc BVTV")
   +fg(so.length,"việc đã ghi vào sổ")
   +fg(tag(ok?"Đạt":"Chưa đạt",ok?"ok":"wait"),"hồ sơ cách ly toàn vụ")+"</div>";
 
+ // Nội dung nằm trong thẻ trắng nổi trên nền bạc hà — đây mới là thứ làm
+ // bậc nền/thẻ nhìn thấy được. Trước đó mọi thứ nằm trần trên nền nên
+ // không có gì để so sánh, thành ra nhìn vẫn ra trắng tinh.
  var h=sec("Thời gian cách ly trước thu hoạch",
-  '<div class="flex flex-wrap items-start gap-8">'+L+R+"</div>"+fig);
+  card('<div class="flex flex-wrap items-start gap-8 p-6">'+L+R+"</div>"+fig));
  h+=sec("Lịch cách ly theo thửa",
-  '<p class="mb-4 max-w-[62ch] text-sm" style="color:'+V.mf+'">Mỗi thanh là một lần dùng thuốc và khoảng phải chờ sau đó. Đường đứt nét là hôm nay.</p>'+chLich());
+  card('<div class="p-6"><p class="mb-4 max-w-[62ch] text-sm" style="color:'+V.mf
+   +'">Mỗi thanh là một lần dùng thuốc và khoảng phải chờ sau đó. Đường đứt nét là hôm nay.</p>'+chLich()+"</div>"));
  var pl="";for(i=0;i<THUA.length;i++)pl+=cThua(THUA[i]);
  h+=sec("Các thửa",'<div class="grid gap-3.5 sm:grid-cols-2">'+pl+"</div>");
  return h}
@@ -674,15 +695,16 @@ function lbl(t,first){return '<div class="'+(first?"mb-2.5":"mb-2.5 mt-6")+' tex
 function pSo(){
  var xit=0,i;for(i=0;i<so.length;i++)if(so[i].phi)xit++;
  var an=true;for(i=0;i<THUA.length;i++)if(tt(THUA[i].id).con>0)an=false;
- var h=sec("Tổng kết vụ",'<div class="flex flex-wrap border-y" style="border-color:'+V.bd+'">'
+ var h=sec("Tổng kết vụ",card('<div class="flex flex-wrap">'
   +fg(so.length,"việc đã ghi",1)+fg(xit,"lần dùng thuốc")+fg(THUA.length,"thửa trong vụ")
-  +fg(tag(an?"Đạt":"Chưa đạt",an?"ok":"wait"),"cách ly toàn vụ")+"</div>");
+  +fg(tag(an?"Đạt":"Chưa đạt",an?"ok":"wait"),"cách ly toàn vụ")+"</div>"));
  var r="";
  for(i=0;i<so.length;i++){var e=so[i],t=byId(THUA,e.thua),d=new Date(e.ngay),cl="—",gt=tag("—","mut");
   if(e.phi){var het=addD(d,e.phi),c=dif(NAY,het);cl=e.phi+" ngày";
    gt=c>0?tag(dmy(het)+" · còn "+c,"wait"):tag(dmy(het)+" · đã qua","ok")}
   r+=tr([dmy(d),esc(t?t.ten:"—"),"<b>"+esc(e.viec)+"</b>",esc(e.thuoc?e.thuoc+" · "+e.lieu:e.lieu),{n:cl},gt])}
- h+=sec("Nhật ký canh tác",tbl(["Ngày","Thửa","Việc","Vật tư / liều",{n:"Cách ly"},"Gặt được từ"],r),
+ h+=sec("Nhật ký canh tác",
+  card('<div class="p-5 pt-3">'+tbl(["Ngày","Thửa","Việc","Vật tư / liều",{n:"Cách ly"},"Gặt được từ"],r)+"</div>"),
   btn("Ghi việc mới",'data-go="benh"')+btn("Xuất hồ sơ",'id="btnHoSo"',1));
  h+='<section class="mt-8" id="hoSoOut"></section>';
  return h}
