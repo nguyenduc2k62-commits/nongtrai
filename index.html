@@ -1737,17 +1737,49 @@ function pBenh(){
     var bChon=null;
     for(var m=0;m<BENH_MAU.length;m++)if(BENH_MAU[m].id===benhState.benhChon){bChon=BENH_MAU[m];break}
     if(bChon){
-      var ci=cayId(benhState.cay);
-      var dhId=null;
+      var bCay=bChon.cay;
+      benhState.cay=bCay;
+      var ci=cayId(bCay);
+      var dhIds=[];
       if(D){
+        var dhTarget=bChon.dh.toLowerCase();
         for(var d=0;d<D.bang.dich_hai.length;d++){
-          if(D.bang.dich_hai[d].toLowerCase().indexOf(bChon.dh)>=0){dhId=d;break}
+          if(D.bang.dich_hai[d].toLowerCase().indexOf(dhTarget)>=0){dhIds.push(d)}
         }
       }
-      var thuocList=(ci>=0&&dhId!=null)?thuocCho(ci,dhId):[];
+      var thuocList=[];
+      if(D&&ci>=0&&dhIds.length){
+        for(var i=0;i<D.thuoc.length;i++){
+          var tObj=D.thuoc[i];
+          for(var j=0;j<tObj.p.length;j++){
+            if(tObj.p[j][1]===ci&&dhIds.indexOf(tObj.p[j][0])>=0){
+              thuocList.push(tObj);
+              break;
+            }
+          }
+        }
+      }
+      if(!thuocList.length&&D&&dhIds.length){
+        for(var i=0;i<D.thuoc.length;i++){
+          var tObj=D.thuoc[i];
+          for(var j=0;j<tObj.p.length;j++){
+            if(dhIds.indexOf(tObj.p[j][0])>=0){
+              thuocList.push(tObj);
+              break;
+            }
+          }
+        }
+      }
+      if(!benhState.thuocChon&&thuocList.length>0){
+        benhState.thuocChon=thuocList[0].t;
+      }
 
-      var thuocHtml='<div style="font-size:1.1rem;font-weight:700;margin-bottom:6px">💊 Phác đồ & Thuốc đặc trị cho: '+esc(bChon.ten)+'</div>'
-        +'<p style="margin:0 0 16px;font-size:.82rem;color:var(--muted-fg)">Tra cứu tự động từ <b style="color:var(--fg)">5.929 thuốc Thông tư 75/2025</b>. Có <b class="mono" style="color:var(--fg)">'+thuocList.length+' sản phẩm</b> đăng ký hợp lệ:</p>';
+      var thuocHtml='<div id="keDonStep5" style="scroll-margin-top:70px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:1.15rem;font-weight:800;color:var(--primary)">💊 Phác đồ & Đơn thuốc đặc trị cho: '+esc(bChon.ten)+' ('+esc(bChon.cay)+')</div>'
+        +'<span class="tag tag-ok" style="font-size:.8rem;padding:4px 10px">Chuẩn Thông tư 75/2025</span>'
+        +'</div>'
+        +'<p style="margin:0 0 16px;font-size:.84rem;color:var(--muted-fg)">Tra cứu tự động từ <b style="color:var(--fg)">5.929 thuốc Thông tư 75/2025</b>. Tìm thấy <b class="mono" style="color:var(--primary);font-size:.95rem">'+thuocList.length+' sản phẩm</b> đăng ký hợp lệ:</p>';
 
       if(!thuocList.length){
         thuocHtml+='<div style="border:1px dashed var(--border);border-radius:10px;padding:16px;font-size:.85rem;color:var(--muted-fg)">'
@@ -1787,6 +1819,7 @@ function pBenh(){
             +'</div></div>';
         }
       }
+      thuocHtml+='</div>';
       h+=sec("Kê đơn thuốc & Ghi sổ nhật ký",card('<div style="padding:20px">'+thuocHtml+'</div>'));
     }
   }
@@ -2768,7 +2801,23 @@ document.addEventListener("click",function(ev){
   if((v=el.getAttribute("data-setcay"))){benhState.cay=v;benhState.loaiTru={};chayChuanDoanAI();ve();return}
   if((v=el.getAttribute("data-setbophan"))){benhState.boPhan=v;benhState.loaiTru={};chayChuanDoanAI();ve();return}
   if((v=el.getAttribute("data-setmode"))){benhState.mode=v;ve();return}
-  if((v=el.getAttribute("data-chondonbenh"))){benhState.benhChon=v;ve();return}
+  if((v=el.getAttribute("data-chondonbenh"))){
+    benhState.benhChon=v;
+    for(var bi=0;bi<BENH_MAU.length;bi++){
+      if(BENH_MAU[bi].id===v){
+        benhState.cay=BENH_MAU[bi].cay;
+        if(BENH_MAU[bi].boPhan) benhState.boPhan=BENH_MAU[bi].boPhan;
+        break;
+      }
+    }
+    benhState.thuocChon=null;
+    ve();
+    setTimeout(function(){
+      var s5=document.getElementById("keDonStep5");
+      if(s5) s5.scrollIntoView({behavior:"smooth",block:"start"});
+    },50);
+    return;
+  }
   if((v=el.getAttribute("data-loaitrubenh"))){benhState.loaiTru[v]=true;chayChuanDoanAI();ve();return}
   if((v=el.getAttribute("data-chonthuocbenh"))){benhState.thuocChon=v;ve();return}
   if((v=el.getAttribute("data-locloai"))){locDiemLoai=v;ve();return}
