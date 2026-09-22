@@ -216,8 +216,25 @@ th.r,td.r{text-align:right}
 .scr::-webkit-scrollbar{width:6px;height:6px}
 .scr::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .rbtn{display:flex;align-items:center;width:100%;padding:8px 12px;border:none;border-radius:8px;background:transparent;cursor:pointer;font:inherit;text-align:left}
-.rbtn:hover{background:var(--muted)}
-.rbtn.on{background:var(--accent);font-weight:600}
+/* ===== MAP FLOATING CONTROLS & DRAWING ===== */
+.map-toolbar-floating{position:absolute;top:10px;left:10px;right:10px;z-index:900;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);padding:8px 12px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);border:1px solid var(--border);pointer-events:auto}
+.draw-status-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;background:var(--accent);font-size:.78rem;font-weight:700;color:var(--primary)}
+.draw-action-btn{font-size:.8rem;font-weight:700;padding:6px 14px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;border:1px solid var(--border);background:#ffffff;color:var(--fg);transition:all .15s ease}
+.draw-action-btn:hover{background:var(--muted);border-color:var(--primary)}
+.draw-action-btn.btn-finish{background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;border-color:#059669;box-shadow:0 2px 8px rgba(16,185,129,.4)}
+.draw-action-btn.btn-finish:hover{filter:brightness(1.08)}
+.draw-action-btn.btn-danger{color:var(--bad);background:#fef2f2;border-color:#fecaca}
+.draw-action-btn.btn-danger:hover{background:#fee2e2}
+.poly-item-card{padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1px solid var(--border);background:var(--card);transition:all .15s ease}
+.poly-item-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.color-picker-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .15s ease;display:inline-block}
+.color-picker-dot.active{border-color:#1e293b;transform:scale(1.15);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.crop-pill{padding:5px 12px;border-radius:20px;font-size:.8rem;font-weight:600;border:1px solid var(--border);background:var(--bg);cursor:pointer;transition:all .15s ease;display:inline-flex;align-items:center;gap:4px}
+.crop-pill.active{background:var(--primary);color:#ffffff;border-color:var(--primary)}
+.custom-modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px}
+.custom-modal-card{background:#ffffff;width:100%;max-width:460px;border-radius:18px;box-shadow:0 24px 48px rgba(0,0,0,.25);border:1px solid var(--border);padding:24px;max-height:92vh;overflow-y:auto;animation:modalPop .2s ease-out}
+@keyframes modalPop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes gpsPulse{0%{box-shadow:0 0 0 0 rgba(37,99,235,.7)}70%{box-shadow:0 0 0 14px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
 </style>
 </head>
 
@@ -535,234 +552,825 @@ function chLich(){
 }
 
 /* ======================= 2. LÔ ĐẤT & BẢN ĐỒ VỆ TINH ======================= */
-var POLYS=[];try{POLYS=JSON.parse(localStorage.getItem("sr-polygons"))||[]}catch(e){POLYS=[]};
-function savePoly(){try{localStorage.setItem("sr-polygons",JSON.stringify(POLYS))}catch(e){}}
+var FARM_PRESETS = [
+  { id: "nghean", ten: "📍 Nghệ An (TP Vinh / Nghi Lộc / Yên Thành)", lat: 18.664833, lng: 105.701297, zoom: 16 },
+  { id: "daklak", ten: "☕ Đắk Lắk (TP Buôn Ma Thuột / Cư M'gar)", lat: 12.6800, lng: 108.0500, zoom: 15 },
+  { id: "lamdong", ten: "🍵 Lâm Đồng (Di Linh / Bảo Lộc / Cầu Đất)", lat: 11.5500, lng: 107.8000, zoom: 15 },
+  { id: "gialai", ten: "🌿 Gia Lai (Chư Sê / Đắk Đoa / Pleiku)", lat: 13.9800, lng: 108.0000, zoom: 15 },
+  { id: "tiengiang", ten: "🌾 Tiền Giang (Cai Lậy / Chợ Gạo)", lat: 10.4500, lng: 106.6500, zoom: 15 },
+  { id: "dongthap", ten: "🌾 Đồng Tháp (Cao Lãnh / Tháp Mười)", lat: 10.4600, lng: 105.6300, zoom: 15 },
+  { id: "cantho", ten: "🌾 Cần Thơ (Phong Điền / Thốt Nốt)", lat: 10.0400, lng: 105.7800, zoom: 15 },
+  { id: "bentre", ten: "🍈 Bến Tre (Chợ Lách / Châu Thành)", lat: 10.2400, lng: 106.3700, zoom: 15 },
+  { id: "binhphuoc", ten: "🌳 Bình Phước (Đồng Xoài / Bù Đăng)", lat: 11.5300, lng: 106.8800, zoom: 15 },
+  { id: "thaibinh", ten: "🌾 Thái Bình (Vũ Thư / Đông Hưng)", lat: 20.4500, lng: 106.3300, zoom: 15 },
+  { id: "namdinh", ten: "🌾 Nam Định (Hải Hậu / Nghĩa Hưng)", lat: 20.4200, lng: 106.1700, zoom: 15 },
+  { id: "sonla", ten: "🥬 Sơn La (Mộc Châu / Mai Sơn)", lat: 20.8400, lng: 104.6400, zoom: 15 },
+  { id: "hanoi", ten: "🏛️ Hà Nội (Ba Vì / Sóc Sơn)", lat: 21.0285, lng: 105.8542, zoom: 15 }
+];
+
+function getFarmCenter(){
+  try{
+    var s = localStorage.getItem("sr-farm-center");
+    if(s){ var o = JSON.parse(s); if(o && o.lat && o.lng) return o; }
+  }catch(e){}
+  if(window.userGps && window.userGps.lat) return window.userGps;
+  if(POLYS.length && POLYS[0].coords && POLYS[0].coords.length){
+    return { lat: POLYS[0].coords[0][0], lng: POLYS[0].coords[0][1] };
+  }
+  return { lat: 18.664833, lng: 105.701297 };
+}
+
+function setFarmCenter(lat, lng, name){
+  var o = { lat: lat, lng: lng, name: name || "" };
+  try{ localStorage.setItem("sr-farm-center", JSON.stringify(o)); }catch(e){}
+  window.userGps = o;
+}
+
+var POLYS = [];
+try{ POLYS = JSON.parse(localStorage.getItem("sr-polygons")) || []; }catch(e){ POLYS = []; }
+function savePoly(){ try{ localStorage.setItem("sr-polygons", JSON.stringify(POLYS)); }catch(e){} }
 
 function polyArea(c){
-  if(!c||c.length<3)return 0;var R=6378137,rad=Math.PI/180,a=0;
-  for(var i=0;i<c.length;i++){var j=(i+1)%c.length;
-    a+=(c[j][1]-c[i][1])*rad*(2+Math.sin(c[i][0]*rad)+Math.sin(c[j][0]*rad))}
-  return Math.abs(a*R*R/2);
+  if(!c || c.length < 3) return 0;
+  var R = 6378137, rad = Math.PI / 180, a = 0;
+  for(var i = 0; i < c.length; i++){
+    var j = (i + 1) % c.length;
+    a += (c[j][1] - c[i][1]) * rad * (2 + Math.sin(c[i][0] * rad) + Math.sin(c[j][0] * rad));
+  }
+  return Math.abs(a * R * R / 2);
 }
+
 function fmtArea(m){
-  if(m>=10000)return (m/10000).toFixed(2)+' ha';
-  if(m>=1000)return (m/1000).toFixed(1)+' công ('+Math.round(m)+' m²)';
-  return Math.round(m)+' m² ('+(m/360).toFixed(1)+' sào)';
+  if(!m) return '0 m²';
+  if(m >= 10000) return (m / 10000).toFixed(2) + ' ha (' + Math.round(m).toLocaleString('vi-VN') + ' m²)';
+  if(m >= 1000) return (m / 1000).toFixed(1) + ' công (' + Math.round(m).toLocaleString('vi-VN') + ' m²)';
+  return Math.round(m).toLocaleString('vi-VN') + ' m² (' + (m / 360).toFixed(1) + ' sào)';
 }
+
+function fmtAreaFull(m){
+  var saoBac = (m / 360).toFixed(2);
+  var saoTrung = (m / 500).toFixed(2);
+  var congNam = (m / 1000).toFixed(2);
+  var ha = (m / 10000).toFixed(3);
+  return {
+    m2: Math.round(m).toLocaleString('vi-VN') + ' m²',
+    saoBac: saoBac + ' sào Bắc Bộ (360m²)',
+    saoTrung: saoTrung + ' sào Trung Bộ (500m²)',
+    congNam: congNam + ' công Nam Bộ (1000m²)',
+    ha: ha + ' ha'
+  };
+}
+
+var POLY_COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#06b6d4'];
+var CROPS_SUGGEST = ['lúa', 'cà phê', 'sầu riêng', 'hồ tiêu', 'bơ', 'cam', 'bưởi', 'bắp/ngô', 'rau màu', 'cây ăn trái'];
+
+var DRAW_MGR = {
+  mode: 'idle',
+  points: [],
+  markers: [],
+  polyline: null,
+  polygonPreview: null,
+  activePolyId: null,
+  editCoords: [],
+  editMarkers: [],
+  editMidpoints: [],
+  polyLayersMap: {},
+  pendingSaveArea: 0,
+  selectedColor: '#10b981',
+  selectedCrop: 'lúa',
+
+  startDraw: function(){
+    this.cancelEdit();
+    this.mode = 'drawing';
+    this.points = [];
+    this.markers = [];
+    if(this.polyline){ try{ mapInst.removeLayer(this.polyline); }catch(e){} this.polyline = null; }
+    if(this.polygonPreview){ try{ mapInst.removeLayer(this.polygonPreview); }catch(e){} this.polygonPreview = null; }
+    var mapEl = document.getElementById('leafMap');
+    if(mapEl) mapEl.style.cursor = 'crosshair';
+    this.updateToolbarDOM();
+  },
+
+  addPoint: function(latlng){
+    if(this.mode !== 'drawing' || !mapInst) return;
+    var pt = [latlng.lat, latlng.lng];
+    this.points.push(pt);
+    var idx = this.points.length - 1;
+
+    var ic;
+    if(idx === 0){
+      ic = L.divIcon({
+        className: '',
+        html: '<div style="width:22px;height:22px;border-radius:50%;background:#10b981;border:3px solid #ffffff;box-shadow:0 0 0 4px rgba(16,185,129,.45);animation:gpsPulse 1.5s infinite;cursor:pointer" title="Bấm vào điểm này để khép kín ranh giới"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+    } else {
+      ic = L.divIcon({
+        className: '',
+        html: '<div style="width:14px;height:14px;border-radius:50%;background:#ffffff;border:3px solid #10b981;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+      });
+    }
+
+    var mk = L.marker(latlng, { icon: ic }).addTo(mapInst);
+    if(idx === 0){
+      mk.on('click', function(ev){
+        L.DomEvent.stopPropagation(ev);
+        DRAW_MGR.finishDraw();
+      });
+    }
+    this.markers.push(mk);
+
+    if(!this.polyline){
+      this.polyline = L.polyline(this.points, { color: '#10b981', weight: 3, dashArray: '6,6' }).addTo(mapInst);
+    } else {
+      this.polyline.setLatLngs(this.points);
+    }
+
+    if(this.points.length >= 3){
+      if(!this.polygonPreview){
+        this.polygonPreview = L.polygon(this.points, { color: '#10b981', weight: 2, fillOpacity: 0.25, fillColor: '#10b981' }).addTo(mapInst);
+      } else {
+        this.polygonPreview.setLatLngs(this.points);
+      }
+    }
+    this.updateToolbarDOM();
+  },
+
+  removeLastPoint: function(){
+    if(this.points.length === 0) return;
+    this.points.pop();
+    var lastMk = this.markers.pop();
+    if(lastMk){ try{ mapInst.removeLayer(lastMk); }catch(e){} }
+    if(this.polyline) this.polyline.setLatLngs(this.points);
+    if(this.points.length < 3 && this.polygonPreview){
+      try{ mapInst.removeLayer(this.polygonPreview); }catch(e){}
+      this.polygonPreview = null;
+    } else if(this.polygonPreview){
+      this.polygonPreview.setLatLngs(this.points);
+    }
+    this.updateToolbarDOM();
+  },
+
+  cancelDraw: function(){
+    this.mode = 'idle';
+    for(var i = 0; i < this.markers.length; i++){
+      try{ mapInst.removeLayer(this.markers[i]); }catch(e){}
+    }
+    this.markers = [];
+    this.points = [];
+    if(this.polyline){ try{ mapInst.removeLayer(this.polyline); }catch(e){} this.polyline = null; }
+    if(this.polygonPreview){ try{ mapInst.removeLayer(this.polygonPreview); }catch(e){} this.polygonPreview = null; }
+    var mapEl = document.getElementById('leafMap');
+    if(mapEl) mapEl.style.cursor = '';
+    this.updateToolbarDOM();
+  },
+
+  finishDraw: function(){
+    if(this.points.length < 3){
+      alert('Vui lòng chấm ít nhất 3 điểm trên bản đồ để tạo thành một khu đất khép kín!');
+      return;
+    }
+    var area = Math.round(polyArea(this.points));
+    this.pendingSaveArea = area;
+
+    var modal = document.getElementById('modalSavePoly');
+    if(modal){
+      var full = fmtAreaFull(area);
+      document.getElementById('savePolyAreaM2').textContent = full.m2;
+      document.getElementById('savePolyAreaSaoBac').textContent = full.saoBac;
+      document.getElementById('savePolyAreaSaoTrung').textContent = full.saoTrung;
+      document.getElementById('savePolyAreaCongNam').textContent = full.congNam;
+      document.getElementById('savePolyAreaHa').textContent = full.ha;
+
+      var thCur = byId(THUA, thuaCur);
+      var defaultName = 'Khu ' + (POLYS.length + 1) + ' — ' + (thCur ? thCur.cay : 'Cây trồng');
+      document.getElementById('inpPolyTen').value = defaultName;
+      document.getElementById('inpPolyGhiChu').value = '';
+      DRAW_MGR.selectedColor = POLY_COLORS[POLYS.length % POLY_COLORS.length];
+      DRAW_MGR.selectedCrop = thCur ? thCur.cay : 'lúa';
+      DRAW_MGR.renderColorPickers();
+      DRAW_MGR.renderCropChips();
+      modal.style.display = 'flex';
+    }
+  },
+
+  confirmSaveModal: function(){
+    var tenInp = document.getElementById('inpPolyTen');
+    var ten = (tenInp && tenInp.value ? tenInp.value.trim() : '') || ('Khu ' + (POLYS.length + 1));
+    var ghiChuInp = document.getElementById('inpPolyGhiChu');
+    var ghiChu = ghiChuInp ? ghiChuInp.value.trim() : '';
+    var newPoly = {
+      id: 'poly_' + Date.now(),
+      ten: ten,
+      cay: this.selectedCrop || 'lúa',
+      color: this.selectedColor || '#10b981',
+      coords: this.points.slice(),
+      dienTich: this.pendingSaveArea,
+      ghiChu: ghiChu
+    };
+    POLYS.push(newPoly);
+    savePoly();
+
+    var modal = document.getElementById('modalSavePoly');
+    if(modal) modal.style.display = 'none';
+    this.cancelDraw();
+
+    this.addPolyLayerToMap(newPoly);
+    this.renderSidebarList();
+    this.updateToolbarDOM();
+  },
+
+  addPolyLayerToMap: function(poly){
+    if(!mapInst || !poly.coords || poly.coords.length < 3) return;
+    var pg = L.polygon(poly.coords, {
+      color: poly.color || '#10b981',
+      weight: 3,
+      fillColor: poly.color || '#10b981',
+      fillOpacity: 0.28
+    }).addTo(mapInst);
+
+    pg.polyId = poly.id;
+    this.polyLayersMap[poly.id] = pg;
+
+    var popupContent = '<div style="font-size:13px;line-height:1.4">'
+      + '<div style="font-size:14px;font-weight:700;color:' + poly.color + ';margin-bottom:3px">⬡ ' + esc(poly.ten) + '</div>'
+      + '<div>🌱 Cây trồng: <b>' + esc(poly.cay) + '</b></div>'
+      + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
+      + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
+      + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
+      + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
+      + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+      + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px;color:#ef4444">🗑️ Xóa</button>'
+      + '</div></div>';
+
+    pg.bindPopup(popupContent);
+  },
+
+  startEdit: function(polyId){
+    this.cancelDraw();
+    this.cancelEdit();
+
+    var poly = null;
+    for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === polyId){ poly = POLYS[i]; break; } }
+    if(!poly) return;
+
+    this.mode = 'editing';
+    this.activePolyId = polyId;
+    this.editCoords = poly.coords.map(function(c){ return [c[0], c[1]]; });
+
+    var pg = this.polyLayersMap[polyId];
+    if(pg){
+      pg.closePopup();
+      mapInst.fitBounds(pg.getBounds(), { padding: [60, 60] });
+    }
+
+    this.renderEditHandles();
+    this.updateToolbarDOM();
+  },
+
+  renderEditHandles: function(){
+    if(!mapInst) return;
+    for(var m = 0; m < this.editMarkers.length; m++){ try{ mapInst.removeLayer(this.editMarkers[m]); }catch(e){} }
+    for(var p = 0; p < this.editMidpoints.length; p++){ try{ mapInst.removeLayer(this.editMidpoints[p]); }catch(e){} }
+    this.editMarkers = [];
+    this.editMidpoints = [];
+
+    var coords = this.editCoords;
+    var len = coords.length;
+
+    for(var i = 0; i < len; i++){
+      (function(idx){
+        var ic = L.divIcon({
+          className: '',
+          html: '<div style="width:16px;height:16px;border-radius:50%;background:#f59e0b;border:3px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,.6);cursor:move"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+        var mk = L.marker(coords[idx], { draggable: true, icon: ic }).addTo(mapInst);
+        mk.on('drag', function(ev){
+          var ll = ev.target.getLatLng();
+          DRAW_MGR.editCoords[idx] = [ll.lat, ll.lng];
+          var pgLayer = DRAW_MGR.polyLayersMap[DRAW_MGR.activePolyId];
+          if(pgLayer) pgLayer.setLatLngs(DRAW_MGR.editCoords);
+          var area = Math.round(polyArea(DRAW_MGR.editCoords));
+          var elArea = document.getElementById('editPolyArea');
+          if(elArea) elArea.textContent = fmtArea(area);
+        });
+        mk.on('dragend', function(){
+          DRAW_MGR.renderEditHandles();
+        });
+        DRAW_MGR.editMarkers.push(mk);
+
+        var nextIdx = (idx + 1) % len;
+        var midLat = (coords[idx][0] + coords[nextIdx][0]) / 2;
+        var midLng = (coords[idx][1] + coords[nextIdx][1]) / 2;
+        var midIc = L.divIcon({
+          className: '',
+          html: '<div style="width:14px;height:14px;border-radius:50%;background:#ffffff;border:2.5px solid #10b981;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:pointer;display:grid;place-items:center;font-size:10px;font-weight:900;color:#10b981" title="Bấm vào để thêm đỉnh mới">+</div>',
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+        var midMk = L.marker([midLat, midLng], { icon: midIc }).addTo(mapInst);
+        midMk.on('click', function(ev){
+          L.DomEvent.stopPropagation(ev);
+          DRAW_MGR.editCoords.splice(idx + 1, 0, [midLat, midLng]);
+          var pgLayer = DRAW_MGR.polyLayersMap[DRAW_MGR.activePolyId];
+          if(pgLayer) pgLayer.setLatLngs(DRAW_MGR.editCoords);
+          DRAW_MGR.renderEditHandles();
+          var area = Math.round(polyArea(DRAW_MGR.editCoords));
+          var elArea = document.getElementById('editPolyArea');
+          if(elArea) elArea.textContent = fmtArea(area);
+        });
+        DRAW_MGR.editMidpoints.push(midMk);
+      })(i);
+    }
+  },
+
+  saveEdit: function(){
+    if(!this.activePolyId) return;
+    var poly = null;
+    for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === this.activePolyId){ poly = POLYS[i]; break; } }
+    if(poly){
+      poly.coords = this.editCoords.slice();
+      poly.dienTich = Math.round(polyArea(poly.coords));
+      savePoly();
+
+      var pgLayer = this.polyLayersMap[poly.id];
+      if(pgLayer){
+        pgLayer.setLatLngs(poly.coords);
+        var popupContent = '<div style="font-size:13px;line-height:1.4">'
+          + '<div style="font-size:14px;font-weight:700;color:' + poly.color + ';margin-bottom:3px">⬡ ' + esc(poly.ten) + '</div>'
+          + '<div>🌱 Cây trồng: <b>' + esc(poly.cay) + '</b></div>'
+          + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
+          + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
+          + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
+          + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
+          + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+          + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px;color:#ef4444">🗑️ Xóa</button>'
+          + '</div></div>';
+        pgLayer.setPopupContent(popupContent);
+      }
+    }
+    this.cancelEdit();
+    this.renderSidebarList();
+  },
+
+  cancelEdit: function(){
+    this.mode = 'idle';
+    for(var m = 0; m < this.editMarkers.length; m++){ try{ mapInst.removeLayer(this.editMarkers[m]); }catch(e){} }
+    for(var p = 0; p < this.editMidpoints.length; p++){ try{ mapInst.removeLayer(this.editMidpoints[p]); }catch(e){} }
+    this.editMarkers = [];
+    this.editMidpoints = [];
+
+    if(this.activePolyId){
+      var poly = null;
+      for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === this.activePolyId){ poly = POLYS[i]; break; } }
+      if(poly && this.polyLayersMap[poly.id]){
+        this.polyLayersMap[poly.id].setLatLngs(poly.coords);
+      }
+      this.activePolyId = null;
+    }
+    this.updateToolbarDOM();
+  },
+
+  deletePoly: function(polyId){
+    if(!confirm("Bạn có chắc chắn muốn xóa phân khu ranh giới này khỏi lô đất?")) return;
+    var pg = this.polyLayersMap[polyId];
+    if(pg){ try{ mapInst.removeLayer(pg); }catch(e){} delete this.polyLayersMap[polyId]; }
+    POLYS = POLYS.filter(function(x){ return x.id !== polyId; });
+    savePoly();
+    if(this.activePolyId === polyId) this.cancelEdit();
+    this.renderSidebarList();
+    this.updateToolbarDOM();
+  },
+
+  panToPoly: function(polyId){
+    var poly = null;
+    for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === polyId){ poly = POLYS[i]; break; } }
+    if(!poly || !mapInst) return;
+    var pg = this.polyLayersMap[polyId];
+    if(pg){
+      mapInst.fitBounds(pg.getBounds(), { padding: [60, 60] });
+      pg.openPopup();
+    }
+  },
+
+  openEditInfoModal: function(polyId){
+    var poly = null;
+    for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === polyId){ poly = POLYS[i]; break; } }
+    if(!poly) return;
+    this.activePolyId = polyId;
+    var modal = document.getElementById('modalEditPolyInfo');
+    if(modal){
+      document.getElementById('editInfoTen').value = poly.ten;
+      document.getElementById('editInfoCay').value = poly.cay;
+      document.getElementById('editInfoGhiChu').value = poly.ghiChu || '';
+      DRAW_MGR.selectedColor = poly.color || '#10b981';
+      DRAW_MGR.renderEditColorPickers();
+      modal.style.display = 'flex';
+    }
+  },
+
+  confirmEditInfoModal: function(){
+    if(!this.activePolyId) return;
+    var poly = null;
+    for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === this.activePolyId){ poly = POLYS[i]; break; } }
+    if(poly){
+      var ten = document.getElementById('editInfoTen').value.trim() || poly.ten;
+      var cay = document.getElementById('editInfoCay').value.trim() || poly.cay;
+      var ghiChu = document.getElementById('editInfoGhiChu').value.trim();
+      poly.ten = ten;
+      poly.cay = cay;
+      poly.color = this.selectedColor;
+      poly.ghiChu = ghiChu;
+      savePoly();
+
+      var pgLayer = this.polyLayersMap[poly.id];
+      if(pgLayer){
+        pgLayer.setStyle({ color: poly.color, fillColor: poly.color });
+        var popupContent = '<div style="font-size:13px;line-height:1.4">'
+          + '<div style="font-size:14px;font-weight:700;color:' + poly.color + ';margin-bottom:3px">⬡ ' + esc(poly.ten) + '</div>'
+          + '<div>🌱 Cây trồng: <b>' + esc(poly.cay) + '</b></div>'
+          + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
+          + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
+          + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
+          + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
+          + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+          + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px;color:#ef4444">🗑️ Xóa</button>'
+          + '</div></div>';
+        pgLayer.setPopupContent(popupContent);
+      }
+    }
+    var modal = document.getElementById('modalEditPolyInfo');
+    if(modal) modal.style.display = 'none';
+    this.renderSidebarList();
+  },
+
+  updateToolbarDOM: function(){
+    var bar = document.getElementById('mapFloatingBar');
+    if(!bar) return;
+
+    if(this.mode === 'drawing'){
+      var area = this.points.length >= 3 ? Math.round(polyArea(this.points)) : 0;
+      var canFinish = this.points.length >= 3;
+      bar.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px">'
+        + '<span class="draw-status-chip">🟢 Chấm các góc ranh giới</span>'
+        + '<span class="draw-status-chip">📍 ' + this.points.length + ' điểm</span>'
+        + (canFinish ? '<span class="draw-status-chip" style="background:#ecfdf5;color:#047857">📐 ' + fmtArea(area) + '</span>' : '<span style="font-size:.75rem;color:#64748b">Cần tối thiểu 3 điểm</span>')
+        + '</div>'
+        + '<div style="display:flex;gap:6px;align-items:center">'
+        + '<button type="button" class="draw-action-btn' + (canFinish ? ' btn-finish' : '') + '" onclick="DRAW_MGR.finishDraw()"' + (canFinish ? '' : ' disabled style="opacity:.6;cursor:not-allowed"') + '>✅ HOÀN TẤT & LƯU</button>'
+        + '<button type="button" class="draw-action-btn" onclick="DRAW_MGR.removeLastPoint()"' + (this.points.length > 0 ? '' : ' disabled style="opacity:.5"') + '>↩️ Xóa điểm</button>'
+        + '<button type="button" class="draw-action-btn btn-danger" onclick="DRAW_MGR.cancelDraw()">❌ Hủy vẽ</button>'
+        + '</div>';
+    } else if(this.mode === 'editing'){
+      var poly = null;
+      for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === this.activePolyId){ poly = POLYS[i]; break; } }
+      var curArea = this.editCoords.length >= 3 ? Math.round(polyArea(this.editCoords)) : (poly ? poly.dienTich : 0);
+      bar.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px">'
+        + '<span class="draw-status-chip" style="background:#fef3c7;color:#b45309">📐 Kéo các chấm tròn vàng để nắn ranh giới</span>'
+        + '<span class="draw-status-chip" id="editPolyArea">📐 ' + fmtArea(curArea) + '</span>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;align-items:center">'
+        + '<button type="button" class="draw-action-btn btn-finish" onclick="DRAW_MGR.saveEdit()">💾 LƯU THAY ĐỔI</button>'
+        + '<button type="button" class="draw-action-btn btn-danger" onclick="DRAW_MGR.cancelEdit()">❌ Hủy sửa</button>'
+        + '</div>';
+    } else {
+      var presetsOptions = '';
+      for(var pr = 0; pr < FARM_PRESETS.length; pr++){
+        presetsOptions += '<option value="' + FARM_PRESETS[pr].id + '">' + esc(FARM_PRESETS[pr].ten) + '</option>';
+      }
+
+      bar.innerHTML = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:1">'
+        + '<button type="button" class="draw-action-btn btn-finish" onclick="DRAW_MGR.startDraw()">✏️ BẮT ĐẦU VẼ PHÂN KHU</button>'
+        + '<button type="button" class="draw-action-btn" onclick="locateUserGps()">📍 ĐỊNH VỊ GPS VỀ ĐẤT TÔI</button>'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-left:auto">'
+        + '<span style="font-size:.75rem;font-weight:700;color:var(--muted-fg)">Vùng canh tác:</span>'
+        + '<select id="selFarmPreset" class="btn" style="font-size:.78rem;padding:4px 8px;border-radius:8px" onchange="changeFarmPreset(this.value)">'
+        + presetsOptions
+        + '</select>'
+        + '</div></div>';
+    }
+  },
+
+  renderSidebarList: function(){
+    var container = document.getElementById('polySidebarListContainer');
+    if(!container) return;
+
+    var h = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      + '<span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">✏️ Ranh giới & Phân khu</span>'
+      + '<span class="mono" style="font-size:.72rem;background:var(--accent);padding:2px 6px;border-radius:6px">' + POLYS.length + ' khu</span>'
+      + '</div>';
+
+    if(!POLYS.length){
+      h += '<p style="font-size:.78rem;color:var(--muted-fg);padding:10px;border:1px dashed var(--border);border-radius:8px;text-align:center;line-height:1.5">'
+        + 'Chưa có phân khu nào được vẽ.<br><b style="color:var(--primary)">Bấm nút "✏️ Bắt đầu vẽ phân khu"</b> trên bản đồ để khoanh đất.'
+        + '</p>';
+    } else {
+      var totalArea = 0;
+      for(var p = 0; p < POLYS.length; p++){
+        var py = POLYS[p];
+        totalArea += (py.dienTich || 0);
+        var isEditing = (this.mode === 'editing' && this.activePolyId === py.id);
+        h += '<div class="poly-item-card" style="border-color:' + (isEditing ? 'var(--primary)' : 'var(--border)') + ';background:' + (isEditing ? 'var(--accent)' : 'var(--card)') + '">'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          + '<span style="width:12px;height:12px;border-radius:3px;background:' + py.color + ';flex-shrink:0"></span>'
+          + '<span style="flex:1;min-width:0;font-size:.85rem;font-weight:700;cursor:pointer" onclick="DRAW_MGR.panToPoly(\'' + py.id + '\')">' + esc(py.ten) + '</span>'
+          + '<button type="button" onclick="DRAW_MGR.deletePoly(\'' + py.id + '\')" style="border:none;background:none;color:var(--bad);cursor:pointer;font-size:1.1rem;padding:0 4px" title="Xóa khu này">×</button>'
+          + '</div>'
+          + '<div style="font-size:.75rem;color:var(--muted-fg);margin-top:4px;padding-left:20px">'
+          + '🌱 ' + esc(py.cay) + ' · 📐 <b>' + fmtArea(py.dienTich) + '</b>'
+          + '</div>'
+          + '<div style="display:flex;gap:6px;margin-top:8px;padding-left:20px">'
+          + '<button type="button" class="btn" onclick="DRAW_MGR.panToPoly(\'' + py.id + '\')" style="font-size:.7rem;padding:3px 8px">👁️ Xem</button>'
+          + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + py.id + '\')" style="font-size:.7rem;padding:3px 8px">📐 Sửa đỉnh</button>'
+          + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + py.id + '\')" style="font-size:.7rem;padding:3px 8px">✏️ Đổi tên</button>'
+          + '</div>'
+          + '</div>';
+      }
+      h += '<div style="margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:8px;font-size:.72rem;color:var(--muted-fg);display:flex;justify-content:space-between">'
+        + '<span>Tổng diện tích đã khoanh:</span><b class="mono" style="color:var(--fg)">' + fmtArea(totalArea) + '</b>'
+        + '</div>';
+    }
+
+    container.innerHTML = h;
+  },
+
+  renderColorPickers: function(){
+    var container = document.getElementById('polyColorPickerContainer');
+    if(!container) return;
+    var h = '';
+    for(var i = 0; i < POLY_COLORS.length; i++){
+      var c = POLY_COLORS[i];
+      var isActive = (c === this.selectedColor);
+      h += '<span class="color-picker-dot' + (isActive ? ' active' : '') + '" style="background:' + c + '" onclick="DRAW_MGR.selectColor(\'' + c + '\')"></span>';
+    }
+    container.innerHTML = h;
+  },
+
+  selectColor: function(c){
+    this.selectedColor = c;
+    this.renderColorPickers();
+  },
+
+  renderEditColorPickers: function(){
+    var container = document.getElementById('editInfoColorPickerContainer');
+    if(!container) return;
+    var h = '';
+    for(var i = 0; i < POLY_COLORS.length; i++){
+      var c = POLY_COLORS[i];
+      var isActive = (c === this.selectedColor);
+      h += '<span class="color-picker-dot' + (isActive ? ' active' : '') + '" style="background:' + c + '" onclick="DRAW_MGR.selectColor(\'' + c + '\');DRAW_MGR.renderEditColorPickers()"></span>';
+    }
+    container.innerHTML = h;
+  },
+
+  renderCropChips: function(){
+    var container = document.getElementById('polyCropChipsContainer');
+    if(!container) return;
+    var h = '';
+    for(var i = 0; i < CROPS_SUGGEST.length; i++){
+      var c = CROPS_SUGGEST[i];
+      var isActive = (c === this.selectedCrop);
+      h += '<span class="crop-pill' + (isActive ? ' active' : '') + '" onclick="DRAW_MGR.selectCrop(\'' + c + '\')">' + c + '</span>';
+    }
+    container.innerHTML = h;
+  },
+
+  selectCrop: function(c){
+    this.selectedCrop = c;
+    this.renderCropChips();
+  }
+};
+
+function locateUserGps(){
+  if(!mapInst){ return; }
+  mapInst.locate({ setView: true, maxZoom: 17, enableHighAccuracy: true });
+}
+
+function changeFarmPreset(presetId){
+  var found = null;
+  for(var i = 0; i < FARM_PRESETS.length; i++){
+    if(FARM_PRESETS[i].id === presetId){ found = FARM_PRESETS[i]; break; }
+  }
+  if(found && mapInst){
+    mapInst.flyTo([found.lat, found.lng], found.zoom, { animate: true, duration: 1.2 });
+    setFarmCenter(found.lat, found.lng, found.ten);
+  }
+}
+window.DRAW_MGR = DRAW_MGR;
+window.locateUserGps = locateUserGps;
+window.changeFarmPreset = changeFarmPreset;
 
 function pThua(){
-  if(!thuaCur||!byId(THUA,thuaCur))thuaCur=THUA.length?THUA[0].id:null;
-  var dt=0,cho=0,i;
-  for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++}
-
-  var list='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Danh sách lô đất</div>';
-  for(i=0;i<THUA.length;i++){
-    var th=THUA[i],on=thuaCur===th.id,s=tt(th.id);
-    list+='<button type="button" data-chothua="'+th.id+'" class="field-card'+(on?' field-sel':'')+'" style="margin-bottom:8px">'
-      +'<div style="display:flex;align-items:center;gap:10px">'
-      +'<span class="field-emoji">'+(th.cay==="lúa"?"🌾":th.cay==="cà phê"?"☕":"🌱")+'</span>'
-      +'<div style="min-width:0;flex:1">'
-      +'<div style="font-size:.88rem;font-weight:700">'+esc(th.ten)+'</div>'
-      +'<div style="font-size:.72rem;color:var(--muted-fg)">'+esc(th.cay)+' · '+th.dt+' sào · '+esc(th.gd||"")+'</div>'
-      +'</div>'
-      +tag(s.con>0?'Chờ '+s.con+'n':'Đạt',s.con>0?'wait':'ok')
-      +'</div></button>';
-  }
-
-  /* Danh sách phân khu polygon đã vẽ */
-  list+='<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-    +'<span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">✏️ Ranh giới & Phân khu</span>'
-    +'<span class="mono" style="font-size:.72rem;background:var(--accent);padding:2px 6px;border-radius:6px">'+POLYS.length+' khu</span>'
-    +'</div>';
-  if(!POLYS.length){
-    list+='<p style="font-size:.78rem;color:var(--muted-fg);padding:8px;border:1px dashed var(--border);border-radius:8px;text-align:center">Bấm nút vẽ ⬡ trên bản đồ để khoanh ranh giới đất & chia khu trồng.</p>';
-  }else{
-    for(var p=0;p<POLYS.length;p++){
-      var py=POLYS[p];
-      list+='<div class="card" style="padding:10px 12px;margin-bottom:6px;cursor:pointer" data-panpoly="'+py.id+'">'
-        +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span style="width:12px;height:12px;border-radius:3px;background:'+py.color+';flex-shrink:0"></span>'
-        +'<span style="flex:1;min-width:0;font-size:.82rem;font-weight:700">'+esc(py.ten)+'</span>'
-        +'<button type="button" data-delpoly="'+py.id+'" style="border:none;background:none;color:var(--bad);cursor:pointer;font-size:.85rem;padding:0 4px" title="Xóa khu này">×</button>'
-        +'</div>'
-        +'<div style="font-size:.72rem;color:var(--muted-fg);margin-top:2px;padding-left:20px">'
-        +'🌱 '+(py.cay?esc(py.cay):'Chưa gán cây')+' · 📐 '+fmtArea(py.dienTich)+'</div></div>';
+  if(!thuaCur || !byId(THUA, thuaCur)) thuaCur = THUA.length ? THUA[0].id : null;
+  var dt = 0, cho = 0, i;
+  for(i = 0; i < THUA.length; i++){
+    dt += THUA[i].dt;
+    if(tt(THUA[i].id).con > 0) cho++;
+    if(THUA[i].ten === "RuRuong Nha" || THUA[i].ten === "RuRuong"){
+      THUA[i].ten = "Lô 1 — Ruộng Nhà";
+      luuThua();
     }
   }
-  list+='<button type="button" id="btnThemThuaQuick" class="btn" style="width:100%;margin-top:10px;font-size:.82rem">+ Thêm lô đất mới</button></div>';
 
-  var h=sec("Bản đồ vệ tinh & Phân khu lô đất",
+  var list = '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Danh sách lô đất</div>';
+  for(i = 0; i < THUA.length; i++){
+    var th = THUA[i], on = thuaCur === th.id, s = tt(th.id);
+    list += '<button type="button" data-chothua="' + th.id + '" class="field-card' + (on ? ' field-sel' : '') + '" style="margin-bottom:8px">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+      + '<span class="field-emoji">' + (th.cay === "lúa" ? "🌾" : th.cay === "cà phê" ? "☕" : "🌱") + '</span>'
+      + '<div style="min-width:0;flex:1">'
+      + '<div style="font-size:.88rem;font-weight:700">' + esc(th.ten) + '</div>'
+      + '<div style="font-size:.72rem;color:var(--muted-fg)">' + esc(th.cay) + ' · ' + th.dt + ' sào · ' + esc(th.gd || "") + '</div>'
+      + '</div>'
+      + tag(s.con > 0 ? 'Chờ ' + s.con + 'n' : 'Đạt', s.con > 0 ? 'wait' : 'ok')
+      + '</div></button>';
+  }
+
+  list += '<div id="polySidebarListContainer" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"></div>';
+  list += '<button type="button" id="btnThemThuaQuick" class="btn" style="width:100%;margin-top:10px;font-size:.82rem">+ Thêm lô đất mới</button>';
+
+  var h = sec("Bản đồ vệ tinh & Phân khu lô đất",
     '<div class="map-layout">'
-    +'<div class="map-sidebar scr">'+list+'</div>'
-    +'<div class="map-main"><div id="leafMap" class="leaflet-box"></div></div>'
-    +'</div>');
+    + '<div class="map-sidebar scr">' + list + '</div>'
+    + '<div class="map-main" style="position:relative">'
+      + '<div id="mapFloatingBar" class="map-toolbar-floating"></div>'
+      + '<div id="leafMap" class="leaflet-box"></div>'
+    + '</div>'
+    + '</div>');
 
-  /* Chi tiết lô đất đã chọn */
-  var thCur=byId(THUA,thuaCur);
+  h += '<div id="modalSavePoly" class="custom-modal-backdrop" style="display:none">'
+    + '<div class="custom-modal-card">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      + '<h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--fg)">💾 Lưu phân khu lô đất mới</h3>'
+      + '<button type="button" onclick="DRAW_MGR.cancelDraw();document.getElementById(\x27modalSavePoly\x27).style.display=\x27none\x27" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
+    + '</div>'
+    + '<div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:16px;border:1px solid var(--border)">'
+      + '<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted-fg);margin-bottom:6px">📐 Diện tích đo đạc tự động:</div>'
+      + '<div style="font-size:1.25rem;font-weight:800;color:var(--primary);margin-bottom:6px" id="savePolyAreaM2">0 m²</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.78rem;color:var(--muted-fg)">'
+        + '<div>• <b id="savePolyAreaSaoBac" style="color:var(--fg)">0 sào</b></div>'
+        + '<div>• <b id="savePolyAreaSaoTrung" style="color:var(--fg)">0 sào</b></div>'
+        + '<div>• <b id="savePolyAreaCongNam" style="color:var(--fg)">0 công</b></div>'
+        + '<div>• <b id="savePolyAreaHa" style="color:var(--fg)">0 ha</b></div>'
+      + '</div>'
+    + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px">'
+      + '<label style="font-size:.82rem;font-weight:700">Tên phân khu / thửa ruộng:'
+        + '<input type="text" id="inpPolyTen" placeholder="vd: Khu 1 — Lúa thơm, Vườn sầu riêng..." style="width:100%;margin-top:4px">'
+      + '</label>'
+      + '<div>'
+        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Loại cây trồng tại khu này:</div>'
+        + '<div id="polyCropChipsContainer" style="display:flex;flex-wrap:wrap;gap:6px"></div>'
+      + '</div>'
+      + '<div>'
+        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Màu sắc viền ranh giới:</div>'
+        + '<div id="polyColorPickerContainer" style="display:flex;gap:10px;align-items:center"></div>'
+      + '</div>'
+      + '<label style="font-size:.82rem;font-weight:700">Ghi chú (tùy chọn):'
+        + '<input type="text" id="inpPolyGhiChu" placeholder="vd: Đất trũng gần mương, mới bón lót..." style="width:100%;margin-top:4px">'
+      + '</label>'
+    + '</div>'
+    + '<div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">'
+      + '<button type="button" class="btn" onclick="DRAW_MGR.cancelDraw();document.getElementById(\x27modalSavePoly\x27).style.display=\x27none\x27">Hủy bỏ</button>'
+      + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.confirmSaveModal()" style="padding:8px 20px;font-weight:700">💾 Xác nhận lưu phân khu</button>'
+    + '</div>'
+    + '</div></div>';
+
+  h += '<div id="modalEditPolyInfo" class="custom-modal-backdrop" style="display:none">'
+    + '<div class="custom-modal-card">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      + '<h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--fg)">✏️ Chỉnh sửa thông tin phân khu</h3>'
+      + '<button type="button" onclick="document.getElementById(\x27modalEditPolyInfo\x27).style.display=\x27none\x27" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
+    + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px">'
+      + '<label style="font-size:.82rem;font-weight:700">Tên phân khu:'
+        + '<input type="text" id="editInfoTen" style="width:100%;margin-top:4px">'
+      + '</label>'
+      + '<label style="font-size:.82rem;font-weight:700">Loại cây trồng:'
+        + '<input type="text" id="editInfoCay" style="width:100%;margin-top:4px">'
+      + '</label>'
+      + '<div>'
+        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Màu sắc ranh giới:</div>'
+        + '<div id="editInfoColorPickerContainer" style="display:flex;gap:10px;align-items:center"></div>'
+      + '</div>'
+      + '<label style="font-size:.82rem;font-weight:700">Ghi chú:'
+        + '<input type="text" id="editInfoGhiChu" style="width:100%;margin-top:4px">'
+      + '</label>'
+    + '</div>'
+    + '<div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">'
+      + '<button type="button" class="btn" onclick="document.getElementById(\x27modalEditPolyInfo\x27).style.display=\x27none\x27">Hủy</button>'
+      + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.confirmEditInfoModal()" style="padding:8px 20px;font-weight:700">💾 Lưu thay đổi</button>'
+    + '</div>'
+    + '</div></div>';
+
+  var thCur = byId(THUA, thuaCur);
   if(thCur){
-    var st=tt(thCur.id),w=st.con>0;
-    var rows='',k=0;
-    for(var j=0;j<so.length;j++){
-      var e=so[j];if(e.thua!==thuaCur)continue;k++;
-      var d2=new Date(e.ngay),gt2=e.phi?(dif(NAY,addD(d2,e.phi))>0?tag('Chờ '+dif(NAY,addD(d2,e.phi))+'n','wait'):tag('Đạt','ok')):tag('—','mut');
-      rows+='<div style="display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--border)">'
-        +'<div class="mono" style="flex-shrink:0;font-size:.78rem;color:var(--muted-fg)">'+dmy(d2)+'</div>'
-        +'<div style="min-width:0;flex:1"><div style="font-size:.85rem;font-weight:600">'+esc(e.viec)+'</div>'
-        +'<div style="font-size:.72rem;color:var(--muted-fg)">'+esc(e.thuoc?e.thuoc+' · '+e.lieu:e.lieu)+'</div></div>'
-        +gt2+'</div>';
+    var st = tt(thCur.id), w = st.con > 0;
+    var rows = '', k = 0;
+    for(var j = 0; j < so.length; j++){
+      var e = so[j]; if(e.thua !== thuaCur) continue; k++;
+      var d2 = new Date(e.ngay), gt2 = e.phi ? (dif(NAY, addD(d2, e.phi)) > 0 ? tag('Chờ ' + dif(NAY, addD(d2, e.phi)) + 'n', 'wait') : tag('Đạt', 'ok')) : tag('—', 'mut');
+      rows += '<div style="display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--border)">'
+        + '<div class="mono" style="flex-shrink:0;font-size:.78rem;color:var(--muted-fg)">' + dmy(d2) + '</div>'
+        + '<div style="min-width:0;flex:1"><div style="font-size:.85rem;font-weight:600">' + esc(e.viec) + '</div>'
+        + '<div style="font-size:.72rem;color:var(--muted-fg)">' + esc(e.thuoc ? e.thuoc + ' · ' + e.lieu : e.lieu) + '</div></div>'
+        + gt2 + '</div>';
     }
-    if(!k)rows='<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--muted-fg)">Chưa ghi việc nào cho lô này.</div>';
+    if(!k) rows = '<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--muted-fg)">Chưa ghi việc nào cho lô này.</div>';
 
-    h+=sec('Chi tiết lô đất — '+esc(thCur.ten),
+    h += sec('Chi tiết lô đất — ' + esc(thCur.ten),
       '<div class="g2">'
-      +card('<div style="padding:20px">'
-        +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
-        +ring(w?st.con:0,w?Math.max(st.con,14):14,32,4)
-        +'<div style="min-width:0"><div style="font-size:1.15rem;font-weight:700">'+esc(thCur.ten)+'</div>'
-        +'<div style="font-size:.78rem;color:var(--muted-fg)">Trạng thái: '+tag(w?"Đang cách ly thuốc":"An toàn thu hoạch",w?"wait":"ok")+'</div></div></div>'
-        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-        +'<div class="detail-cell"><span class="detail-lbl">Cây trồng</span><span class="detail-val">'+esc(thCur.cay)+'</span></div>'
-        +'<div class="detail-cell"><span class="detail-lbl">Giống cây</span><span class="detail-val">'+esc(thCur.giong||"Chuẩn F1")+'</span></div>'
-        +'<div class="detail-cell"><span class="detail-lbl">Diện tích</span><span class="detail-val">'+thCur.dt+' sào ('+Math.round(thCur.dt*360)+' m²)</span></div>'
-        +'<div class="detail-cell"><span class="detail-lbl">Loại đất</span><span class="detail-val">'+esc(thCur.dat||"Phù sa")+'</span></div>'
-        +'<div class="detail-cell"><span class="detail-lbl">Giai đoạn</span><span class="detail-val">'+esc(thCur.gd||"Sinh trưởng")+'</span></div>'
-        +'<div class="detail-cell"><span class="detail-lbl">Ngày sau trồng</span><span class="detail-val mono">'+thCur.ngaycay+' ngày</span></div>'
-        +(w?'<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">Thu hoạch sớm nhất</span><span class="detail-val" style="color:var(--wait);font-weight:700">'+dmy(st.het)+' (còn '+st.con+' ngày)</span></div>':'')
-        +'</div></div>')
-      +card('<div style="padding:20px"><div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Nhật ký canh tác gần đây của lô này</div>'
-        +rows+'</div>')
-      +'</div>',
+      + card('<div style="padding:20px">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
+        + ring(w ? st.con : 0, w ? Math.max(st.con, 14) : 14, 32, 4)
+        + '<div style="min-width:0"><div style="font-size:1.15rem;font-weight:700">' + esc(thCur.ten) + '</div>'
+        + '<div style="font-size:.78rem;color:var(--muted-fg)">Trạng thái: ' + tag(w ? "Đang cách ly thuốc" : "An toàn thu hoạch", w ? "wait" : "ok") + '</div></div></div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+        + '<div class="detail-cell"><span class="detail-lbl">Cây trồng</span><span class="detail-val">' + esc(thCur.cay) + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Giống cây</span><span class="detail-val">' + esc(thCur.giong || "Chuẩn F1") + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Diện tích</span><span class="detail-val">' + thCur.dt + ' sào (' + Math.round(thCur.dt * 360) + ' m²)</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Loại đất</span><span class="detail-val">' + esc(thCur.dat || "Phù sa") + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Giai đoạn</span><span class="detail-val">' + esc(thCur.gd || "Sinh trưởng") + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Ngày sau trồng</span><span class="detail-val mono">' + thCur.ngaycay + ' ngày</span></div>'
+        + (w ? '<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">Thu hoạch sớm nhất</span><span class="detail-val" style="color:var(--wait);font-weight:700">' + dmy(st.het) + ' (còn ' + st.con + ' ngày)</span></div>' : '')
+        + '</div></div>')
+      + card('<div style="padding:20px"><div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Nhật ký canh tác gần đây của lô này</div>'
+        + rows + '</div>')
+      + '</div>',
       '<button type="button" data-go="benh" class="btn btn-p" style="font-size:.82rem">Ghi việc xịt thuốc</button>'
-      +'<button type="button" data-xoathua="'+thCur.id+'" class="btn" style="font-size:.82rem;color:var(--bad)">Xoá lô</button>');
+      + '<button type="button" onclick="locateUserGps()" class="btn" style="font-size:.82rem">📍 Định vị GPS lô này</button>'
+      + '<button type="button" data-xoathua="' + thCur.id + '" class="btn" style="font-size:.82rem;color:var(--bad)">Xoá lô</button>');
   }
   return h;
 }
 
 function initMap(){
-  var el=document.getElementById('leafMap');if(!el)return;
-  if(mapInst){try{mapInst.remove()}catch(e){}mapInst=null}
-  var defLat=10.45,defLng=106.65,defZoom=15;
-  mapInst=L.map(el,{zoomControl:false,attributionControl:false}).setView([defLat,defLng],defZoom);
-  L.control.zoom({position:'topright'}).addTo(mapInst);
+  var el = document.getElementById('leafMap');
+  if(!el) return;
+  if(mapInst){ try{ mapInst.remove(); }catch(e){} mapInst = null; }
+
+  var center = getFarmCenter();
+  var defLat = center.lat, defLng = center.lng, defZoom = 16;
+
+  mapInst = L.map(el, { zoomControl: false, attributionControl: false }).setView([defLat, defLng], defZoom);
+  L.control.zoom({ position: 'topright' }).addTo(mapInst);
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
-    attribution:'Esri Imagery',maxZoom:19}).addTo(mapInst);
+    attribution: 'Esri Imagery', maxZoom: 19
+  }).addTo(mapInst);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
-    maxZoom:19,opacity:.7}).addTo(mapInst);
+    maxZoom: 19, opacity: .7
+  }).addTo(mapInst);
 
-  var drawnItems=new L.FeatureGroup();
-  mapInst.addLayer(drawnItems);
+  DRAW_MGR.polyLayersMap = {};
 
-  var COLORS=['#10b981','#f59e0b','#3b82f6','#ef4444','#8b5cf6','#ec4899'];
-
-  /* Load Polygons */
-  for(var p=0;p<POLYS.length;p++){
-    var poly=POLYS[p];
-    if(!poly.coords||poly.coords.length<3)continue;
-    var pg=L.polygon(poly.coords,{color:poly.color||COLORS[p%COLORS.length],weight:3,fillOpacity:0.25});
-    pg.bindPopup('<div style="font-size:13px"><b>'+esc(poly.ten)+'</b><br>'
-      +(poly.cay?'🌱 Cây: '+esc(poly.cay)+'<br>':'')
-      +'📐 Diện tích: <b>'+fmtArea(poly.dienTich)+'</b></div>');
-    pg.polyId=poly.id;
-    drawnItems.addLayer(pg);
+  for(var p = 0; p < POLYS.length; p++){
+    DRAW_MGR.addPolyLayerToMap(POLYS[p]);
   }
 
-  /* Leaflet.draw control */
-  if(L.Control&&L.Control.Draw){
-    var drawControl=new L.Control.Draw({
-      position:'topleft',
-      edit:{featureGroup:drawnItems},
-      draw:{
-        polygon:{allowIntersection:false,showArea:true,shapeOptions:{color:'#10b981',weight:3,fillOpacity:0.25}},
-        polyline:false,circle:false,rectangle:false,marker:false,circlemarker:false
-      }
-    });
-    mapInst.addControl(drawControl);
-
-    mapInst.on(L.Draw.Event.CREATED,function(e){
-      var layer=e.layer;
-      var coords=layer.getLatLngs()[0].map(function(ll){return[ll.lat,ll.lng]});
-      var area=polyArea(coords);
-      var ten=prompt('Đặt tên phân khu / lô đất (vd: Khu 1 — Lúa thơm, Khu 2 — Cà phê):');
-      if(!ten)return;
-      var cay=prompt('Loại cây trồng (vd: lúa, cà phê, tiêu, sầu riêng):','lúa');
-      var col=COLORS[POLYS.length%COLORS.length];
-      var id='p'+Date.now();
-      layer.setStyle({color:col,weight:3,fillOpacity:0.25});
-      layer.bindPopup('<div style="font-size:13px"><b>'+esc(ten)+'</b><br>🌱 Cây: '+esc(cay||'')+'<br>📐 Diện tích: <b>'+fmtArea(area)+'</b></div>');
-      layer.polyId=id;
-      drawnItems.addLayer(layer);
-      POLYS.push({id:id,ten:ten,cay:cay||'',color:col,coords:coords,dienTich:area});
-      savePoly();ve();
-    });
-
-    mapInst.on(L.Draw.Event.EDITED,function(e){
-      e.layers.eachLayer(function(layer){
-        if(!layer.polyId)return;
-        var coords=layer.getLatLngs()[0].map(function(ll){return[ll.lat,ll.lng]});
-        var area=polyArea(coords);
-        for(var i=0;i<POLYS.length;i++){
-          if(POLYS[i].id===layer.polyId){
-            POLYS[i].coords=coords;POLYS[i].dienTich=area;
-            layer.setPopupContent('<div style="font-size:13px"><b>'+esc(POLYS[i].ten)+'</b><br>🌱 Cây: '+esc(POLYS[i].cay)+'<br>📐 Diện tích: <b>'+fmtArea(area)+'</b></div>');
-            break;
-          }
-        }
-      });
-      savePoly();ve();
-    });
-
-    mapInst.on(L.Draw.Event.DELETED,function(e){
-      e.layers.eachLayer(function(layer){
-        if(!layer.polyId)return;
-        POLYS=POLYS.filter(function(x){return x.id!==layer.polyId});
-      });
-      savePoly();ve();
-    });
-  }
-
-  /* GPS Locator button */
-  var GpsBtn=L.Control.extend({
-    options:{position:'topleft'},
-    onAdd:function(){
-      var div=L.DomUtil.create('div','leaflet-bar');
-      var a=L.DomUtil.create('a','',div);
-      a.href='#';a.title='📍 Định vị vị trí hiện tại của tôi';a.innerHTML='📍';
-      a.style.cssText='display:flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:18px;text-decoration:none;cursor:pointer;background:#fff';
-      L.DomEvent.on(a,'click',function(ev){
-        L.DomEvent.preventDefault(ev);
-        mapInst.locate({setView:true,maxZoom:17});
-      });
-      return div;
+  mapInst.on('click', function(e){
+    if(DRAW_MGR.mode === 'drawing'){
+      DRAW_MGR.addPoint(e.latlng);
     }
   });
-  new GpsBtn().addTo(mapInst);
 
-  var gpsM=null;
-  mapInst.on('locationfound',function(e){
-    window.userGps={lat:e.latlng.lat,lng:e.latlng.lng};
-    if(gpsM)mapInst.removeLayer(gpsM);
-    gpsM=L.circleMarker(e.latlng,{radius:9,color:'#2563eb',fillColor:'#3b82f6',fillOpacity:0.9,weight:3}).addTo(mapInst);
-    gpsM.bindPopup('<b>📍 Bạn đang ở đây</b><br><span style="font-size:11px;color:#666">'+e.latlng.lat.toFixed(6)+', '+e.latlng.lng.toFixed(6)+'</span>').openPopup();
+  var gpsMarker = null;
+  mapInst.on('locationfound', function(e){
+    window.userGps = { lat: e.latlng.lat, lng: e.latlng.lng };
+    setFarmCenter(e.latlng.lat, e.latlng.lng);
+    if(gpsMarker) mapInst.removeLayer(gpsMarker);
+    gpsMarker = L.circleMarker(e.latlng, {
+      radius: 11,
+      color: '#2563eb',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.9,
+      weight: 3
+    }).addTo(mapInst);
+
+    gpsMarker.bindPopup(
+      '<div style="font-size:13px;line-height:1.4">'
+      + '<b>📍 Vị trí GPS chính xác của bạn</b><br>'
+      + '<span style="font-size:11px;color:#64748b">' + e.latlng.lat.toFixed(6) + ', ' + e.latlng.lng.toFixed(6) + '</span><br>'
+      + '<span style="display:inline-block;margin-top:4px;color:#16a34a;font-weight:700;font-size:12px">✅ Đã tự động lưu làm tâm Lô đất</span>'
+      + '</div>'
+    ).openPopup();
   });
-  mapInst.on('locationerror',function(){alert('Không lấy được tọa độ GPS. Vui lòng cho phép trình duyệt truy cập vị trí.')});
 
-  /* Markers đại diện các lô */
-  for(var i=0;i<THUA.length;i++){
-    var th=THUA[i];
-    var angle=i*(2*Math.PI/Math.max(THUA.length,1));
-    var r=0.002+0.001*i;
-    var lat=defLat+r*Math.cos(angle),lng=defLng+r*Math.sin(angle);
-    var col2=COLORS[i%COLORS.length];
-    var ic=L.divIcon({className:'',html:'<div style="width:30px;height:30px;border-radius:50%;background:'+col2+';border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff">'+(i+1)+'</div>',iconSize:[30,30],iconAnchor:[15,15]});
-    var mk=L.marker([lat,lng],{icon:ic}).addTo(mapInst);
-    mk.bindPopup('<b>'+esc(th.ten)+'</b><br>'+esc(th.cay)+' · '+th.dt+' sào');
-    (function(id){mk.on('click',function(){thuaCur=id;ve()})})(th.id);
-  }
+  mapInst.on('locationerror', function(){
+    alert('Không lấy được tọa độ GPS từ thiết bị. Vui lòng bật GPS và cho phép quyền truy cập vị trí trên trình duyệt.');
+  });
 
-  setTimeout(function(){if(mapInst)mapInst.invalidateSize()},200);
+  DRAW_MGR.updateToolbarDOM();
+  DRAW_MGR.renderSidebarList();
+
+  setTimeout(function(){ if(mapInst) mapInst.invalidateSize(); }, 200);
 }
+
 
 /* ======================= 3. TRA BỆNH AI & ĐỐI CHIẾU ẢNH MẪU ======================= */
 var BO_PHAN=[
