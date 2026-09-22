@@ -683,7 +683,83 @@ function fmtAreaFull(m){
 }
 
 var POLY_COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#06b6d4'];
-var CROPS_SUGGEST = ['lúa', 'cà phê', 'sầu riêng', 'hồ tiêu', 'bơ', 'cam', 'bưởi', 'bắp/ngô', 'rau màu', 'cây ăn trái'];
+var ALL_CROPS = [
+  { group: "🌾 CÂY LƯƠNG THỰC", items: [
+    { val: "lúa", label: "🌾 Lúa nước (ST25, Đài Thơm 8, Lúa mùa)" },
+    { val: "bắp", label: "🌽 Bắp ngô (Ngô ngọt, Ngô nếp, Ngô sinh khối)" },
+    { val: "khoai lang", label: "🍠 Khoai lang (Khoai lang mật, Nhật Bản)" },
+    { val: "khoai mì", label: "🥔 Khoai mì (Sắn cao sản)" }
+  ]},
+  { group: "☕ CÂY CÔNG NGHIỆP", items: [
+    { val: "cà phê", label: "☕ Cà phê (Robusta, Arabica)" },
+    { val: "hồ tiêu", label: "🌶️ Hồ tiêu (Tiêu đen, Tiêu sọ)" },
+    { val: "hạt điều", label: "🌰 Hạt điều (Bình Phước, Đồng Nai)" },
+    { val: "cao su", label: "🌿 Cao su (Mủ cao su)" },
+    { val: "chè", label: "🍵 Chè / Trà (Thái Nguyên, Lâm Đồng)" },
+    { val: "mía", label: "🎋 Mía đường" }
+  ]},
+  { group: "🍈 CÂY ĂN TRÁI CAO CẤP", items: [
+    { val: "sầu riêng", label: "🍈 Sầu riêng (Ri6, Monthong / Dona)" },
+    { val: "cam", label: "🍊 Cam sành (Miền Tây, Cam Vinh)" },
+    { val: "bưởi", label: "🍈 Bưởi da xanh & Bưởi Năm Roi" },
+    { val: "chanh", label: "🍋 Chanh không hạt & Chanh giấy" },
+    { val: "xoài", label: "🥭 Xoài cát Hòa Lộc & Cát Chu" },
+    { val: "thanh long", label: "🐉 Thanh long (Ruột đỏ, Ruột trắng)" },
+    { val: "bơ", label: "🥑 Bơ sáp & Bơ Booth" },
+    { val: "mít", label: "🟡 Mít Thái siêu sớm & Mít ruột đỏ" },
+    { val: "nhãn", label: "🍇 Nhãn xuồng & Ido" },
+    { val: "vải", label: "🍒 Vải thiều Lục Ngạn" },
+    { val: "chuối", label: "🍌 Chuối già Nam Mỹ & Chuối sứ" }
+  ]},
+  { group: "🥬 RAU MÀU & GIA VỊ", items: [
+    { val: "ớt", label: "🌶️ Ớt hiểm & Ớt chuông" },
+    { val: "cà chua", label: "🍅 Cà chua bi & ghép" },
+    { val: "dưa leo", label: "🥒 Dưa leo / Dưa chuột" },
+    { val: "dưa hấu", label: "🍉 Dưa hấu" },
+    { val: "hành tỏi", label: "🧅 Hành lá, Hành tím & Tỏi" },
+    { val: "rau màu", label: "🥬 Rau ăn lá các loại (Cải, Xà lách, Muống)" }
+  ]},
+  { group: "✨ TÙY CHỌN KHÁC", items: [
+    { val: "khac", label: "✏️ Cây trồng khác (Tự nhập tên)..." }
+  ]}
+];
+
+var QUICK_CROPS = [
+  { val: "lúa", label: "🌾 Lúa" },
+  { val: "cà phê", label: "☕ Cà phê" },
+  { val: "sầu riêng", label: "🍈 Sầu riêng" },
+  { val: "cam", label: "🍊 Cam sành" },
+  { val: "bưởi", label: "🍈 Bưởi" },
+  { val: "chanh", label: "🍋 Chanh" },
+  { val: "hồ tiêu", label: "🌶️ Hồ tiêu" },
+  { val: "hạt điều", label: "🌰 Hạt điều" },
+  { val: "bắp", label: "🌽 Bắp/Ngô" },
+  { val: "xoài", label: "🥭 Xoài" },
+  { val: "cao su", label: "🌿 Cao su" },
+  { val: "rau màu", label: "🥬 Rau màu" }
+];
+
+function taoCropOptionsHTML(selectedVal){
+  selectedVal = (selectedVal || "").toLowerCase().trim();
+  var h = "";
+  var found = false;
+  for(var g = 0; g < ALL_CROPS.length; g++){
+    var grp = ALL_CROPS[g];
+    h += '<optgroup label="' + grp.group + '">';
+    for(var i = 0; i < grp.items.length; i++){
+      var item = grp.items[i];
+      var isSel = (item.val === selectedVal || (item.val !== "khac" && selectedVal.indexOf(item.val) >= 0));
+      if(isSel && !found){
+        found = true;
+        h += '<option value="' + item.val + '" selected>' + item.label + '</option>';
+      } else {
+        h += '<option value="' + item.val + '">' + item.label + '</option>';
+      }
+    }
+    h += '</optgroup>';
+  }
+  return { html: h, found: found };
+}
 
 var DRAW_MGR = {
   mode: 'idle',
@@ -806,27 +882,111 @@ var DRAW_MGR = {
       document.getElementById('savePolyAreaCongNam').textContent = full.congNam;
       document.getElementById('savePolyAreaHa').textContent = full.ha;
 
-      var thCur = byId(THUA, thuaCur);
-      var defaultName = 'Khu ' + (POLYS.length + 1) + ' — ' + (thCur ? thCur.cay : 'Cây trồng');
+        // Modal Xác nhận xóa phân khu
+  h += '<div id="modalConfirmDeletePoly" class="custom-modal-backdrop" style="display:none">'
+    + '<div class="custom-modal-card" style="max-width:380px;text-align:center">'
+      + '<div style="font-size:2.2rem;margin-bottom:8px">🗑️</div>'
+      + '<h3 style="margin:0 0 8px;font-size:1.1rem;font-weight:700;color:var(--fg)">Xóa phân khu ranh giới này?</h3>'
+      + '<p style="font-size:.82rem;color:var(--muted-fg);margin:0 0 20px;line-height:1.5">Phân khu và diện tích đo đạc sẽ bị xóa khỏi bản đồ lô đất.</p>'
+      + '<div style="display:flex;gap:10px;justify-content:center">'
+        + '<button type="button" class="btn" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalConfirmDeletePoly">Hủy bỏ</button>'
+        + '<button type="button" class="btn btn-danger" onclick="DRAW_MGR.executeDeletePoly()" style="background:#ef4444;color:#fff;font-weight:700;padding:8px 20px">Đồng ý xóa</button>'
+      + '</div>'
+    + '</div></div>';
+
+  // Modal Xác nhận xóa lô đất
+  h += '<div id="modalConfirmDeleteThua" class="custom-modal-backdrop" style="display:none">'
+    + '<div class="custom-modal-card" style="max-width:380px;text-align:center">'
+      + '<div style="font-size:2.2rem;margin-bottom:8px">⚠️</div>'
+      + '<h3 style="margin:0 0 8px;font-size:1.1rem;font-weight:700;color:var(--fg)">Xóa lô đất canh tác này?</h3>'
+      + '<p id="confirmDeleteThuaDesc" style="font-size:.82rem;color:var(--muted-fg);margin:0 0 20px;line-height:1.5">Lô đất và toàn bộ nhật ký liên quan sẽ bị xóa.</p>'
+      + '<div style="display:flex;gap:10px;justify-content:center">'
+        + '<button type="button" class="btn" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalConfirmDeleteThua">Hủy bỏ</button>'
+        + '<button type="button" class="btn btn-danger" onclick="thucHienXoaThua()" style="background:#ef4444;color:#fff;font-weight:700;padding:8px 20px">Đồng ý xóa</button>'
+      + '</div>'
+    + '</div></div>';
+
+  var thCur = byId(THUA, thuaCur);
+      var defaultCrop = thCur ? thCur.cay : 'lúa';
+      var defaultName = 'Khu ' + (POLYS.length + 1) + ' — ' + defaultCrop;
       document.getElementById('inpPolyTen').value = defaultName;
       document.getElementById('inpPolyGhiChu').value = '';
       DRAW_MGR.selectedColor = POLY_COLORS[POLYS.length % POLY_COLORS.length];
-      DRAW_MGR.selectedCrop = thCur ? thCur.cay : 'lúa';
+      DRAW_MGR.selectedCrop = defaultCrop;
       DRAW_MGR.renderColorPickers();
-      DRAW_MGR.renderCropChips();
+
+      // Render Dropdown and Quick Chips for Save Modal
+      var sel = document.getElementById('savePolyCaySelect');
+      var customWrap = document.getElementById('savePolyCayCustomWrap');
+      var customInp = document.getElementById('savePolyCayCustom');
+      if(sel){
+        var res = taoCropOptionsHTML(defaultCrop);
+        sel.innerHTML = res.html;
+        if(res.found){
+          if(customWrap) customWrap.style.display = 'none';
+          if(customInp) customInp.value = '';
+        } else {
+          sel.value = 'khac';
+          if(customWrap) customWrap.style.display = 'block';
+          if(customInp) customInp.value = defaultCrop;
+        }
+      }
+      DRAW_MGR.renderSaveCropChips(defaultCrop);
+
       modal.style.display = 'flex';
     }
+  },
+
+  onSaveSelectChange: function(val){
+    var customWrap = document.getElementById('savePolyCayCustomWrap');
+    if(val === 'khac'){
+      if(customWrap) customWrap.style.display = 'block';
+    } else {
+      if(customWrap) customWrap.style.display = 'none';
+      this.selectedCrop = val;
+      this.renderSaveCropChips(val);
+    }
+  },
+
+  renderSaveCropChips: function(activeVal){
+    var container = document.getElementById('savePolyCropChipsBar');
+    if(!container) return;
+    activeVal = (activeVal || this.selectedCrop || 'lúa').toLowerCase().trim();
+    var h = '';
+    for(var i = 0; i < QUICK_CROPS.length; i++){
+      var q = QUICK_CROPS[i];
+      var isAct = (q.val === activeVal || (activeVal && activeVal.indexOf(q.val) >= 0));
+      h += '<button type="button" class="crop-pill' + (isAct ? ' active' : '') + '" style="font-size:.72rem;padding:3px 8px;cursor:pointer" data-crop="' + q.val + '" onclick="DRAW_MGR.pickCropForSave(this.dataset.crop)">'
+        + q.label
+        + '</button>';
+    }
+    container.innerHTML = h;
+  },
+
+  pickCropForSave: function(cropVal){
+    this.selectedCrop = cropVal;
+    var sel = document.getElementById('savePolyCaySelect');
+    var customWrap = document.getElementById('savePolyCayCustomWrap');
+    if(sel){
+      sel.value = cropVal;
+      if(customWrap) customWrap.style.display = 'none';
+    }
+    this.renderSaveCropChips(cropVal);
   },
 
   confirmSaveModal: function(){
     var tenInp = document.getElementById('inpPolyTen');
     var ten = (tenInp && tenInp.value ? tenInp.value.trim() : '') || ('Khu ' + (POLYS.length + 1));
+    var sel = document.getElementById('savePolyCaySelect');
+    var customInp = document.getElementById('savePolyCayCustom');
+    var cay = (sel && sel.value !== 'khac') ? sel.value : (customInp && customInp.value.trim() ? customInp.value.trim() : (this.selectedCrop || 'lúa'));
     var ghiChuInp = document.getElementById('inpPolyGhiChu');
     var ghiChu = ghiChuInp ? ghiChuInp.value.trim() : '';
+
     var newPoly = {
       id: 'poly_' + Date.now(),
       ten: ten,
-      cay: this.selectedCrop || 'lúa',
+      cay: cay,
       color: this.selectedColor || '#10b981',
       coords: this.points.slice(),
       dienTich: this.pendingSaveArea,
@@ -862,9 +1022,9 @@ var DRAW_MGR = {
       + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
       + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
       + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-      + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
-      + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
-      + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px;color:#ef4444">🗑️ Xóa</button>'
+      + '<button type="button" class="btn btn-p" data-polyid="' + poly.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
+      + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+      + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="event.stopPropagation();DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:11px;padding:3px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xóa</button>'
       + '</div></div>';
 
     pg.bindPopup(popupContent);
@@ -968,9 +1128,9 @@ var DRAW_MGR = {
           + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
           + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
           + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-          + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
-          + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
-          + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px;color:#ef4444">🗑️ Xóa</button>'
+          + '<button type="button" class="btn btn-p" data-polyid="' + poly.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
+          + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+          + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="event.stopPropagation();DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:11px;padding:3px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xóa</button>'
           + '</div></div>';
         pgLayer.setPopupContent(popupContent);
       }
@@ -997,13 +1157,53 @@ var DRAW_MGR = {
     this.updateToolbarDOM();
   },
 
+  pendingDeletePolyId: null,
+
   deletePoly: function(polyId){
-    if(!confirm("Bạn có chắc chắn muốn xóa phân khu ranh giới này khỏi lô đất?")) return;
-    var pg = this.polyLayersMap[polyId];
-    if(pg){ try{ mapInst.removeLayer(pg); }catch(e){} delete this.polyLayersMap[polyId]; }
+    if(!polyId) return;
+    this.pendingDeletePolyId = polyId;
+    var modal = document.getElementById('modalConfirmDeletePoly');
+    if(modal){
+      modal.style.display = 'flex';
+    } else {
+      this.executeDeletePoly();
+    }
+  },
+
+  executeDeletePoly: function(){
+    var polyId = this.pendingDeletePolyId;
+    if(!polyId) return;
+
+    // 1. Close any open Leaflet popup
+    if(mapInst){
+      try{ mapInst.closePopup(); }catch(e){}
+      mapInst.eachLayer(function(l){
+        if(l.polyId === polyId){
+          try{ mapInst.removeLayer(l); }catch(e){}
+        }
+      });
+    }
+
+    // 2. Remove from layer map
+    if(this.polyLayersMap && this.polyLayersMap[polyId]){
+      try{ mapInst.removeLayer(this.polyLayersMap[polyId]); }catch(e){}
+      delete this.polyLayersMap[polyId];
+    }
+
+    // 3. Remove from POLYS and persist
     POLYS = POLYS.filter(function(x){ return x.id !== polyId; });
     savePoly();
+
+    // 4. Cancel active edit or close modal if open
     if(this.activePolyId === polyId) this.cancelEdit();
+    var editModal = document.getElementById('modalEditPolyInfo');
+    if(editModal) editModal.style.display = 'none';
+
+    var confirmModal = document.getElementById('modalConfirmDeletePoly');
+    if(confirmModal) confirmModal.style.display = 'none';
+    this.pendingDeletePolyId = null;
+
+    // 5. Update UI
     this.renderSidebarList();
     this.updateToolbarDOM();
   },
@@ -1027,12 +1227,65 @@ var DRAW_MGR = {
     var modal = document.getElementById('modalEditPolyInfo');
     if(modal){
       document.getElementById('editInfoTen').value = poly.ten;
-      document.getElementById('editInfoCay').value = poly.cay;
       document.getElementById('editInfoGhiChu').value = poly.ghiChu || '';
       DRAW_MGR.selectedColor = poly.color || '#10b981';
       DRAW_MGR.renderEditColorPickers();
+
+      // Populate dropdown & quick chips
+      var sel = document.getElementById('editInfoCaySelect');
+      var customWrap = document.getElementById('editInfoCayCustomWrap');
+      var customInp = document.getElementById('editInfoCayCustom');
+      if(sel){
+        var res = taoCropOptionsHTML(poly.cay);
+        sel.innerHTML = res.html;
+        if(res.found){
+          if(customWrap) customWrap.style.display = 'none';
+          if(customInp) customInp.value = '';
+        } else {
+          sel.value = 'khac';
+          if(customWrap) customWrap.style.display = 'block';
+          if(customInp) customInp.value = poly.cay;
+        }
+      }
+      DRAW_MGR.renderEditCropChips(poly.cay);
+
       modal.style.display = 'flex';
     }
+  },
+
+  onEditSelectChange: function(val){
+    var customWrap = document.getElementById('editInfoCayCustomWrap');
+    if(val === 'khac'){
+      if(customWrap) customWrap.style.display = 'block';
+    } else {
+      if(customWrap) customWrap.style.display = 'none';
+      this.renderEditCropChips(val);
+    }
+  },
+
+  renderEditCropChips: function(activeVal){
+    var container = document.getElementById('editInfoCropChipsBar');
+    if(!container) return;
+    activeVal = (activeVal || '').toLowerCase().trim();
+    var h = '';
+    for(var i = 0; i < QUICK_CROPS.length; i++){
+      var q = QUICK_CROPS[i];
+      var isAct = (q.val === activeVal || (activeVal && activeVal.indexOf(q.val) >= 0));
+      h += '<button type="button" class="crop-pill' + (isAct ? ' active' : '') + '" style="font-size:.72rem;padding:3px 8px;cursor:pointer" data-crop="' + q.val + '" onclick="DRAW_MGR.pickCropForEdit(this.dataset.crop)">'
+        + q.label
+        + '</button>';
+    }
+    container.innerHTML = h;
+  },
+
+  pickCropForEdit: function(cropVal){
+    var sel = document.getElementById('editInfoCaySelect');
+    var customWrap = document.getElementById('editInfoCayCustomWrap');
+    if(sel){
+      sel.value = cropVal;
+      if(customWrap) customWrap.style.display = 'none';
+    }
+    this.renderEditCropChips(cropVal);
   },
 
   confirmEditInfoModal: function(){
@@ -1041,8 +1294,11 @@ var DRAW_MGR = {
     for(var i = 0; i < POLYS.length; i++){ if(POLYS[i].id === this.activePolyId){ poly = POLYS[i]; break; } }
     if(poly){
       var ten = document.getElementById('editInfoTen').value.trim() || poly.ten;
-      var cay = document.getElementById('editInfoCay').value.trim() || poly.cay;
+      var sel = document.getElementById('editInfoCaySelect');
+      var customInp = document.getElementById('editInfoCayCustom');
+      var cay = (sel && sel.value !== 'khac') ? sel.value : (customInp && customInp.value.trim() ? customInp.value.trim() : poly.cay);
       var ghiChu = document.getElementById('editInfoGhiChu').value.trim();
+
       poly.ten = ten;
       poly.cay = cay;
       poly.color = this.selectedColor;
@@ -1058,9 +1314,9 @@ var DRAW_MGR = {
           + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
           + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
           + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-          + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
-          + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
-          + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(\'' + poly.id + '\')" style="font-size:11px;padding:3px 8px;color:#ef4444">🗑️ Xóa</button>'
+          + '<button type="button" class="btn btn-p" data-polyid="' + poly.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
+          + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+          + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="event.stopPropagation();DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:11px;padding:3px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xóa</button>'
           + '</div></div>';
         pgLayer.setPopupContent(popupContent);
       }
@@ -1139,16 +1395,17 @@ var DRAW_MGR = {
         h += '<div class="poly-item-card" style="border-color:' + (isEditing ? 'var(--primary)' : 'var(--border)') + ';background:' + (isEditing ? 'var(--accent)' : 'var(--card)') + '">'
           + '<div style="display:flex;align-items:center;gap:8px">'
           + '<span style="width:12px;height:12px;border-radius:3px;background:' + py.color + ';flex-shrink:0"></span>'
-          + '<span style="flex:1;min-width:0;font-size:.85rem;font-weight:700;cursor:pointer" onclick="DRAW_MGR.panToPoly(\'' + py.id + '\')">' + esc(py.ten) + '</span>'
-          + '<button type="button" onclick="DRAW_MGR.deletePoly(\'' + py.id + '\')" style="border:none;background:none;color:var(--bad);cursor:pointer;font-size:1.1rem;padding:0 4px" title="Xóa khu này">×</button>'
+          + '<span style="flex:1;min-width:0;font-size:.85rem;font-weight:700;cursor:pointer" data-polyid="' + py.id + '" onclick="DRAW_MGR.panToPoly(this.dataset.polyid)">' + esc(py.ten) + '</span>'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.deletePoly(this.dataset.polyid)" style="border:none;background:rgba(239,68,68,.1);color:var(--bad);cursor:pointer;font-size:.75rem;padding:2px 6px;border-radius:4px" title="Xóa khu này">🗑️</button>'
           + '</div>'
           + '<div style="font-size:.75rem;color:var(--muted-fg);margin-top:4px;padding-left:20px">'
           + '🌱 ' + esc(py.cay) + ' · 📐 <b>' + fmtArea(py.dienTich) + '</b>'
           + '</div>'
-          + '<div style="display:flex;gap:6px;margin-top:8px;padding-left:20px">'
-          + '<button type="button" class="btn" onclick="DRAW_MGR.panToPoly(\'' + py.id + '\')" style="font-size:.7rem;padding:3px 8px">👁️ Xem</button>'
-          + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startEdit(\'' + py.id + '\')" style="font-size:.7rem;padding:3px 8px">📐 Sửa đỉnh</button>'
-          + '<button type="button" class="btn" onclick="DRAW_MGR.openEditInfoModal(\'' + py.id + '\')" style="font-size:.7rem;padding:3px 8px">✏️ Đổi tên</button>'
+          + '<div style="display:flex;gap:6px;margin-top:8px;padding-left:20px;flex-wrap:wrap">'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.panToPoly(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px">👁️ Xem</button>'
+          + '<button type="button" class="btn btn-p" data-polyid="' + py.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px">📐 Sửa đỉnh</button>'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px">✏️ Đổi tên & Cây</button>'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700" title="Xóa phân khu">🗑️ Xóa</button>'
           + '</div>'
           + '</div>';
       }
@@ -1167,14 +1424,9 @@ var DRAW_MGR = {
     for(var i = 0; i < POLY_COLORS.length; i++){
       var c = POLY_COLORS[i];
       var isActive = (c === this.selectedColor);
-      h += '<span class="color-picker-dot' + (isActive ? ' active' : '') + '" style="background:' + c + '" onclick="DRAW_MGR.selectColor(\'' + c + '\')"></span>';
+      h += '<span class="color-picker-dot' + (isActive ? ' active' : '') + '" style="background:' + c + '" data-color="' + c + '" onclick="DRAW_MGR.selectColor(this.dataset.color);DRAW_MGR.renderColorPickers()"></span>';
     }
     container.innerHTML = h;
-  },
-
-  selectColor: function(c){
-    this.selectedColor = c;
-    this.renderColorPickers();
   },
 
   renderEditColorPickers: function(){
@@ -1184,26 +1436,13 @@ var DRAW_MGR = {
     for(var i = 0; i < POLY_COLORS.length; i++){
       var c = POLY_COLORS[i];
       var isActive = (c === this.selectedColor);
-      h += '<span class="color-picker-dot' + (isActive ? ' active' : '') + '" style="background:' + c + '" onclick="DRAW_MGR.selectColor(\'' + c + '\');DRAW_MGR.renderEditColorPickers()"></span>';
+      h += '<span class="color-picker-dot' + (isActive ? ' active' : '') + '" style="background:' + c + '" data-color="' + c + '" onclick="DRAW_MGR.selectColor(this.dataset.color);DRAW_MGR.renderEditColorPickers()"></span>';
     }
     container.innerHTML = h;
   },
 
-  renderCropChips: function(){
-    var container = document.getElementById('polyCropChipsContainer');
-    if(!container) return;
-    var h = '';
-    for(var i = 0; i < CROPS_SUGGEST.length; i++){
-      var c = CROPS_SUGGEST[i];
-      var isActive = (c === this.selectedCrop);
-      h += '<span class="crop-pill' + (isActive ? ' active' : '') + '" onclick="DRAW_MGR.selectCrop(\'' + c + '\')">' + c + '</span>';
-    }
-    container.innerHTML = h;
-  },
-
-  selectCrop: function(c){
-    this.selectedCrop = c;
-    this.renderCropChips();
+  selectColor: function(c){
+    this.selectedColor = c;
   }
 };
 
@@ -1228,11 +1467,9 @@ window.changeFarmPreset = changeFarmPreset;
 
 function pThua(){
   if(!thuaCur || !byId(THUA, thuaCur)) thuaCur = THUA.length ? THUA[0].id : null;
-  var dt = 0, cho = 0, i;
+  var i;
   for(i = 0; i < THUA.length; i++){
-    dt += THUA[i].dt;
-    if(tt(THUA[i].id).con > 0) cho++;
-    if(THUA[i].ten === "RuRuong Nha" || THUA[i].ten === "RuRuong"){
+    if(THUA[i].id === "thua1" && (!THUA[i].ten || THUA[i].ten.indexOf("Khu A") >= 0 || THUA[i].ten === "Lô 1")){
       THUA[i].ten = "Lô 1 — Ruộng Nhà";
       luuThua();
     }
@@ -1241,19 +1478,30 @@ function pThua(){
   var list = '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Danh sách lô đất</div>';
   for(i = 0; i < THUA.length; i++){
     var th = THUA[i], on = thuaCur === th.id, s = tt(th.id);
-    list += '<button type="button" data-chothua="' + th.id + '" class="field-card' + (on ? ' field-sel' : '') + '" style="margin-bottom:8px">'
-      + '<div style="display:flex;align-items:center;gap:10px">'
-      + '<span class="field-emoji">' + (th.cay === "lúa" ? "🌾" : th.cay === "cà phê" ? "☕" : "🌱") + '</span>'
+    var cropEmoji = "🌱";
+    if(th.cay === "lúa") cropEmoji = "🌾";
+    else if(th.cay === "cà phê") cropEmoji = "☕";
+    else if(th.cay === "sầu riêng") cropEmoji = "🍈";
+    else if(th.cay === "cam") cropEmoji = "🍊";
+    else if(th.cay === "bưởi" || th.cay === "chanh") cropEmoji = "🍋";
+    else if(th.cay === "bắp") cropEmoji = "🌽";
+    else if(th.cay === "hồ tiêu") cropEmoji = "🌶️";
+
+    list += '<div class="field-card' + (on ? ' field-sel' : '') + '" style="margin-bottom:8px;display:flex;align-items:center;gap:6px">'
+      + '<button type="button" data-chothua="' + th.id + '" style="all:unset;display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;min-width:0">'
+      + '<span class="field-emoji">' + cropEmoji + '</span>'
       + '<div style="min-width:0;flex:1">'
-      + '<div style="font-size:.88rem;font-weight:700">' + esc(th.ten) + '</div>'
+      + '<div style="font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(th.ten) + '</div>'
       + '<div style="font-size:.72rem;color:var(--muted-fg)">' + esc(th.cay) + ' · ' + th.dt + ' sào · ' + esc(th.gd || "") + '</div>'
       + '</div>'
       + tag(s.con > 0 ? 'Chờ ' + s.con + 'n' : 'Đạt', s.con > 0 ? 'wait' : 'ok')
-      + '</div></button>';
+      + '</button>'
+      + (THUA.length > 1 ? '<button type="button" data-xoathua="' + th.id + '" class="btn" style="padding:4px 7px;font-size:.72rem;color:var(--bad);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);flex-shrink:0" title="Xóa lô đất này">🗑️</button>' : '')
+      + '</div>';
   }
 
   list += '<div id="polySidebarListContainer" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"></div>';
-  list += '<button type="button" id="btnThemThuaQuick" class="btn" style="width:100%;margin-top:10px;font-size:.82rem">+ Thêm lô đất mới</button>';
+  list += '<button type="button" id="btnThemThuaQuick" class="btn btn-p" style="width:100%;margin-top:10px;font-size:.82rem;font-weight:700">+ Thêm lô đất mới</button>';
 
   var h = sec("Bản đồ vệ tinh & Phân khu lô đất",
     '<div class="map-layout">'
@@ -1264,11 +1512,12 @@ function pThua(){
     + '</div>'
     + '</div>');
 
+  // Modal 1: Lưu phân khu mới vẽ
   h += '<div id="modalSavePoly" class="custom-modal-backdrop" style="display:none">'
     + '<div class="custom-modal-card">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
       + '<h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--fg)">💾 Lưu phân khu lô đất mới</h3>'
-      + '<button type="button" onclick="DRAW_MGR.cancelDraw();document.getElementById(\x27modalSavePoly\x27).style.display=\x27none\x27" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
+      + '<button type="button" onclick="DRAW_MGR.cancelDraw();dongModal(this.dataset.closemodal)" data-closemodal="modalSavePoly" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
     + '</div>'
     + '<div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:16px;border:1px solid var(--border)">'
       + '<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted-fg);margin-bottom:6px">📐 Diện tích đo đạc tự động:</div>'
@@ -1285,8 +1534,12 @@ function pThua(){
         + '<input type="text" id="inpPolyTen" placeholder="vd: Khu 1 — Lúa thơm, Vườn sầu riêng..." style="width:100%;margin-top:4px">'
       + '</label>'
       + '<div>'
-        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Loại cây trồng tại khu này:</div>'
-        + '<div id="polyCropChipsContainer" style="display:flex;flex-wrap:wrap;gap:6px"></div>'
+        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Loại cây trồng (Thanh trượt xuống có sẵn):</div>'
+        + '<select id="savePolyCaySelect" class="btn" style="width:100%;font-size:.85rem;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer" onchange="DRAW_MGR.onSaveSelectChange(this.value)"></select>'
+        + '<div id="savePolyCropChipsBar" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>'
+        + '<div id="savePolyCayCustomWrap" style="margin-top:6px;display:none">'
+          + '<input type="text" id="savePolyCayCustom" placeholder="Nhập tên loại cây trồng đặc thù..." style="width:100%;padding:6px 10px;font-size:.82rem">'
+        + '</div>'
       + '</div>'
       + '<div>'
         + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Màu sắc viền ranh giới:</div>'
@@ -1297,24 +1550,30 @@ function pThua(){
       + '</label>'
     + '</div>'
     + '<div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">'
-      + '<button type="button" class="btn" onclick="DRAW_MGR.cancelDraw();document.getElementById(\x27modalSavePoly\x27).style.display=\x27none\x27">Hủy bỏ</button>'
+      + '<button type="button" class="btn" onclick="DRAW_MGR.cancelDraw();dongModal(this.dataset.closemodal)" data-closemodal="modalSavePoly">Hủy bỏ</button>'
       + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.confirmSaveModal()" style="padding:8px 20px;font-weight:700">💾 Xác nhận lưu phân khu</button>'
     + '</div>'
     + '</div></div>';
 
+  // Modal 2: Chỉnh sửa thông tin phân khu (Có Dropdown chọn cây + Nút Xóa to rõ)
   h += '<div id="modalEditPolyInfo" class="custom-modal-backdrop" style="display:none">'
     + '<div class="custom-modal-card">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
       + '<h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--fg)">✏️ Chỉnh sửa thông tin phân khu</h3>'
-      + '<button type="button" onclick="document.getElementById(\x27modalEditPolyInfo\x27).style.display=\x27none\x27" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
+      + '<button type="button" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalEditPolyInfo" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
     + '</div>'
     + '<div style="display:flex;flex-direction:column;gap:12px">'
       + '<label style="font-size:.82rem;font-weight:700">Tên phân khu:'
         + '<input type="text" id="editInfoTen" style="width:100%;margin-top:4px">'
       + '</label>'
-      + '<label style="font-size:.82rem;font-weight:700">Loại cây trồng:'
-        + '<input type="text" id="editInfoCay" style="width:100%;margin-top:4px">'
-      + '</label>'
+      + '<div>'
+        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Loại cây trồng (Thanh trượt xuống có sẵn):</div>'
+        + '<select id="editInfoCaySelect" class="btn" style="width:100%;font-size:.85rem;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer" onchange="DRAW_MGR.onEditSelectChange(this.value)"></select>'
+        + '<div id="editInfoCropChipsBar" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>'
+        + '<div id="editInfoCayCustomWrap" style="margin-top:6px;display:none">'
+          + '<input type="text" id="editInfoCayCustom" placeholder="Nhập tên loại cây trồng đặc thù..." style="width:100%;padding:6px 10px;font-size:.82rem">'
+        + '</div>'
+      + '</div>'
       + '<div>'
         + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Màu sắc ranh giới:</div>'
         + '<div id="editInfoColorPickerContainer" style="display:flex;gap:10px;align-items:center"></div>'
@@ -1323,9 +1582,61 @@ function pThua(){
         + '<input type="text" id="editInfoGhiChu" style="width:100%;margin-top:4px">'
       + '</label>'
     + '</div>'
+    + '<div style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
+      + '<button type="button" class="btn" onclick="DRAW_MGR.deletePoly(DRAW_MGR.activePolyId)" style="color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xóa phân khu này</button>'
+      + '<div style="display:flex;gap:8px">'
+        + '<button type="button" class="btn" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalEditPolyInfo">Hủy</button>'
+        + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.confirmEditInfoModal()" style="padding:8px 20px;font-weight:700">💾 Lưu thay đổi</button>'
+      + '</div>'
+    + '</div>'
+    + '</div></div>';
+
+  // Modal 3: Thêm lô đất mới chuẩn UI thay vì prompt chay
+  h += '<div id="modalThemThuaMoi" class="custom-modal-backdrop" style="display:none">'
+    + '<div class="custom-modal-card">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      + '<h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--fg)">🌱 Thêm lô đất canh tác mới</h3>'
+      + '<button type="button" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalThemThuaMoi" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted-fg)">×</button>'
+    + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px">'
+      + '<label style="font-size:.82rem;font-weight:700">Tên lô đất:'
+        + '<input type="text" id="themThuaTen" placeholder="vd: Lô 2 — Vườn Sầu Riêng, Ruộng Sau Nhà..." style="width:100%;margin-top:4px">'
+      + '</label>'
+      + '<div>'
+        + '<div style="font-size:.82rem;font-weight:700;margin-bottom:6px">Loại cây trồng (Thanh trượt xuống có sẵn):</div>'
+        + '<select id="themThuaCaySelect" class="btn" style="width:100%;font-size:.85rem;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer" onchange="onThemThuaSelectChange(this.value)"></select>'
+        + '<div id="themThuaCropChipsBar" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>'
+        + '<div id="themThuaCayCustomWrap" style="margin-top:6px;display:none">'
+          + '<input type="text" id="themThuaCayCustom" placeholder="Nhập tên loại cây trồng đặc thù..." style="width:100%;padding:6px 10px;font-size:.82rem">'
+        + '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+        + '<label style="font-size:.82rem;font-weight:700">Diện tích (sào):'
+          + '<input type="number" id="themThuaDt" value="3" min="0.5" step="0.5" style="width:100%;margin-top:4px">'
+        + '</label>'
+        + '<label style="font-size:.82rem;font-weight:700">Loại đất:'
+          + '<select id="themThuaDat" class="btn" style="width:100%;margin-top:4px;font-size:.85rem;padding:8px">'
+            + '<option value="Phù sa">Đất phù sa ngọt</option>'
+            + '<option value="Đất đỏ Bazan">Đất đỏ Bazan</option>'
+            + '<option value="Đất lên mô">Đất lên mô xẻ rãnh</option>'
+            + '<option value="Thịt pha cát">Đất thịt pha cát</option>'
+            + '<option value="Đất phèn nhẹ">Đất phèn nhẹ</option>'
+          + '</select>'
+        + '</label>'
+      + '</div>'
+      + '<label style="font-size:.82rem;font-weight:700">Giai đoạn canh tác hiện tại:'
+        + '<select id="themThuaGd" class="btn" style="width:100%;margin-top:4px;font-size:.85rem;padding:8px">'
+          + '<option value="Cây con / Mới trồng">Cây con / Mới xuống giống</option>'
+          + '<option value="Sinh trưởng thân lá / Đẻ nhánh">Sinh trưởng thân lá / Đẻ nhánh</option>'
+          + '<option value="Làm đòng / Ra hoa">Làm đòng / Phân hóa mầm hoa</option>'
+          + '<option value="Nuôi trái non / Vào hạt">Nuôi trái non / Vào hạt</option>'
+          + '<option value="Chín / Chuẩn bị thu hoạch">Chín / Chuẩn bị thu hoạch</option>'
+        + '</select>'
+      + '</label>'
+    + '</div>'
     + '<div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">'
-      + '<button type="button" class="btn" onclick="document.getElementById(\x27modalEditPolyInfo\x27).style.display=\x27none\x27">Hủy</button>'
-      + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.confirmEditInfoModal()" style="padding:8px 20px;font-weight:700">💾 Lưu thay đổi</button>'
+      + '<button type="button" class="btn" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalThemThuaMoi">Hủy bỏ</button>'
+      + '<button type="button" class="btn btn-p" onclick="xacNhanThemThuaMoi()" style="padding:8px 20px;font-weight:700">💾 Tạo lô đất mới</button>'
     + '</div>'
     + '</div></div>';
 
@@ -1365,10 +1676,116 @@ function pThua(){
       + '</div>',
       '<button type="button" data-go="benh" class="btn btn-p" style="font-size:.82rem">Ghi việc xịt thuốc</button>'
       + '<button type="button" onclick="locateUserGps()" class="btn" style="font-size:.82rem">📍 Định vị GPS lô này</button>'
-      + '<button type="button" data-xoathua="' + thCur.id + '" class="btn" style="font-size:.82rem;color:var(--bad)">Xoá lô</button>');
+      + (THUA.length > 1 ? '<button type="button" data-xoathua="' + thCur.id + '" class="btn" style="font-size:.82rem;color:var(--bad)">Xoá lô này</button>' : ''));
   }
   return h;
 }
+
+/* ===== HELPER FUNCTIONS FOR THÊM LÔ ĐẤT MỚI ===== */
+function moModalThemThuaMoi(){
+  var modal = document.getElementById('modalThemThuaMoi');
+  if(!modal) return;
+  var tenInp = document.getElementById('themThuaTen');
+  if(tenInp) tenInp.value = "Lô " + (THUA.length + 1) + " — Vườn Mới";
+  var sel = document.getElementById('themThuaCaySelect');
+  if(sel){
+    var res = taoCropOptionsHTML('lúa');
+    sel.innerHTML = res.html;
+  }
+  renderThemThuaCropChips('lúa');
+  var customWrap = document.getElementById('themThuaCayCustomWrap');
+  if(customWrap) customWrap.style.display = 'none';
+  modal.style.display = 'flex';
+}
+
+function onThemThuaSelectChange(val){
+  var customWrap = document.getElementById('themThuaCayCustomWrap');
+  if(val === 'khac'){
+    if(customWrap) customWrap.style.display = 'block';
+  } else {
+    if(customWrap) customWrap.style.display = 'none';
+    renderThemThuaCropChips(val);
+  }
+}
+
+function renderThemThuaCropChips(activeVal){
+  var container = document.getElementById('themThuaCropChipsBar');
+  if(!container) return;
+  activeVal = (activeVal || '').toLowerCase().trim();
+  var h = '';
+  for(var i = 0; i < QUICK_CROPS.length; i++){
+    var q = QUICK_CROPS[i];
+    var isAct = (q.val === activeVal || (activeVal && activeVal.indexOf(q.val) >= 0));
+    h += '<button type="button" class="crop-pill' + (isAct ? ' active' : '') + '" style="font-size:.72rem;padding:3px 8px;cursor:pointer" data-crop="' + q.val + '" onclick="pickCropForThemThua(this.dataset.crop)">'
+      + q.label
+      + '</button>';
+  }
+  container.innerHTML = h;
+}
+
+function pickCropForThemThua(cropVal){
+  var sel = document.getElementById('themThuaCaySelect');
+  var customWrap = document.getElementById('themThuaCayCustomWrap');
+  if(sel){
+    sel.value = cropVal;
+    if(customWrap) customWrap.style.display = 'none';
+  }
+  renderThemThuaCropChips(cropVal);
+}
+
+function xacNhanThemThuaMoi(){
+  var tenInp = document.getElementById('themThuaTen');
+  var ten = (tenInp && tenInp.value ? tenInp.value.trim() : '') || ("Lô " + (THUA.length + 1));
+  var sel = document.getElementById('themThuaCaySelect');
+  var customInp = document.getElementById('themThuaCayCustom');
+  var cay = (sel && sel.value !== 'khac') ? sel.value : (customInp && customInp.value.trim() ? customInp.value.trim() : 'lúa');
+  var dtInp = document.getElementById('themThuaDt');
+  var dt = dtInp ? (parseFloat(dtInp.value) || 3) : 3;
+  var datSel = document.getElementById('themThuaDat');
+  var dat = datSel ? datSel.value : 'Phù sa';
+  var gdSel = document.getElementById('themThuaGd');
+  var gd = gdSel ? gdSel.value : 'Cây con';
+
+  var id = "thua" + Date.now();
+  THUA.push({
+    id: id,
+    ten: ten,
+    cay: cay,
+    giong: "Chuẩn F1",
+    dt: dt,
+    dat: dat,
+    gd: gd,
+    ngaycay: 10
+  });
+  luuThua();
+  thuaCur = id;
+
+  var modal = document.getElementById('modalThemThuaMoi');
+  if(modal) modal.style.display = 'none';
+  veNav();
+  ve();
+}
+window.moModalThemThuaMoi = moModalThemThuaMoi;
+window.onThemThuaSelectChange = onThemThuaSelectChange;
+window.pickCropForThemThua = pickCropForThemThua;
+window.xacNhanThemThuaMoi = xacNhanThemThuaMoi;
+
+function dongModal(id){ var el=document.getElementById(id); if(el) el.style.display="none"; }
+window.dongModal=dongModal;
+
+function thucHienXoaThua(){
+  var v = window.pendingDeleteThuaId;
+  if(!v) return;
+  THUA = THUA.filter(function(x){ return x.id !== v; });
+  luuThua();
+  thuaCur = THUA.length ? THUA[0].id : null;
+  window.pendingDeleteThuaId = null;
+  var m = document.getElementById("modalConfirmDeleteThua");
+  if(m) m.style.display = "none";
+  veNav();
+  ve();
+}
+window.thucHienXoaThua = thucHienXoaThua;
 
 function initMap(){
   var el = document.getElementById('leafMap');
@@ -5813,11 +6230,12 @@ document.addEventListener("click",function(ev){
     return;
   }
   if((v=el.getAttribute("data-xoathua"))){
-    if(confirm("Xoá lô đất này? Các nhật ký liên quan cũng sẽ cập nhật.")){
-      THUA=THUA.filter(function(x){return x.id!==v});
-      luuThua();thuaCur=THUA.length?THUA[0].id:null;
-      veNav();ve();
-    }
+    window.pendingDeleteThuaId = v;
+    var thObj = byId(THUA, v);
+    var descEl = document.getElementById("confirmDeleteThuaDesc");
+    if(descEl && thObj) descEl.textContent = "Bạn có chắc muốn xóa lô '" + thObj.ten + "'? Toàn bộ nhật ký liên quan sẽ bị xóa.";
+    var m = document.getElementById("modalConfirmDeleteThua");
+    if(m) m.style.display = "flex";
     return;
   }
 
@@ -5913,14 +6331,7 @@ document.addEventListener("click",function(ev){
     return;
   }
   if(el.id==="btnThemThuaQuick"){
-    var ten=prompt("Tên lô đất mới (vd: Lô 3 — Vườn Bưởi Da Xanh):");
-    if(!ten)return;
-    var cay=prompt("Loại cây trồng (vd: lúa, cà phê, bưởi, sầu riêng):","lúa");
-    var dt=parseFloat(prompt("Diện tích (sào):","5"))||5;
-    var dat=prompt("Loại đất:","Phù sa");
-    var id="thua"+Date.now();
-    THUA.push({id:id,ten:ten,cay:cay||"lúa",giong:"Chuẩn F1",dt:dt,dat:dat||"Phù sa",gd:"Cây con",ngaycay:10});
-    luuThua();thuaCur=id;veNav();ve();
+    moModalThemThuaMoi();
     return;
   }
 
