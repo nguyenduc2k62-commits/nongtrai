@@ -376,6 +376,43 @@ th.r,td.r{text-align:right}
 .toast-msg.toast-error{border-left:5px solid #ef4444}
 @keyframes toastSlideIn{from{opacity:0;transform:translateY(-18px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 .toast-fade-out{opacity:0!important;transform:translateY(-10px) scale(.95)!important}
+
+/* ===== USER ACCOUNT & FARM PROFILE SYSTEM ===== */
+.sb-foot{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--border);margin-top:auto;cursor:pointer;border-radius:10px;margin:8px 8px 4px 8px;transition:all .18s ease;position:relative;user-select:none}
+.sb-foot:hover{background:var(--accent);color:var(--accent-fg)}
+.sb-foot:hover .sb-avatar{background:linear-gradient(135deg,#059669,#047857);box-shadow:0 0 0 3px rgba(16,185,129,.25)}
+.sb-foot:active{transform:scale(0.98)}
+.sb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#10b981 0%,#047857 100%);display:grid;place-items:center;font-weight:800;font-size:.82rem;color:#ffffff;box-shadow:0 2px 6px rgba(16,185,129,.25);flex-shrink:0;transition:all .2s ease}
+
+.account-popover{position:fixed;bottom:70px;left:14px;z-index:9999;width:315px;background:#ffffff;border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.18);padding:14px;display:flex;flex-direction:column;gap:8px;animation:modalPop .18s ease-out}
+.account-popover-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:none;background:transparent;color:var(--fg);font-size:.84rem;font-weight:600;cursor:pointer;width:100%;text-align:left;transition:all .15s ease}
+.account-popover-item:hover{background:var(--accent);color:var(--accent-fg)}
+.account-popover-item.text-danger:hover{background:#fee2e2;color:#dc2626}
+
+.account-tabs{display:flex;gap:8px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:20px;overflow-x:auto}
+.account-tab-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted-fg);font-size:.84rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.account-tab-btn:hover{color:var(--fg);border-color:var(--primary)}
+.account-tab-btn.active{background:var(--primary);color:#ffffff;border-color:var(--primary);box-shadow:0 2px 8px rgba(16,185,129,.3)}
+
+.cert-card{background:linear-gradient(135deg,#fffbf0 0%,#f0fdf4 100%);border:2px solid #ca8a04;border-radius:16px;padding:24px;position:relative;box-shadow:0 6px 24px rgba(202,138,4,.12)}
+.avatar-badge-opt{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;cursor:pointer;border:2px solid var(--border);background:var(--card);transition:all .15s ease}
+.avatar-badge-opt:hover{transform:scale(1.1);border-color:var(--primary)}
+.avatar-badge-opt.active{border-color:var(--primary);background:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,.3);transform:scale(1.1)}
+
+.switch-toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.switch-toggle input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#cbd5e1;transition:.25s;border-radius:24px}
+.switch-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:white;transition:.25s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input:checked + .switch-slider{background-color:#10b981}
+input:checked + .switch-slider:before{transform:translateX(20px)}
+
+@media print{
+  body * { visibility: hidden!important; }
+  #modalXuatSoVietGap, #modalXuatSoVietGap * { visibility: visible!important; }
+  #modalXuatSoVietGap { position: absolute!important; left: 0!important; top: 0!important; width: 100%!important; background: #fff!important; box-shadow: none!important; padding: 0!important; margin: 0!important; }
+  .no-print { display: none!important; }
+}
+
 </style>
 </head>
 
@@ -396,14 +433,39 @@ th.r,td.r{text-align:right}
     </div>
     <nav id="nav" class="sb-nav scr"></nav>
     <div class="sb-sum" id="navTomTat"></div>
-    <div class="sb-foot">
-      <div class="sb-avatar">ND</div>
+    <div class="sb-foot" id="btnSbProfile" role="button" tabindex="0" title="Quản lý hồ sơ nông hộ & tài khoản">
+      <div class="sb-avatar" id="sbAvatarText">ND</div>
       <div style="min-width:0;flex:1">
-        <div style="font-size:.78rem;font-weight:600;line-height:1.2">Nông Dân Hiện Đại</div>
-        <div style="font-size:.66rem;color:var(--muted-fg)">Hộ sản xuất canh tác số</div>
+        <div id="sbProfileName" style="font-size:.78rem;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nông Dân Hiện Đại</div>
+        <div id="sbProfileSub" style="font-size:.66rem;color:var(--muted-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Hộ sản xuất canh tác số</div>
       </div>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;color:var(--muted-fg);flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 18 6-6-6-6"/></svg>
     </div>
   </aside>
+
+  <!-- Quick Account Popover Menu -->
+  <div id="userAccountPopover" class="account-popover" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      <div class="sb-avatar" id="popoverUserAvatar" style="width:40px;height:40px;font-size:.9rem">ND</div>
+      <div style="min-width:0;flex:1">
+        <div id="popoverUserName" style="font-weight:700;font-size:.88rem;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nông Dân Hiện Đại</div>
+        <div id="popoverUserSub" style="font-size:.7rem;color:var(--muted-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Hộ sản xuất canh tác số</div>
+        <span style="display:inline-block;font-size:10px;font-weight:700;color:#047857;background:#ecfdf5;padding:1px 6px;border-radius:10px;border:1px solid #a7f3d0;margin-top:2px">✓ Đã định danh VNeID</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <button type="button" class="account-popover-item" data-actab="hoso"><span>👤</span> Hồ sơ nông hộ & Chủ hộ</button>
+      <button type="button" class="account-popover-item" data-actab="vietgap"><span>📜</span> Mã vùng trồng & VietGAP</button>
+      <button type="button" class="account-popover-item" data-actab="nhansu"><span>👥</span> Đội ngũ & Nhân công</button>
+      <button type="button" class="account-popover-item" data-actab="caidat"><span>⚙️</span> Cài đặt canh tác & Đơn vị</button>
+      <button type="button" class="account-popover-item" data-actab="saoluu"><span>💾</span> Sao lưu & Xuất sổ VietGAP</button>
+      <button type="button" class="account-popover-item" data-actab="baomat"><span>🔒</span> Mã PIN & Thiết bị</button>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:6px;display:flex;flex-direction:column;gap:4px">
+      <button type="button" class="account-popover-item" id="btnPopoverMoTrungTam" style="color:var(--primary);font-weight:700"><span>🖥️</span> Mở Trung Tâm Quản Lý</button>
+      <button type="button" class="account-popover-item text-danger" id="btnPopoverDangXuat" style="color:#ef4444"><span>🚪</span> Đổi tài khoản / Đăng xuất</button>
+    </div>
+  </div>
 
   <!-- ==================== MAIN ==================== -->
   <div class="main-wrap">
@@ -419,6 +481,10 @@ th.r,td.r{text-align:right}
         <div style="margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
           <button type="button" data-go="benh" class="btn btn-p">🔍 Tra bệnh AI</button>
           <button type="button" data-go="pha" class="btn">🧪 Pha thuốc</button>
+          <button type="button" id="btnHeaderProfile" class="btn" style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:10px" title="Hồ sơ nông hộ & Cài đặt tài khoản">
+            <span class="sb-avatar" style="width:24px;height:24px;font-size:.7rem;box-shadow:none" id="headerAvatarText">ND</span>
+            <span id="headerProfileName" style="font-size:.78rem;font-weight:600;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nông Dân Hiện Đại</span>
+          </button>
         </div>
       </div>
     </header>
@@ -604,6 +670,13 @@ function showToast(msg, type, duration){
 }
 window.showToast = showToast;
 
+function moModal(id){ var el=document.getElementById(id); if(el) el.style.display="flex"; }
+function hienModal(id){ var el=document.getElementById(id); if(el) el.style.display="flex"; }
+function dongModal(id){ var el=document.getElementById(id); if(el) el.style.display="none"; }
+window.moModal = moModal;
+window.hienModal = hienModal;
+window.dongModal = dongModal;
+
 /* ======================= NAVIGATION ======================= */
 var PAGES=[
   {id:"tongquan", ten:"Tổng quan", sub:"Trung tâm điều hành nông trại · Vận hành đa cây trồng theo niên vụ & chu kỳ sinh học", g:1},
@@ -613,7 +686,8 @@ var PAGES=[
   {id:"pha", ten:"Pha thuốc", sub:"Hình ảnh bình thuốc · Tương thích Cây & Đất · Dẫn chứng khoa học", g:2},
   {id:"bando", ten:"Điểm bán quanh vùng", sub:"Bản đồ đại lý VTNN · SĐT · Facebook · Google Maps", g:2},
   {id:"gia", ten:"Giá thị trường", sub:"Realtime 30p-1h · 100% Nông sản · Đối soát web uy tín", g:2},
-  {id:"mophong", ten:"Mô phỏng đồng ruộng", sub:"Lát cắt sinh thái đất, rễ, sâu bệnh, thời tiết mở rộng", g:3}
+  {id:"mophong", ten:"Mô phỏng đồng ruộng", sub:"Lát cắt sinh thái đất, rễ, sâu bệnh, thời tiết mở rộng", g:3},
+  {id:"taikhoan", ten:"Hồ sơ & Tài khoản", sub:"Thông tin nông hộ · Chứng nhận VietGAP · Quản lý nhân sự & Dữ liệu", g:2}
 ];
 var cur="tongquan";
 var thuaCur=THUA.length?THUA[0].id:null;
@@ -627,7 +701,8 @@ var IC={
   pha:'<path d="M10 3h4v6l4 9.5A2 2 0 0 1 16.2 21H7.8A2 2 0 0 1 6 18.5L10 9V3Z"/><path d="M7.4 14.5h9.2"/>',
   bando:'<path d="m9 4 6 2 5-2v14l-5 2-6-2-5 2V6l5-2Z"/><path d="M9 4v14M15 6v14"/>',
   gia:'<path d="M4 18 9 12l4 3 7-8"/><path d="M15 7h5v5"/>',
-  mophong:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h3v3H8zM13 13h3v3h-3z"/>'
+  mophong:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h3v3H8zM13 13h3v3h-3z"/>',
+  taikhoan:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
 };
 
 function veNav(){
@@ -647,11 +722,13 @@ function veNav(){
 
   var dt=0,cho=0;
   for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++}
+  var dvHienTai = (typeof USER_PROFILE !== "undefined" && USER_PROFILE.donViDienTich) ? USER_PROFILE.donViDienTich : "sao_trung";
+  var dtHienThi = (typeof quyDoiDienTich === "function") ? quyDoiDienTich(dt, dvHienTai) : (dt + " sào Trung Bộ");
   var el=document.getElementById("navTomTat");
   if(el)el.innerHTML='<div class="card" style="padding:14px">'
     +'<div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">Vụ mùa 2026</div>'
-    +'<div style="margin-top:6px;display:flex;align-items:baseline;gap:6px"><span class="mono" style="font-size:1.3rem;font-weight:700">'+dt+'</span>'
-    +'<span style="font-size:.78rem;color:var(--muted-fg)">sào · '+THUA.length+' lô đất</span></div>'
+    +'<div style="margin-top:6px;display:flex;align-items:baseline;gap:6px"><span class="mono" style="font-size:1.15rem;font-weight:800;color:var(--primary)">'+dtHienThi+'</span></div>'
+    +'<div style="font-size:.75rem;color:var(--muted-fg);margin-top:2px">'+THUA.length+' lô đất canh tác</div>'
     +'<div style="margin-top:6px;font-size:.75rem;color:var(--muted-fg)">'
     +(cho?'<span class="tag tag-wait" style="padding:2px 6px">'+cho+' lô đang chờ cách ly</span>':'<span class="tag tag-ok" style="padding:2px 6px">Tất cả lô đã đạt cách ly</span>')
     +'</div></div>';
@@ -668,6 +745,882 @@ function di(id){
   }
   dongSidebarMobile();
   veNav();ve();window.scrollTo(0,0);
+}
+
+
+/* ======================= QUẢN LÝ TÀI KHOẢN & HỒ SƠ NÔNG HỘ ======================= */
+var DEFAULT_USER_PROFILE = {
+  hoTen: "Nguyễn Văn Nông",
+  biDanh: "Nông Dân Hiện Đại",
+  vaiTro: "Chủ hộ & Quản trị nông trại",
+  sdt: "0912 345 678",
+  email: "nongdan@htx-so.vn",
+  cccd: "079085012345",
+  avatar: "ND",
+  tenTrangTrai: "Nông Trại Hữu Cơ Xanh Đắk Nông",
+  htx: "HTX Nông Nghiệp Số Tây Nguyên",
+  diaChi: "Thôn 3, Xã Đắk Nia, TP. Gia Nghĩa, Tỉnh Đắk Nông",
+  msvt: "VN-ĐNO-0482-2026",
+  chungNhan: "VietGAP Trồng Trọt & Hữu cơ chuyển đổi",
+  ngayCapChungNhan: "15/01/2025",
+  hanChungNhan: "15/01/2028",
+  coQuanCap: "Chi cục Trồng trọt & BVTV Đắk Nông",
+  
+  // Đơn vị diện tích: sao_trung (500m2), sao_bac (360m2), cong_nam (1000m2), ha (10000m2)
+  donViDienTich: "sao_trung",
+  
+  // Cài đặt thông báo & cảnh báo
+  thongBaoThoiTiet: true,
+  thongBaoCachLy: true,
+  thongBaoGiaNongSan: true,
+  cheDoNgoaiTuyen: true,
+  
+  // Đội ngũ nhân sự
+  thanhVien: [
+    { id: "tv1", ten: "Nguyễn Văn Nông", vaiTro: "Chủ trang trại (Admin)", sdt: "0912 345 678", phuTrach: "Toàn quyền điều hành mọi lô đất", laAdmin: true },
+    { id: "tv2", ten: "Trần Thị Mai (Vợ)", vaiTro: "Kế toán & Kho vật tư", sdt: "0913 234 567", phuTrach: "Sổ sách chi phí, kho phân bón & thuốc", laAdmin: false },
+    { id: "tv3", ten: "Lê Văn Hùng (Kỹ thuật viên)", vaiTro: "Kỹ thuật canh tác", sdt: "0988 765 432", phuTrach: "Phun xịt BVTV & Khám bệnh AI Lô 1, Lô 2", laAdmin: false },
+    { id: "tv4", ten: "Y Ksor (Nhân công)", vaiTro: "Nhân công thời vụ", sdt: "0977 112 233", phuTrach: "Tưới nước đợt 3 & Thu hoạch mủ cao su", laAdmin: false }
+  ],
+  
+  // Bảo mật & Thiết bị
+  pin: "1234",
+  sinhTracHoc: true,
+  thietBi: [
+    { id: "tb1", ten: "Samsung Galaxy A54 (Điện thoại ngoài đồng)", viTri: "Gia Nghĩa, Đắk Nông", hoatDong: "Vừa xong", laHienTai: true },
+    { id: "tb2", ten: "Máy tính bàn văn phòng HTX (Windows 11)", viTri: "Văn phòng HTX Số", hoatDong: "2 giờ trước", laHienTai: false }
+  ]
+};
+
+var USER_PROFILE = (function(){
+  try {
+    var raw = localStorage.getItem("sr_user_profile");
+    if(raw) {
+      var parsed = JSON.parse(raw);
+      return Object.assign({}, DEFAULT_USER_PROFILE, parsed);
+    }
+  } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_USER_PROFILE));
+})();
+
+var curAccountTab = "hoso"; // hoso, vietgap, nhansu, caidat, saoluu, baomat
+
+function saveUserProfile(p, notify){
+  USER_PROFILE = p;
+  try {
+    localStorage.setItem("sr_user_profile", JSON.stringify(USER_PROFILE));
+  } catch(e){}
+  renderSidebarUser();
+  veNav();
+  if(notify){
+    showToast("Đã lưu thông tin hồ sơ & tài khoản thành công!", "success");
+  }
+}
+
+function renderSidebarUser(){
+  var sbName = document.getElementById("sbProfileName");
+  var sbSub = document.getElementById("sbProfileSub");
+  var sbAv = document.getElementById("sbAvatarText");
+  var hName = document.getElementById("headerProfileName");
+  var hAv = document.getElementById("headerAvatarText");
+
+  var name = USER_PROFILE.biDanh || USER_PROFILE.hoTen || "Nông Dân";
+  var sub = USER_PROFILE.tenTrangTrai || USER_PROFILE.vaiTro || "Hộ sản xuất canh tác số";
+  var av = USER_PROFILE.avatar || "ND";
+
+  if(sbName) sbName.textContent = name;
+  if(sbSub) sbSub.textContent = sub;
+  if(sbAv) sbAv.textContent = av;
+  if(hName) hName.textContent = name;
+  if(hAv) hAv.textContent = av;
+
+  var popName = document.getElementById("popoverUserName");
+  var popSub = document.getElementById("popoverUserSub");
+  var popAv = document.getElementById("popoverUserAvatar");
+  if(popName) popName.textContent = name;
+  if(popSub) popSub.textContent = sub;
+  if(popAv) popAv.textContent = av;
+}
+
+function toggleUserPopover(forceState){
+  var pop = document.getElementById("userAccountPopover");
+  if(!pop) return;
+  var isShow = (forceState !== undefined) ? forceState : (pop.style.display !== "none");
+  pop.style.display = isShow ? "none" : "flex";
+}
+
+function chuyenTabTaiKhoan(tabId){
+  curAccountTab = tabId;
+  toggleUserPopover(false);
+  if(cur !== "taikhoan"){
+    di("taikhoan");
+  } else {
+    ve();
+  }
+}
+
+function doiDonViDienTich(dv){
+  USER_PROFILE.donViDienTich = dv;
+  saveUserProfile(USER_PROFILE, false);
+  showToast("Đã đổi đơn vị đo diện tích: " + layTenDonViDienTich(dv), "info");
+  ve();
+}
+
+function layTenDonViDienTich(dv){
+  if(dv === "sao_bac") return "Sào Bắc Bộ (360 m²)";
+  if(dv === "cong_nam") return "Công / Sào Nam Bộ (1.000 m²)";
+  if(dv === "ha") return "Hécta (10.000 m² / ha)";
+  return "Sào Trung Bộ (500 m²)";
+}
+
+function quyDoiDienTich(soSaoGoc, dv){
+  var m2 = soSaoGoc * 500;
+  if(dv === "sao_bac") return (m2 / 360).toFixed(1) + " sào Bắc Bộ";
+  if(dv === "cong_nam") return (m2 / 1000).toFixed(2) + " công Nam Bộ";
+  if(dv === "ha") return (m2 / 10000).toFixed(2) + " ha";
+  return soSaoGoc.toFixed(1) + " sào Trung Bộ";
+}
+
+function tinhTongDienTichGoc(){
+  var dt = 0;
+  for(var i=0; i<THUA.length; i++) dt += THUA[i].dt;
+  return dt;
+}
+
+function xuatDuLieuJSON(){
+  var backupData = {
+    phienBan: "SoRuong_v2026",
+    ngayXuat: new Date().toISOString(),
+    user: USER_PROFILE,
+    thua: THUA,
+    polys: POLYS,
+    nhatKy: so,
+    giaThiTruong: GIA_THI_TRUONG
+  };
+  var str = JSON.stringify(backupData, null, 2);
+  var blob = new Blob([str], { type: "application/json" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "so_ruong_backup_" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("Đã tải xuống file sao lưu dữ liệu toàn bộ mùa vụ thành công!", "success");
+}
+
+function nhapDuLieuJSONFile(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var data = JSON.parse(e.target.result);
+      if(!data.user && !data.thua){
+        showToast("File không đúng cấu trúc sao lưu của Sổ Ruộng!", "error");
+        return;
+      }
+      if(confirm("Khôi phục dữ liệu từ file này sẽ cập nhật lô đất, nhật ký và tài khoản. Bạn có chắc chắn muốn khôi phục?")){
+        if(data.user) USER_PROFILE = Object.assign({}, DEFAULT_USER_PROFILE, data.user);
+        if(data.thua && Array.isArray(data.thua)) { THUA = data.thua; saveThua(); }
+        if(data.polys && Array.isArray(data.polys)) { POLYS = data.polys; savePoly(); }
+        if(data.nhatKy && Array.isArray(data.nhatKy)) { so = data.nhatKy; saveSo(); }
+        saveUserProfile(USER_PROFILE, false);
+        showToast("Khôi phục toàn bộ dữ liệu nông trại thành công!", "success");
+        ve();
+      }
+    } catch(err){
+      showToast("Lỗi khi đọc file sao lưu: " + err.message, "error");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetDuLieuGoc(){
+  if(confirm("Bạn có chắc chắn muốn đặt lại dữ liệu mẫu ban đầu? Toàn bộ sửa đổi tài khoản sẽ được khôi phục về mặc định.")){
+    localStorage.removeItem("sr_user_profile");
+    USER_PROFILE = JSON.parse(JSON.stringify(DEFAULT_USER_PROFILE));
+    saveUserProfile(USER_PROFILE, false);
+    showToast("Đã khôi phục dữ liệu tài khoản mẫu mặc định!", "info");
+    ve();
+  }
+}
+
+/* ======================= RENDER VIEW TÀI KHOẢN ======================= */
+function pTaiKhoan(){
+  var p = USER_PROFILE;
+  var h = "";
+
+  // 1. Header Banner
+  h += '<div class="card" style="padding:24px;border:none;background:linear-gradient(135deg,#064e3b 0%,#047857 50%,#059669 100%);color:#ffffff;border-radius:18px;margin-bottom:20px;box-shadow:0 8px 24px rgba(4,120,87,.2)">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px">'
+    + '<div style="display:flex;align-items:center;gap:18px">'
+    + '<div style="width:72px;height:72px;border-radius:50%;background:#ffffff;color:#047857;display:grid;place-items:center;font-size:2rem;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,.25);border:3px solid #6ee7b7;flex-shrink:0" id="profBannerAvatar">' + esc(p.avatar||"ND") + '</div>'
+    + '<div>'
+    + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+    + '<h2 style="margin:0;font-size:1.4rem;font-weight:800;color:#ffffff">' + esc(p.hoTen||"Nguyễn Văn Nông") + '</h2>'
+    + '<span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.3)">' + esc(p.vaiTro||"Chủ trang trại") + '</span>'
+    + '<span style="background:#10b981;color:#ffffff;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.2)">✓ XÁC THỰC CSDL QUỐC GIA</span>'
+    + '</div>'
+    + '<div style="margin-top:4px;font-size:.85rem;color:#d1fae5;display:flex;flex-wrap:wrap;gap:14px">'
+    + '<span>🏡 ' + esc(p.tenTrangTrai||"Nông Trại Hữu Cơ Xanh") + '</span>'
+    + '<span>📍 ' + esc(p.diaChi||"Đắk Nông") + '</span>'
+    + '<span>📜 MSVT: <b>' + esc(p.msvt||"VN-ĐNO-0482-2026") + '</b></span>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
+    + '<button type="button" class="btn" id="btnHeaderXuatSo" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;backdrop-filter:blur(6px);font-weight:700">🖨️ Xuất Sổ VietGAP</button>'
+    + '<button type="button" class="btn" id="btnHeaderBackup" style="background:#ffffff;border:none;color:#047857;font-weight:800">📥 Sao Lưu JSON</button>'
+    + '</div>'
+    + '</div>'
+    
+    // Quick Metrics
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2)">'
+    + '<div style="background:rgba(0,0,0,.15);padding:10px 14px;border-radius:12px">'
+    + '<div style="font-size:.7rem;text-transform:uppercase;color:#a7f3d0;font-weight:700">TỔNG DIỆN TÍCH</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;margin-top:2px">' + quyDoiDienTich(tinhTongDienTichGoc(), p.donViDienTich) + '</div>'
+    + '</div>'
+    + '<div style="background:rgba(0,0,0,.15);padding:10px 14px;border-radius:12px">'
+    + '<div style="font-size:.7rem;text-transform:uppercase;color:#a7f3d0;font-weight:700">LÔ ĐẤT CANH TÁC</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;margin-top:2px">' + THUA.length + ' thửa đất số hóa</div>'
+    + '</div>'
+    + '<div style="background:rgba(0,0,0,.15);padding:10px 14px;border-radius:12px">'
+    + '<div style="font-size:.7rem;text-transform:uppercase;color:#a7f3d0;font-weight:700">TIÊU CHUẨN</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;margin-top:2px">VietGAP & Hữu cơ</div>'
+    + '</div>'
+    + '<div style="background:rgba(0,0,0,.15);padding:10px 14px;border-radius:12px">'
+    + '<div style="font-size:.7rem;text-transform:uppercase;color:#a7f3d0;font-weight:700">ĐỘI NGŨ NHÂN CÔNG</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;margin-top:2px">' + (p.thanhVien ? p.thanhVien.length : 4) + ' thành viên</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+
+  // 2. Navigation Sub-Tabs
+  var tabs = [
+    { id: "hoso", icon: "👤", ten: "Hồ sơ nông hộ & Chủ hộ" },
+    { id: "vietgap", icon: "📜", ten: "Vùng trồng & VietGAP" },
+    { id: "nhansu", icon: "👥", ten: "Đội ngũ & Nhân công" },
+    { id: "caidat", icon: "⚙️", ten: "Cài đặt & Cảnh báo" },
+    { id: "saoluu", icon: "💾", ten: "Sao lưu & Xuất sổ" },
+    { id: "baomat", icon: "🔒", ten: "Bảo mật & Phiên" }
+  ];
+
+  h += '<div class="account-tabs scr">';
+  for(var t=0; t<tabs.length; t++){
+    var tb = tabs[t];
+    var active = (curAccountTab === tb.id);
+    h += '<button type="button" class="account-tab-btn ' + (active ? 'active' : '') + '" data-setactab="' + tb.id + '">'
+      + '<span>' + tb.icon + '</span> ' + esc(tb.ten)
+      + '</button>';
+  }
+  h += '</div>';
+
+  // 3. Tab Content Dispatcher
+  if(curAccountTab === "hoso"){
+    h += renderTabHoSo(p);
+  } else if(curAccountTab === "vietgap"){
+    h += renderTabVietGap(p);
+  } else if(curAccountTab === "nhansu"){
+    h += renderTabNhanSu(p);
+  } else if(curAccountTab === "caidat"){
+    h += renderTabCaiDat(p);
+  } else if(curAccountTab === "saoluu"){
+    h += renderTabSaoLuu(p);
+  } else if(curAccountTab === "baomat"){
+    h += renderTabBaoMat(p);
+  }
+
+  // Modals
+  h += renderModalThemThanhVien();
+  h += renderModalXuatSoVietGap(p);
+  h += renderModalLoginSwitcher();
+  h += renderModalQrViewer(p);
+
+  return h;
+}
+
+function renderTabHoSo(p){
+  var avatars = ["ND", "🌾", "☕", "🍈", "🚜", "🌿", "🥑", "🇻🇳"];
+  var avHtml = '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px">';
+  for(var a=0; a<avatars.length; a++){
+    var isSel = (p.avatar === avatars[a]);
+    avHtml += '<div class="avatar-badge-opt ' + (isSel ? 'active' : '') + '" data-setavatar="' + avatars[a] + '">' + avatars[a] + '</div>';
+  }
+  avHtml += '</div>';
+
+  return '<div class="card" style="padding:24px">'
+    + '<h3 style="margin:0 0 16px;font-size:1.1rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px">👤 Thông Tin Nông Hộ & Chủ Sở Hữu Trang Trại</h3>'
+    + '<div style="margin-bottom:20px">'
+    + '<label style="font-size:.78rem;font-weight:700;color:var(--muted-fg);text-transform:uppercase;letter-spacing:.05em">Biểu Tượng Avatar Nông Hộ</label>'
+    + avHtml
+    + '</div>'
+    + '<div class="g2" style="gap:16px">'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Họ và tên chủ hộ <span style="color:#ef4444">*</span></label>'
+    + '<input type="text" id="inpProfHoTen" class="inp" value="' + esc(p.hoTen||'') + '" placeholder="Ví dụ: Nguyễn Văn Nông">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Biệt danh / Tên hiển thị sổ ruộng</label>'
+    + '<input type="text" id="inpProfBiDanh" class="inp" value="' + esc(p.biDanh||'') + '" placeholder="Ví dụ: Nông Dân Hiện Đại">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Tên trang trại / Vườn rẫy</label>'
+    + '<input type="text" id="inpProfTenTrangTrai" class="inp" value="' + esc(p.tenTrangTrai||'') + '" placeholder="Ví dụ: Nông Trại Hữu Cơ Xanh">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Hợp tác xã / Liên minh nông nghiệp</label>'
+    + '<input type="text" id="inpProfHtx" class="inp" value="' + esc(p.htx||'') + '" placeholder="Ví dụ: HTX Nông Nghiệp Số Tây Nguyên">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Số điện thoại liên hệ <span style="color:#ef4444">*</span></label>'
+    + '<input type="text" id="inpProfSdt" class="inp" value="' + esc(p.sdt||'') + '" placeholder="Ví dụ: 0912 345 678">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Địa chỉ Email</label>'
+    + '<input type="email" id="inpProfEmail" class="inp" value="' + esc(p.email||'') + '" placeholder="Ví dụ: nongdan@htx-so.vn">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Số CCCD / Mã định danh VNeID</label>'
+    + '<input type="text" id="inpProfCccd" class="inp" value="' + esc(p.cccd||'') + '" placeholder="12 chữ số căn cước công dân">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Vai trò điều hành</label>'
+    + '<input type="text" id="inpProfVaiTro" class="inp" value="' + esc(p.vaiTro||'Chủ hộ & Quản trị nông trại') + '">'
+    + '</div>'
+    + '<div style="grid-column:1/-1">'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Địa chỉ vùng canh tác (Thôn / Xã / Huyện / Tỉnh) <span style="color:#ef4444">*</span></label>'
+    + '<input type="text" id="inpProfDiaChi" class="inp" value="' + esc(p.diaChi||'') + '" placeholder="Địa chỉ chi tiết nơi đặt các thửa ruộng">'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap">'
+    + '<button type="button" class="btn" id="btnResetProfForm">🔄 Khôi phục mặc định</button>'
+    + '<button type="button" class="btn btn-p" id="btnSaveProfForm" style="padding:10px 24px;font-weight:800">💾 Lưu Thay Đổi Hồ Sơ</button>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderTabVietGap(p){
+  return '<div style="display:flex;flex-direction:column;gap:20px">'
+    + '<div class="cert-card">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">'
+    + '<div>'
+    + '<div style="font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#854d0e">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM — ĐỘC LẬP - TỰ DO - HẠNH PHÚC</div>'
+    + '<h2 style="margin:6px 0 0;font-size:1.35rem;font-weight:900;color:#713f12">GIẤY CHỨNG NHẬN MÃ SỐ VÙNG TRỒNG QUỐC GIA</h2>'
+    + '<div style="font-size:.82rem;color:#854d0e;margin-top:4px">Cấp theo Tiêu chuẩn VietGAP Trồng trọt (TCVN 11892-1:2017) & Chuẩn xuất khẩu</div>'
+    + '</div>'
+    + '<div style="text-align:right">'
+    + '<div style="font-size:.7rem;font-weight:700;color:#854d0e">MÃ SỐ VÙNG TRỒNG (MSVT)</div>'
+    + '<div style="font-size:1.25rem;font-weight:900;color:#047857;letter-spacing:.05em" class="mono">' + esc(p.msvt||"VN-ĐNO-0482-2026") + '</div>'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;background:rgba(255,255,255,.8);padding:16px;border-radius:12px;border:1px solid #fde047">'
+    + '<div><b>🏡 Chủ thể sản xuất:</b><br>' + esc(p.hoTen) + ' (' + esc(p.tenTrangTrai) + ')</div>'
+    + '<div><b>📍 Địa bàn canh tác:</b><br>' + esc(p.diaChi) + '</div>'
+    + '<div><b>🌱 Cây trồng đăng ký:</b><br>Cà phê Robusta, Cao su, Sầu riêng</div>'
+    + '<div><b>🏛️ Cơ quan cấp & Giám sát:</b><br>' + esc(p.coQuanCap||"Chi cục Trồng trọt & BVTV Đắk Nông") + '</div>'
+    + '<div><b>📅 Thời hạn hiệu lực:</b><br>' + esc(p.ngayCapChungNhan||"15/01/2025") + ' — ' + esc(p.hanChungNhan||"15/01/2028") + '</div>'
+    + '<div><b>🛡️ Tình trạng kiểm định:</b><br><span style="color:#047857;font-weight:700">✅ ĐẠT YÊU CẦU XUẤT KHẨU</span></div>'
+    + '</div>'
+    + '<div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'
+    + '<div style="font-size:.8rem;color:#713f12">Hồ sơ đã được đồng bộ với Cổng thông tin Truy xuất nguồn gốc Sản phẩm Nông nghiệp Quốc gia.</div>'
+    + '<div style="display:flex;gap:10px">'
+    + '<button type="button" class="btn" id="btnChinhSuaMsvt">✏️ Sửa thông tin MSVT</button>'
+    + '<button type="button" class="btn btn-p" id="btnQuetThuQr">🔍 Quét Thử Mã QR Nông Sản</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+
+    // Card mã QR truy xuất
+    + '<div class="card" style="padding:20px;display:flex;flex-wrap:wrap;align-items:center;gap:24px">'
+    + '<div style="width:120px;height:120px;background:#ffffff;border:2px dashed #10b981;border-radius:12px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.06)">'
+    + '<svg viewBox="0 0 100 100" style="width:90px;height:90px" fill="#0f172a">'
+    + '<rect x="10" y="10" width="25" height="25" fill="#047857"/><rect x="15" y="15" width="15" height="15" fill="#fff"/><rect x="18" y="18" width="9" height="9" fill="#047857"/>'
+    + '<rect x="65" y="10" width="25" height="25" fill="#047857"/><rect x="70" y="15" width="15" height="15" fill="#fff"/><rect x="73" y="18" width="9" height="9" fill="#047857"/>'
+    + '<rect x="10" y="65" width="25" height="25" fill="#047857"/><rect x="15" y="70" width="15" height="15" fill="#fff"/><rect x="18" y="73" width="9" height="9" fill="#047857"/>'
+    + '<rect x="45" y="20" width="8" height="8"/><rect x="40" y="45" width="12" height="12" fill="#10b981"/><rect x="60" y="45" width="15" height="8"/><rect x="50" y="65" width="10" height="15"/><rect x="70" y="70" width="15" height="15"/>'
+    + '</svg>'
+    + '</div>'
+    + '<div style="flex:1;min-width:260px">'
+    + '<h4 style="margin:0 0 6px;font-size:1.05rem;font-weight:800;color:var(--fg)">Mã QR Định Danh & Tem Truy Xuất Nông Sản Số</h4>'
+    + '<p style="margin:0;font-size:.82rem;color:var(--muted-fg);line-height:1.6">Người tiêu dùng hoặc thương lái khi dùng Zalo / Camera điện thoại quét mã QR này sẽ xem được: Họ tên chủ nông hộ, vị trí tọa độ GPS lô đất, lịch sử phun xịt phân thuốc minh bạch và xác nhận đã qua thời hạn cách ly (PHI) an toàn.</p>'
+    + '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">'
+    + '<button type="button" class="btn" id="btnTaiAnhQr">📥 Tải tem QR in bao bì</button>'
+    + '<button type="button" class="btn btn-p" id="btnXemLichSuQr">👁️ Xem trang lý lịch nông sản</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderTabNhanSu(p){
+  var tv = p.thanhVien || [];
+  var rows = "";
+  for(var i=0; i<tv.length; i++){
+    var m = tv[i];
+    var roleBadge = '<span style="background:#e0f2fe;color:#0284c7;font-weight:700;font-size:.72rem;padding:3px 8px;border-radius:10px">Nhân công</span>';
+    if(m.vaiTro && m.vaiTro.indexOf("Admin") >= 0) {
+      roleBadge = '<span style="background:#f3e8ff;color:#7e22ce;font-weight:800;font-size:.72rem;padding:3px 8px;border-radius:10px">Chủ trang trại (Admin)</span>';
+    } else if(m.vaiTro && m.vaiTro.indexOf("Kỹ thuật") >= 0) {
+      roleBadge = '<span style="background:#ecfdf5;color:#047857;font-weight:700;font-size:.72rem;padding:3px 8px;border-radius:10px">Kỹ thuật BVTV</span>';
+    } else if(m.vaiTro && m.vaiTro.indexOf("Kế toán") >= 0) {
+      roleBadge = '<span style="background:#fef3c7;color:#b45309;font-weight:700;font-size:.72rem;padding:3px 8px;border-radius:10px">Kế toán & Vật tư</span>';
+    }
+
+    rows += '<tr>'
+      + '<td style="font-weight:700;color:var(--fg)">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+      + '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:800;font-size:.75rem">' + esc(m.ten.slice(0,2).toUpperCase()) + '</div>'
+      + '<div>' + esc(m.ten) + '</div>'
+      + '</div>'
+      + '</td>'
+      + '<td>' + roleBadge + '</td>'
+      + '<td class="mono">' + esc(m.sdt||"---") + '</td>'
+      + '<td style="font-size:.82rem;color:var(--muted-fg)">' + esc(m.phuTrach||"Mọi lô đất") + '</td>'
+      + '<td style="text-align:right">'
+      + (m.laAdmin ? '<span style="font-size:.75rem;color:var(--muted-fg);font-style:italic">Không thể xóa</span>' : '<button type="button" class="btn btn-sm" style="color:#ef4444;border-color:#fca5a5" data-xoatv="' + m.id + '" title="Xóa nhân sự">🗑️</button>')
+      + '</td>'
+      + '</tr>';
+  }
+
+  return '<div class="card" style="padding:24px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'
+    + '<div>'
+    + '<h3 style="margin:0;font-size:1.1rem;font-weight:800;color:var(--primary)">👥 Đội Ngũ Nông Hộ & Phân Quyền Nhân Công</h3>'
+    + '<div style="font-size:.82rem;color:var(--muted-fg);margin-top:2px">Quản lý các thành viên gia đình và nhân công thời vụ tham gia quy trình sản xuất và ghi chép nhật ký.</div>'
+    + '</div>'
+    + '<button type="button" class="btn btn-p" id="btnMoModalThemThanhVien" style="font-weight:700">+ Thêm Nhân Sự Mới</button>'
+    + '</div>'
+    + '<div class="tbl-wrap">'
+    + '<table class="tbl">'
+    + '<thead><tr>'
+    + '<th>Thành viên</th>'
+    + '<th>Vai trò & Quyền hạn</th>'
+    + '<th>Số điện thoại</th>'
+    + '<th>Phạm vi phụ trách</th>'
+    + '<th style="text-align:right">Thao tác</th>'
+    + '</tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '</table>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderTabCaiDat(p){
+  var dv = p.donViDienTich || "sao_trung";
+  var tongSao = tinhTongDienTichGoc();
+
+  return '<div style="display:flex;flex-direction:column;gap:20px">'
+    + '<div class="card" style="padding:24px">'
+    + '<h3 style="margin:0 0 14px;font-size:1.1rem;font-weight:800;color:var(--primary)">📐 Đơn Vị Đo Lường Diện Tích Vùng Miền</h3>'
+    + '<div style="font-size:.82rem;color:var(--muted-fg);margin-bottom:16px">Lựa chọn quy chuẩn tính diện tích theo phong tục tập quán từng vùng miền để ứng dụng tự động hiển thị số đo quen thuộc nhất với bạn.</div>'
+    + '<div class="g2" style="gap:12px">'
+    + '<label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1.5px solid ' + (dv==='sao_trung'?'var(--primary)':'var(--border)') + ';border-radius:12px;background:' + (dv==='sao_trung'?'var(--accent)':'var(--card)') + ';cursor:pointer">'
+    + '<input type="radio" name="radDonViDienTich" value="sao_trung" ' + (dv==='sao_trung'?'checked':'') + ' style="margin-top:3px">'
+    + '<div>'
+    + '<b style="color:var(--fg)">Sào Trung Bộ (500 m²)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:3px">Phổ biến tại các tỉnh Tây Nguyên (Đắk Lắk, Đắk Nông, Gia Lai, Lâm Đồng) và miền Trung.</div>'
+    + '<div style="font-size:.82rem;font-weight:700;color:#047857;margin-top:6px">Tổng 3 lô: ' + quyDoiDienTich(tongSao, "sao_trung") + '</div>'
+    + '</div>'
+    + '</label>'
+    + '<label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1.5px solid ' + (dv==='sao_bac'?'var(--primary)':'var(--border)') + ';border-radius:12px;background:' + (dv==='sao_bac'?'var(--accent)':'var(--card)') + ';cursor:pointer">'
+    + '<input type="radio" name="radDonViDienTich" value="sao_bac" ' + (dv==='sao_bac'?'checked':'') + ' style="margin-top:3px">'
+    + '<div>'
+    + '<b style="color:var(--fg)">Sào Bắc Bộ (360 m²)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:3px">Áp dụng tại các tỉnh đồng bằng sông Hồng và trung du miền núi phía Bắc.</div>'
+    + '<div style="font-size:.82rem;font-weight:700;color:#047857;margin-top:6px">Tổng 3 lô: ' + quyDoiDienTich(tongSao, "sao_bac") + '</div>'
+    + '</div>'
+    + '</label>'
+    + '<label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1.5px solid ' + (dv==='cong_nam'?'var(--primary)':'var(--border)') + ';border-radius:12px;background:' + (dv==='cong_nam'?'var(--accent)':'var(--card)') + ';cursor:pointer">'
+    + '<input type="radio" name="radDonViDienTich" value="cong_nam" ' + (dv==='cong_nam'?'checked':'') + ' style="margin-top:3px">'
+    + '<div>'
+    + '<b style="color:var(--fg)">Công / Sào Nam Bộ (1.000 m²)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:3px">Áp dụng tại Đông Nam Bộ và đồng bằng sông Cửu Long (1 công = 1.000 m²).</div>'
+    + '<div style="font-size:.82rem;font-weight:700;color:#047857;margin-top:6px">Tổng 3 lô: ' + quyDoiDienTich(tongSao, "cong_nam") + '</div>'
+    + '</div>'
+    + '</label>'
+    + '<label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:1.5px solid ' + (dv==='ha'?'var(--primary)':'var(--border)') + ';border-radius:12px;background:' + (dv==='ha'?'var(--accent)':'var(--card)') + ';cursor:pointer">'
+    + '<input type="radio" name="radDonViDienTich" value="ha" ' + (dv==='ha'?'checked':'') + ' style="margin-top:3px">'
+    + '<div>'
+    + '<b style="color:var(--fg)">Hécta Quốc Tế (10.000 m² / ha)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:3px">Chuẩn xuất khẩu nông nghiệp, nông trường cao su và trang trại lớn.</div>'
+    + '<div style="font-size:.82rem;font-weight:700;color:#047857;margin-top:6px">Tổng 3 lô: ' + quyDoiDienTich(tongSao, "ha") + '</div>'
+    + '</div>'
+    + '</label>'
+    + '</div>'
+    + '</div>'
+
+    // Cài đặt thông báo & cảnh báo
+    + '<div class="card" style="padding:24px">'
+    + '<h3 style="margin:0 0 14px;font-size:1.1rem;font-weight:800;color:var(--primary)">🔔 Cài Đặt Cảnh Báo & Đồng Bộ Dữ Liệu</h3>'
+    + '<div style="display:flex;flex-direction:column;gap:16px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">'
+    + '<div>'
+    + '<b>Báo động thời tiết cực đoan</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Nhận thông báo khẩn cấp khi có dự báo mưa đá, sương muối hoặc đợt nắng nóng >35°C.</div>'
+    + '</div>'
+    + '<label class="switch-toggle"><input type="checkbox" id="chkThoiTiet" ' + (p.thongBaoThoiTiet?'checked':'') + '><span class="switch-slider"></span></label>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">'
+    + '<div>'
+    + '<b>Nhắc nhở thời gian cách ly thuốc BVTV (PHI)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Đếm ngược ngày an toàn và cảnh báo đỏ nếu thu hoạch trước khi hết hạn cách ly.</div>'
+    + '</div>'
+    + '<label class="switch-toggle"><input type="checkbox" id="chkCachLy" ' + (p.thongBaoCachLy?'checked':'') + '><span class="switch-slider"></span></label>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">'
+    + '<div>'
+    + '<b>Bản tin giá nông sản sáng sớm (07:00 AM)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Tự động đối soát giá cà phê, lúa gạo, sầu riêng, hồ tiêu từ sàn giao dịch.</div>'
+    + '</div>'
+    + '<label class="switch-toggle"><input type="checkbox" id="chkGiaNongSan" ' + (p.thongBaoGiaNongSan?'checked':'') + '><span class="switch-slider"></span></label>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">'
+    + '<div>'
+    + '<b>Chế độ lưu trữ đệm ngoại tuyến (Offline-First)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Tự động lưu tạm dữ liệu ghi chép khi ra rẫy mất sóng 4G và đồng bộ khi có mạng.</div>'
+    + '</div>'
+    + '<label class="switch-toggle"><input type="checkbox" id="chkNgoaiTuyen" ' + (p.cheDoNgoaiTuyen?'checked':'') + '><span class="switch-slider"></span></label>'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:20px;text-align:right">'
+    + '<button type="button" class="btn btn-p" id="btnLuuCaiDatCanhTac" style="padding:10px 24px;font-weight:800">💾 Lưu Cài Đặt Canh Tác</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderTabSaoLuu(p){
+  return '<div style="display:flex;flex-direction:column;gap:20px">'
+    + '<div class="card" style="padding:24px">'
+    + '<h3 style="margin:0 0 14px;font-size:1.1rem;font-weight:800;color:var(--primary)">💾 Sao Lưu & Khôi Phục Dữ Liệu Toàn Diện</h3>'
+    + '<div style="font-size:.82rem;color:var(--muted-fg);margin-bottom:20px">Đảm bảo an toàn 100% dữ liệu lịch sử canh tác, thông tin thửa đất, ranh giới GPS và nhật ký phân thuốc trong suốt niên vụ.</div>'
+    + '<div class="g2" style="gap:16px">'
+    + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between">'
+    + '<div>'
+    + '<div style="font-size:1.8rem;margin-bottom:8px">📥</div>'
+    + '<h4 style="margin:0 0 6px;font-size:1rem;color:var(--fg)">Xuất file sao lưu (JSON)</h4>'
+    + '<p style="margin:0;font-size:.78rem;color:var(--muted-fg);line-height:1.5">Tải toàn bộ cơ sở dữ liệu hiện tại về máy tính hoặc điện thoại dưới dạng file sao lưu nén chuẩn JSON.</p>'
+    + '</div>'
+    + '<div style="margin-top:16px">'
+    + '<button type="button" class="btn btn-p" id="btnTaiSaoLuuJson" style="width:100%;font-weight:700">Tải File Sao Lưu (.JSON)</button>'
+    + '</div>'
+    + '</div>'
+    + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between">'
+    + '<div>'
+    + '<div style="font-size:1.8rem;margin-bottom:8px">📤</div>'
+    + '<h4 style="margin:0 0 6px;font-size:1rem;color:var(--fg)">Khôi phục từ file sao lưu</h4>'
+    + '<p style="margin:0;font-size:.78rem;color:var(--muted-fg);line-height:1.5">Nạp lại dữ liệu cũ khi đổi điện thoại mới hoặc phục hồi sau khi thao tác nhầm lẫn.</p>'
+    + '</div>'
+    + '<div style="margin-top:16px">'
+    + '<input type="file" id="inpFileRestore" accept=".json" style="display:none">'
+    + '<button type="button" class="btn" id="btnChonFileRestore" style="width:100%;font-weight:700">Chọn File Để Khôi Phục</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+
+    // Xuất sổ VietGAP in ấn
+    + '<div class="card" style="padding:24px;border:1.5px solid #10b981;background:linear-gradient(180deg,#f0fdf4 0%,#ffffff 100%)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">'
+    + '<div>'
+    + '<h3 style="margin:0 0 6px;font-size:1.1rem;font-weight:800;color:#047857">🖨️ Xuất Sổ Nhật Ký Canh Tác Chuẩn VietGAP (A4 / PDF)</h3>'
+    + '<p style="margin:0;font-size:.82rem;color:var(--muted-fg);max-width:620px">Tạo bản in hoàn chỉnh bao gồm bìa sổ nông hộ, bảng kê khai các thửa đất canh tác, lý lịch bón phân và phun xịt thuốc BVTV có ghi nhận ngày cách ly thu hoạch, sẵn sàng in ra giấy nộp cho Hợp tác xã hoặc đoàn thanh tra.</p>'
+    + '</div>'
+    + '<button type="button" class="btn btn-p" id="btnMoModalXuatSoVietGap" style="padding:10px 22px;font-weight:800;font-size:.9rem">Xem & In Sổ VietGAP</button>'
+    + '</div>'
+    + '</div>'
+
+    // Reset dữ liệu mẫu
+    + '<div class="card" style="padding:20px;border:1px dashed #fca5a5;background:#fff5f5">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">'
+    + '<div>'
+    + '<b style="color:#b91c1c">♻️ Khôi phục dữ liệu mẫu ban đầu của ứng dụng</b>'
+    + '<div style="font-size:.78rem;color:#7f1d1d;margin-top:2px">Xóa sạch các thay đổi tùy biến tài khoản và nạp lại dữ liệu mẫu mặc định để trải nghiệm từ đầu.</div>'
+    + '</div>'
+    + '<button type="button" class="btn" id="btnResetToDefault" style="border-color:#ef4444;color:#dc2626;font-weight:700">Khôi Phục Gốc</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderTabBaoMat(p){
+  return '<div style="display:flex;flex-direction:column;gap:20px">'
+    + '<div class="card" style="padding:24px">'
+    + '<h3 style="margin:0 0 14px;font-size:1.1rem;font-weight:800;color:var(--primary)">🔒 Mã PIN Bảo Vệ Sổ Ruộng Trên Đồng</h3>'
+    + '<div style="font-size:.82rem;color:var(--muted-fg);margin-bottom:18px">Khóa nhanh giao diện khi cho người khác mượn điện thoại xem bản đồ thửa đất nhằm bảo vệ nhật ký canh tác số.</div>'
+    + '<div class="g3" style="gap:16px;max-width:650px">'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Mã PIN hiện tại</label>'
+    + '<input type="password" id="inpPinCu" class="inp" maxlength="6" placeholder="Mặc định: 1234">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Mã PIN mới (4-6 số)</label>'
+    + '<input type="password" id="inpPinMoi" class="inp" maxlength="6" placeholder="Nhập PIN mới">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Xác nhận PIN mới</label>'
+    + '<input type="password" id="inpPinXacNhan" class="inp" maxlength="6" placeholder="Nhập lại PIN mới">'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:18px">'
+    + '<button type="button" class="btn btn-p" id="btnDoiPinSubmit" style="font-weight:700">Cập Nhật Mã PIN</button>'
+    + '</div>'
+    + '</div>'
+
+    // Quản lý thiết bị đăng nhập
+    + '<div class="card" style="padding:24px">'
+    + '<h3 style="margin:0 0 14px;font-size:1.1rem;font-weight:800;color:var(--primary)">📱 Thiết Bị Đang Đăng Nhập</h3>'
+    + '<div style="display:flex;flex-direction:column;gap:12px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border:1px solid #10b981;border-radius:12px">'
+    + '<div style="display:flex;align-items:center;gap:12px">'
+    + '<div style="font-size:1.5rem">📱</div>'
+    + '<div>'
+    + '<b>Samsung Galaxy A54 (Thiết bị này)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Đang hoạt động ngoài đồng · Gia Nghĩa, Đắk Nông</div>'
+    + '</div>'
+    + '</div>'
+    + '<span style="font-size:.72rem;background:#ecfdf5;color:#047857;padding:3px 10px;border-radius:12px;font-weight:800;border:1px solid #a7f3d0">ĐANG HOẠT ĐỘNG</span>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px">'
+    + '<div style="display:flex;align-items:center;gap:12px">'
+    + '<div style="font-size:1.5rem">💻</div>'
+    + '<div>'
+    + '<b>Máy tính bàn văn phòng HTX (Chrome / Windows 11)</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Văn phòng Hợp Tác Xã Nông Nghiệp Số · Hoạt động 2 giờ trước</div>'
+    + '</div>'
+    + '</div>'
+    + '<button type="button" class="btn btn-sm" id="btnDangXuatTbKhac" style="font-size:.75rem">Đăng xuất từ xa</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+
+    // Đăng xuất / chuyển tài khoản
+    + '<div class="card" style="padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">'
+    + '<div>'
+    + '<b style="color:var(--fg)">Chuyển đổi tài khoản nông hộ hoặc đăng xuất</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">Đổi sang tài khoản của kỹ sư nông nghiệp hoặc nông hộ thành viên khác trong hợp tác xã.</div>'
+    + '</div>'
+    + '<button type="button" class="btn" id="btnDangXuatTaiKhoan" style="border-color:#ef4444;color:#ef4444;font-weight:700">🚪 Đăng Xuất / Đổi Tài Khoản</button>'
+    + '</div>'
+    + '</div>';
+}
+
+/* ======================= MODALS QUẢN LÝ TÀI KHOẢN ======================= */
+function renderModalThemThanhVien(){
+  return '<div id="modalThemThanhVien" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongModal(this.id)">'
+    + '<div class="custom-modal-card" style="max-width:480px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    + '<h3 style="margin:0;font-size:1.1rem;font-weight:800;color:var(--primary)">+ Thêm Nhân Sự Nông Hộ</h3>'
+    + '<button type="button" onclick="dongModal(\'modalThemThanhVien\')" style="border:none;background:none;font-size:1.4rem;cursor:pointer">×</button>'
+    + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:12px">'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:4px">Họ và tên <span style="color:#ef4444">*</span></label>'
+    + '<input type="text" id="inpMdlTvTen" class="inp" placeholder="Ví dụ: Lê Văn Hùng">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:4px">Vai trò & Quyền hạn</label>'
+    + '<select id="inpMdlTvVaiTro" class="inp">'
+    + '<option value="Kỹ thuật canh tác">Kỹ thuật canh tác (Khám bệnh AI, kê đơn BVTV)</option>'
+    + '<option value="Kế toán & Kho vật tư">Kế toán & Kho vật tư (Quản lý chi phí, kho thuốc)</option>'
+    + '<option value="Nhân công thời vụ">Nhân công thời vụ (Tưới nước, thu hoạch)</option>'
+    + '<option value="Chủ trang trại (Admin)">Chủ trang trại (Toàn quyền điều hành)</option>'
+    + '</select>'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:4px">Số điện thoại</label>'
+    + '<input type="text" id="inpMdlTvSdt" class="inp" placeholder="09xx xxx xxx">'
+    + '</div>'
+    + '<div>'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:4px">Phạm vi phụ trách</label>'
+    + '<input type="text" id="inpMdlTvPhuTrach" class="inp" placeholder="Ví dụ: Phun xịt BVTV Lô 1, Lô 2">'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">'
+    + '<button type="button" class="btn" onclick="dongModal(\'modalThemThanhVien\')">Hủy bỏ</button>'
+    + '<button type="button" class="btn btn-p" id="btnLuuThanhVienMoi" style="font-weight:700">Lưu Nhân Sự</button>'
+    + '</div>'
+    + '</div></div>';
+}
+
+function renderModalXuatSoVietGap(p){
+  p = p || USER_PROFILE;
+  var rowsThua = "";
+  for(var i=0; i<THUA.length; i++){
+    var t = THUA[i];
+    var toadoStr = (typeof t.lat === "number" && typeof t.lng === "number") ? (t.lat.toFixed(4) + ', ' + t.lng.toFixed(4)) : (t.dat ? ('Đất ' + t.dat) : 'Khu vực Đắk Nông');
+    rowsThua += '<tr>'
+      + '<td style="border:1px solid #94a3b8;padding:6px;font-weight:700">' + esc(t.ten) + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + esc(t.cay) + (t.giong ? (' (' + esc(t.giong) + ')') : '') + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + t.dt + ' sào</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + esc(t.gd||t.giaiDoan||"---") + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px;font-family:monospace">' + toadoStr + '</td>'
+      + '</tr>';
+  }
+
+  var rowsSo = "";
+  for(var j=0; j<Math.min(so.length, 12); j++){
+    var s = so[j];
+    var tName = "Lô đất chung";
+    for(var k=0; k<THUA.length; k++) if(THUA[k].id === s.thuaId) tName = THUA[k].ten;
+    rowsSo += '<tr>'
+      + '<td style="border:1px solid #94a3b8;padding:6px;font-family:monospace">' + esc(s.ngay) + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + esc(tName) + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px;font-weight:700">' + esc(s.thuoc||s.viec) + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + esc(s.lieu||"1 bình 25L") + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + esc(s.lyDo||s.viec) + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + (s.phi ? (s.phi + ' ngày') : 'An toàn') + '</td>'
+      + '<td style="border:1px solid #94a3b8;padding:6px">' + esc(s.nguoi||p.hoTen) + '</td>'
+      + '</tr>';
+  }
+
+  return '<div id="modalXuatSoVietGap" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongModal(this.id)">'
+    + '<div class="custom-modal-card" style="max-width:850px;width:95%">'
+    + '<div class="no-print" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px">'
+    + '<h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#047857;display:flex;align-items:center;gap:8px">🖨️ Sổ Nhật Ký Canh Tác Chuẩn VietGAP (Mẫu Bộ NN&PTNT)</h3>'
+    + '<div style="display:flex;gap:8px">'
+    + '<button type="button" class="btn btn-p" onclick="window.print()" style="font-weight:700">🖨️ In Ngay (Ctrl+P)</button>'
+    + '<button type="button" class="btn" onclick="dongModal(\'modalXuatSoVietGap\')">Đóng</button>'
+    + '</div>'
+    + '</div>'
+    + '<div id="printSection" style="padding:24px;background:#ffffff;color:#0f172a;border-radius:12px;border:1px solid #cbd5e1;line-height:1.5">'
+    + '<div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:16px">'
+    + '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM — ĐỘC LẬP - TỰ DO - HẠNH PHÚC</div>'
+    + '<h2 style="margin:8px 0 2px;font-size:18px;font-weight:900;text-transform:uppercase;color:#047857">SỔ NHẬT KÝ CANH TÁC & SỬ DỤNG VẬT TƯ NÔNG NGHIỆP</h2>'
+    + '<div style="font-size:12px;font-weight:600">Áp dụng theo Tiêu chuẩn Quốc gia VietGAP Trồng trọt TCVN 11892-1:2017</div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;margin-bottom:16px;background:#f8fafc;padding:12px;border-radius:8px">'
+    + '<div><b>Chủ nông hộ:</b> ' + esc(p.hoTen) + '</div>'
+    + '<div><b>Mã số vùng trồng:</b> ' + esc(p.msvt) + '</div>'
+    + '<div><b>Tên trang trại:</b> ' + esc(p.tenTrangTrai) + '</div>'
+    + '<div><b>Số điện thoại:</b> ' + esc(p.sdt) + '</div>'
+    + '<div><b>Hợp tác xã liên kết:</b> ' + esc(p.htx) + '</div>'
+    + '<div><b>Địa bàn canh tác:</b> ' + esc(p.diaChi) + '</div>'
+    + '</div>'
+    + '<div style="font-weight:800;font-size:13px;margin:12px 0 6px;color:#047857">I. DANH SÁCH THỬA ĐẤT CANH TÁC</div>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px">'
+    + '<thead><tr style="background:#e2e8f0;text-align:left">'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Tên Lô / Thửa</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Cây trồng</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Diện tích</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Giai đoạn</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Tọa độ GPS</th>'
+    + '</tr></thead>'
+    + '<tbody>' + rowsThua + '</tbody>'
+    + '</table>'
+    + '<div style="font-weight:800;font-size:13px;margin:12px 0 6px;color:#047857">II. NHẬT KÝ SỬ DỤNG THUỐC BVTV & THỜI GIAN CÁCH LY (PHI)</div>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px">'
+    + '<thead><tr style="background:#e2e8f0;text-align:left">'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Ngày thực hiện</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Lô đất</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Tên thuốc / Phân bón</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Liều lượng</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Lý do sử dụng</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Cách ly (PHI)</th>'
+    + '<th style="border:1px solid #94a3b8;padding:6px">Người thực hiện</th>'
+    + '</tr></thead>'
+    + '<tbody>' + rowsSo + '</tbody>'
+    + '</table>'
+    + '<div style="display:flex;justify-content:space-between;margin-top:30px;font-size:12px;text-align:center">'
+    + '<div>'
+    + '<b>CÁN BỘ KỸ THUẬT HTX GIÁM SÁT</b><br>'
+    + '<i style="font-size:10px">(Ký và ghi rõ họ tên)</i><br><br><br><br>'
+    + '<b>Lê Văn Hùng</b>'
+    + '</div>'
+    + '<div>'
+    + '<b>CHỦ HỘ NÔNG DÂN CAM ĐOAN</b><br>'
+    + '<i style="font-size:10px">(Ký và ghi rõ họ tên)</i><br><br><br><br>'
+    + '<b>' + esc(p.hoTen) + '</b>'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+    + '</div></div>';
+}
+
+function renderModalLoginSwitcher(){
+  return '<div id="modalLoginSwitcher" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongModal(this.id)">'
+    + '<div class="custom-modal-card" style="max-width:440px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    + '<h3 style="margin:0;font-size:1.1rem;font-weight:800;color:var(--primary)">🚪 Đổi Tài Khoản Nông Hộ</h3>'
+    + '<button type="button" onclick="dongModal(\'modalLoginSwitcher\')" style="border:none;background:none;font-size:1.4rem;cursor:pointer">×</button>'
+    + '</div>'
+    + '<div style="font-size:.82rem;color:var(--muted-fg);margin-bottom:14px">Chọn một trong các hồ sơ nông hộ mẫu hoặc nhập số điện thoại để đăng nhập:</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px">'
+    + '<div class="btn" data-switchacc="preset1" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;text-align:left;cursor:pointer">'
+    + '<div class="sb-avatar" style="width:38px;height:38px">ND</div>'
+    + '<div style="flex:1">'
+    + '<b>Nguyễn Văn Nông (Chủ hộ - Hiện tại)</b>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg)">Nông Trại Hữu Cơ Xanh · Đắk Nông</div>'
+    + '</div>'
+    + '<span style="font-size:.7rem;color:#047857;background:#ecfdf5;padding:2px 8px;border-radius:10px;font-weight:700">Đang dùng</span>'
+    + '</div>'
+    + '<div class="btn" data-switchacc="preset2" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;text-align:left;cursor:pointer">'
+    + '<div class="sb-avatar" style="width:38px;height:38px;background:linear-gradient(135deg,#3b82f6,#1d4ed8)">LH</div>'
+    + '<div style="flex:1">'
+    + '<b>Lê Văn Hùng (Kỹ sư BVTV HTX)</b>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg)">HTX Nông Nghiệp Số Tây Nguyên</div>'
+    + '</div>'
+    + '<span style="font-size:.75rem">Chuyển</span>'
+    + '</div>'
+    + '<div class="btn" data-switchacc="preset3" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;text-align:left;cursor:pointer">'
+    + '<div class="sb-avatar" style="width:38px;height:38px;background:linear-gradient(135deg,#f59e0b,#b45309)">YK</div>'
+    + '<div style="flex:1">'
+    + '<b>Y Krang (Nông hộ Sầu riêng & Cà phê)</b>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg)">Buôn Ma Thuột, Đắk Lắk</div>'
+    + '</div>'
+    + '<span style="font-size:.75rem">Chuyển</span>'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">'
+    + '<label style="display:block;font-size:.8rem;font-weight:700;margin-bottom:6px">Hoặc đăng nhập bằng Số Điện Thoại</label>'
+    + '<div style="display:flex;gap:8px">'
+    + '<input type="text" id="inpLoginSdt" class="inp" placeholder="Nhập số điện thoại">'
+    + '<button type="button" class="btn btn-p" id="btnLoginSdtSubmit" style="font-weight:700;white-space:nowrap">Đăng Nhập</button>'
+    + '</div>'
+    + '</div>'
+    + '</div></div>';
+}
+
+function renderModalQrViewer(p){
+  p = p || USER_PROFILE;
+  return '<div id="modalQrViewer" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongModal(this.id)">'
+    + '<div class="custom-modal-card" style="max-width:460px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    + '<h3 style="margin:0;font-size:1.1rem;font-weight:800;color:var(--primary)">🔍 Lý Lịch Nông Sản Truy Xuất Số</h3>'
+    + '<button type="button" onclick="dongModal(\'modalQrViewer\')" style="border:none;background:none;font-size:1.4rem;cursor:pointer">×</button>'
+    + '</div>'
+    + '<div style="text-align:center;padding:16px;background:#f0fdf4;border-radius:12px;border:1px solid #86efac;margin-bottom:14px">'
+    + '<div style="font-size:1.8rem;margin-bottom:6px">☕ 🌱 🍈</div>'
+    + '<b style="color:#065f46;font-size:1rem">NÔNG SẢN AN TOÀN VIETGAP ĐẮK NÔNG</b>'
+    + '<div style="font-size:.8rem;color:#047857;margin-top:4px">Mã số lô hàng: LÔ-2026-0482 · Đạt tiêu chuẩn xuất khẩu</div>'
+    + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem">'
+    + '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
+    + '<span style="color:var(--muted-fg)">Chủ nông hộ sản xuất:</span>'
+    + '<b>' + esc(p.hoTen) + '</b>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
+    + '<span style="color:var(--muted-fg)">Mã số vùng trồng:</span>'
+    + '<b class="mono" style="color:#047857">' + esc(p.msvt) + '</b>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
+    + '<span style="color:var(--muted-fg)">Địa chỉ vườn rẫy:</span>'
+    + '<span>' + esc(p.diaChi) + '</span>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
+    + '<span style="color:var(--muted-fg)">Tiêu chuẩn chứng nhận:</span>'
+    + '<span style="color:#047857;font-weight:700">VietGAP & Hữu cơ</span>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
+    + '<span style="color:var(--muted-fg)">Kiểm tra cách ly PHI:</span>'
+    + '<span style="color:#047857;font-weight:700">✅ 100% ĐẠT CÁCH LY</span>'
+    + '</div>'
+    + '</div>'
+    + '<div style="margin-top:16px;text-align:right">'
+    + '<button type="button" class="btn btn-p" onclick="dongModal(\'modalQrViewer\')">Đã rõ thông tin</button>'
+    + '</div>'
+    + '</div></div>';
 }
 
 /* ======================= 1. TỔNG QUAN ======================= */
@@ -6768,6 +7721,7 @@ function ve(){
   else if(cur==="bando")h=pMap();
   else if(cur==="gia")h=pGia();
   else if(cur==="mophong")h=pSim();
+  else if(cur==="taikhoan")h=pTaiKhoan();
 
   if(h.indexOf('id="modalPhotoView"')<0){
     h+=veModalPhotoViewGlobal();
@@ -7695,6 +8649,327 @@ document.addEventListener("click", function(e){
     dongSidebarMobile();
   }
 });
+
+/* ===== LẮNG NGHE SỰ KIỆN TÀI KHOẢN & HỒ SƠ NÔNG HỘ ===== */
+document.addEventListener("click", function(ev){
+  // 1. Click mở / đóng Popover tài khoản ở sidebar
+  var sbFoot = ev.target.closest("#btnSbProfile");
+  if(sbFoot){
+    ev.stopPropagation();
+    toggleUserPopover();
+    return;
+  }
+
+  // 2. Click nút tài khoản trên header
+  var hdrProf = ev.target.closest("#btnHeaderProfile");
+  if(hdrProf){
+    ev.stopPropagation();
+    chuyenTabTaiKhoan("hoso");
+    return;
+  }
+
+  // 3. Click đóng Popover khi click ra ngoài
+  var pop = document.getElementById("userAccountPopover");
+  if(pop && pop.style.display !== "none"){
+    if(!ev.target.closest("#userAccountPopover") && !ev.target.closest("#btnSbProfile")){
+      toggleUserPopover(false);
+    }
+  }
+
+  // 4. Click item trong Popover
+  var popItem = ev.target.closest("[data-actab]");
+  if(popItem){
+    var tab = popItem.getAttribute("data-actab");
+    chuyenTabTaiKhoan(tab);
+    return;
+  }
+
+  var btnPopMo = ev.target.closest("#btnPopoverMoTrungTam");
+  if(btnPopMo){
+    chuyenTabTaiKhoan("hoso");
+    return;
+  }
+
+  var btnPopDx = ev.target.closest("#btnPopoverDangXuat, #btnDangXuatTaiKhoan");
+  if(btnPopDx){
+    toggleUserPopover(false);
+    hienModal("modalLoginSwitcher");
+    return;
+  }
+
+  // 5. Chuyển sub-tab trong trang tài khoản
+  var setTabBtn = ev.target.closest("[data-setactab]");
+  if(setTabBtn){
+    var tId = setTabBtn.getAttribute("data-setactab");
+    curAccountTab = tId;
+    ve();
+    return;
+  }
+
+  // 6. Chọn Avatar
+  var avOpt = ev.target.closest("[data-setavatar]");
+  if(avOpt){
+    var newAv = avOpt.getAttribute("data-setavatar");
+    USER_PROFILE.avatar = newAv;
+    saveUserProfile(USER_PROFILE, false);
+    var bAv = document.getElementById("profBannerAvatar");
+    if(bAv) bAv.textContent = newAv;
+    document.querySelectorAll(".avatar-badge-opt").forEach(function(el){
+      el.classList.toggle("active", el.getAttribute("data-setavatar") === newAv);
+    });
+    return;
+  }
+
+  // 7. Lưu Form Hồ Sơ
+  if(ev.target.closest("#btnSaveProfForm")){
+    var inpHt = document.getElementById("inpProfHoTen");
+    var inpBd = document.getElementById("inpProfBiDanh");
+    var inpTt = document.getElementById("inpProfTenTrangTrai");
+    var inpHtx = document.getElementById("inpProfHtx");
+    var inpSdt = document.getElementById("inpProfSdt");
+    var inpEm = document.getElementById("inpProfEmail");
+    var inpCc = document.getElementById("inpProfCccd");
+    var inpVt = document.getElementById("inpProfVaiTro");
+    var inpDc = document.getElementById("inpProfDiaChi");
+
+    if(!inpHt || !inpSdt || !inpHt.value.trim() || !inpSdt.value.trim()){
+      showToast("Vui lòng điền Họ tên và Số điện thoại chủ hộ!", "warning");
+      return;
+    }
+
+    USER_PROFILE.hoTen = inpHt.value.trim();
+    if(inpBd) USER_PROFILE.biDanh = inpBd.value.trim();
+    if(inpTt) USER_PROFILE.tenTrangTrai = inpTt.value.trim();
+    if(inpHtx) USER_PROFILE.htx = inpHtx.value.trim();
+    USER_PROFILE.sdt = inpSdt.value.trim();
+    if(inpEm) USER_PROFILE.email = inpEm.value.trim();
+    if(inpCc) USER_PROFILE.cccd = inpCc.value.trim();
+    if(inpVt) USER_PROFILE.vaiTro = inpVt.value.trim();
+    if(inpDc) USER_PROFILE.diaChi = inpDc.value.trim();
+
+    saveUserProfile(USER_PROFILE, true);
+    ve();
+    return;
+  }
+
+  // 8. Đặt lại Form Hồ Sơ
+  if(ev.target.closest("#btnResetProfForm")){
+    ve();
+    showToast("Đã hủy các thay đổi chưa lưu trên form hồ sơ", "info");
+    return;
+  }
+
+  // 9. Nút Mở Xuất Sổ VietGAP
+  if(ev.target.closest("#btnHeaderXuatSo, #btnMoModalXuatSoVietGap")){
+    hienModal("modalXuatSoVietGap");
+    return;
+  }
+
+  // 10. Tải File Sao Lưu JSON
+  if(ev.target.closest("#btnHeaderBackup, #btnTaiSaoLuuJson")){
+    xuatDuLieuJSON();
+    return;
+  }
+
+  // 11. Nút Chọn File Phục Hồi
+  if(ev.target.closest("#btnChonFileRestore")){
+    var fInp = document.getElementById("inpFileRestore");
+    if(fInp) fInp.click();
+    return;
+  }
+
+  // 12. Nút Khôi Phục Gốc
+  if(ev.target.closest("#btnResetToDefault")){
+    resetDuLieuGoc();
+    return;
+  }
+
+  // 13. Mở Modal Thêm Thành Viên
+  if(ev.target.closest("#btnMoModalThemThanhVien")){
+    hienModal("modalThemThanhVien");
+    return;
+  }
+
+  // 14. Lưu Thành Viên Mới
+  if(ev.target.closest("#btnLuuThanhVienMoi")){
+    var inMdlTen = document.getElementById("inpMdlTvTen");
+    var inMdlVt = document.getElementById("inpMdlTvVaiTro");
+    var inMdlSdt = document.getElementById("inpMdlTvSdt");
+    var inMdlPt = document.getElementById("inpMdlTvPhuTrach");
+
+    if(!inMdlTen || !inMdlTen.value.trim()){
+      showToast("Vui lòng nhập họ tên nhân sự!", "warning");
+      return;
+    }
+
+    if(!USER_PROFILE.thanhVien) USER_PROFILE.thanhVien = [];
+    var newMember = {
+      id: "tv_" + Date.now(),
+      ten: inMdlTen.value.trim(),
+      vaiTro: inMdlVt ? inMdlVt.value : "Nhân công thời vụ",
+      sdt: inMdlSdt ? inMdlSdt.value.trim() : "",
+      phuTrach: inMdlPt ? inMdlPt.value.trim() : "Mọi lô đất",
+      laAdmin: false
+    };
+
+    USER_PROFILE.thanhVien.push(newMember);
+    saveUserProfile(USER_PROFILE, false);
+    dongModal("modalThemThanhVien");
+    showToast("Đã thêm thành viên: " + newMember.ten + " vào nông hộ thành công!", "success");
+    ve();
+    return;
+  }
+
+  // 15. Xóa Thành Viên
+  var btnXoaTv = ev.target.closest("[data-xoatv]");
+  if(btnXoaTv){
+    var tvId = btnXoaTv.getAttribute("data-xoatv");
+    if(confirm("Bạn có chắc chắn muốn xóa nhân sự này khỏi danh sách nông hộ?")){
+      USER_PROFILE.thanhVien = (USER_PROFILE.thanhVien || []).filter(function(x){ return x.id !== tvId; });
+      saveUserProfile(USER_PROFILE, false);
+      showToast("Đã xóa nhân sự khỏi danh sách nông hộ", "info");
+      ve();
+    }
+    return;
+  }
+
+  // 16. Lưu Cài Đặt Canh Tác
+  if(ev.target.closest("#btnLuuCaiDatCanhTac")){
+    var chk1 = document.getElementById("chkThoiTiet");
+    var chk2 = document.getElementById("chkCachLy");
+    var chk3 = document.getElementById("chkGiaNongSan");
+    var chk4 = document.getElementById("chkNgoaiTuyen");
+
+    if(chk1) USER_PROFILE.thongBaoThoiTiet = chk1.checked;
+    if(chk2) USER_PROFILE.thongBaoCachLy = chk2.checked;
+    if(chk3) USER_PROFILE.thongBaoGiaNongSan = chk3.checked;
+    if(chk4) USER_PROFILE.cheDoNgoaiTuyen = chk4.checked;
+
+    saveUserProfile(USER_PROFILE, true);
+    return;
+  }
+
+  // 17. Đổi Mã PIN
+  if(ev.target.closest("#btnDoiPinSubmit")){
+    var pCu = document.getElementById("inpPinCu");
+    var pMoi = document.getElementById("inpPinMoi");
+    var pXn = document.getElementById("inpPinXacNhan");
+
+    if(!pCu || !pMoi || !pXn) return;
+    if(pCu.value !== (USER_PROFILE.pin || "1234")){
+      showToast("Mã PIN hiện tại không chính xác!", "error");
+      return;
+    }
+    if(pMoi.value.length < 4){
+      showToast("Mã PIN mới phải từ 4 đến 6 chữ số!", "warning");
+      return;
+    }
+    if(pMoi.value !== pXn.value){
+      showToast("Mã PIN xác nhận không trùng khớp!", "error");
+      return;
+    }
+
+    USER_PROFILE.pin = pMoi.value;
+    saveUserProfile(USER_PROFILE, false);
+    pCu.value = ""; pMoi.value = ""; pXn.value = "";
+    showToast("Đã đổi mã PIN bảo mật sổ ruộng thành công!", "success");
+    return;
+  }
+
+  // 18. Đăng Xuất Thiết Bị Khác
+  if(ev.target.closest("#btnDangXuatTbKhac")){
+    USER_PROFILE.thietBi = (USER_PROFILE.thietBi || []).filter(function(x){ return x.laHienTai; });
+    saveUserProfile(USER_PROFILE, false);
+    showToast("Đã đăng xuất phiên hoạt động khỏi tất cả thiết bị khác!", "success");
+    ve();
+    return;
+  }
+
+  // 19. Chuyển Đổi Tài Khoản Preset
+  var swAcc = ev.target.closest("[data-switchacc]");
+  if(swAcc){
+    var pType = swAcc.getAttribute("data-switchacc");
+    if(pType === "preset2"){
+      USER_PROFILE.hoTen = "Lê Văn Hùng";
+      USER_PROFILE.biDanh = "Kỹ Sư Lê Hùng";
+      USER_PROFILE.vaiTro = "Kỹ thuật viên BVTV HTX";
+      USER_PROFILE.avatar = "LH";
+      USER_PROFILE.sdt = "0988 765 432";
+      USER_PROFILE.email = "lehung.kythuat@htx-so.vn";
+    } else if(pType === "preset3"){
+      USER_PROFILE.hoTen = "Y Krang";
+      USER_PROFILE.biDanh = "Vườn Sầu Riêng Y Krang";
+      USER_PROFILE.vaiTro = "Hộ Nông Dân Sản Xuất Giỏi";
+      USER_PROFILE.avatar = "YK";
+      USER_PROFILE.sdt = "0977 889 900";
+      USER_PROFILE.email = "ykrang.daklak@htx-so.vn";
+      USER_PROFILE.tenTrangTrai = "Nông Hộ Y Krang - Buôn Ma Thuột";
+      USER_PROFILE.diaChi = "Xã Ea Tu, TP. Buôn Ma Thuột, Đắk Lắk";
+      USER_PROFILE.msvt = "VN-DLK-0899-2026";
+    } else {
+      // Preset 1: Default
+      USER_PROFILE = JSON.parse(JSON.stringify(DEFAULT_USER_PROFILE));
+    }
+
+    saveUserProfile(USER_PROFILE, false);
+    dongModal("modalLoginSwitcher");
+    showToast("Đã đăng nhập tài khoản: " + (USER_PROFILE.biDanh || USER_PROFILE.hoTen), "success");
+    ve();
+    return;
+  }
+
+  // 20. Đăng Nhập SĐT Trong Modal
+  if(ev.target.closest("#btnLoginSdtSubmit")){
+    var inpS = document.getElementById("inpLoginSdt");
+    if(!inpS || !inpS.value.trim() || inpS.value.trim().length < 8){
+      showToast("Vui lòng nhập số điện thoại hợp lệ!", "warning");
+      return;
+    }
+    USER_PROFILE.sdt = inpS.value.trim();
+    saveUserProfile(USER_PROFILE, false);
+    dongModal("modalLoginSwitcher");
+    showToast("Đăng nhập thành công với SĐT: " + USER_PROFILE.sdt, "success");
+    ve();
+    return;
+  }
+
+  // 21. Quét Thử QR / Xem Lý Lịch Nông Sản
+  if(ev.target.closest("#btnQuetThuQr, #btnXemLichSuQr")){
+    hienModal("modalQrViewer");
+    return;
+  }
+
+  // 22. Tải Ảnh Tem QR
+  if(ev.target.closest("#btnTaiAnhQr")){
+    showToast("Đã xuất và tải tem mã QR truy xuất nguồn gốc số thành công!", "success");
+    return;
+  }
+
+  // 23. Sửa Nhanh MSVT
+  if(ev.target.closest("#btnChinhSuaMsvt")){
+    var newMsvt = prompt("Nhập mã số vùng trồng quốc gia mới:", USER_PROFILE.msvt || "VN-ĐNO-0482-2026");
+    if(newMsvt && newMsvt.trim()){
+      USER_PROFILE.msvt = newMsvt.trim();
+      saveUserProfile(USER_PROFILE, false);
+      showToast("Đã cập nhật mã số vùng trồng: " + newMsvt.trim(), "success");
+      ve();
+    }
+    return;
+  }
+});
+
+// Lắng nghe thay đổi chọn file phục hồi JSON
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "inpFileRestore"){
+    if(e.target.files && e.target.files[0]){
+      nhapDuLieuJSONFile(e.target.files[0]);
+    }
+  }
+  if(e.target && e.target.name === "radDonViDienTich"){
+    doiDonViDienTich(e.target.value);
+  }
+});
+
 
 // Khôi phục trạng thái thu gọn sidebar đã lưu trên Desktop
 try {
