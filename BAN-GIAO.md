@@ -250,8 +250,9 @@ until curl -s -o /dev/null http://127.0.0.1:8801/index.html; do sleep 1; done
 ```
 rồi đọc file PNG bằng công cụ Read.
 
-**Phải chạy qua `http://127.0.0.1`, không dùng `file://`** — CDN không kịp chạy,
-ảnh ra trang trắng trơn không đại diện gì.
+**Phải chạy qua `http://127.0.0.1`, không dùng `file://`** — `fetch()` nạp
+`du-lieu-app.json` sẽ bị CORS chặn trên `file://`. Bản mới không còn CDN nên
+CSS hiện đúng cả hai chế độ, nhưng trang Tra bệnh và Pha thuốc vẫn cần HTTP.
 
 Muốn đo màu thật: chèn `<script>` gọi `getComputedStyle`, ghi kết quả vào
 `document.title`, chạy `--dump-dom` rồi đọc thẻ title. Cách này tìm ra lỗi chữ
@@ -269,20 +270,22 @@ từng bản, gộp vào một trang HTML so sánh. Anh chọn bằng mắt nhan
 
 > ### ⚠ ĐỌC TRƯỚC: `index.html` đã bị viết lại NGOÀI phiên làm việc này
 >
-> Giữa hai commit của tôi (20/09 20:56 → 22/09 13:28), `index.html` được một
-> công cụ khác viết lại toàn bộ: **bỏ Franken UI, bỏ Tailwind CDN**, thay bằng
-> CSS tự viết dùng token hex thẳng (`var(--X)` chứ không phải `hsl(var(--X))`).
+> Giữa hai commit của tôi (20/09 20:56 → 22/09 13:28), `index.html` được
+> Antigravity IDE viết lại toàn bộ: **bỏ Franken UI, bỏ Tailwind CDN**, thay bằng
+> CSS tự viết dùng token hex thẳng (`var(--X)` chứ không phải `hsl(var(--X))`),
+> dark mode mặc định, hiệu ứng glassmorphism và countdown ring SVG.
 >
 > Tôi chạy `git add -A` mà không soát, nên bản viết lại đó bị commit chung vào
-> `12fe75e` — một commit có thông điệp nói về *lọc dữ liệu và xuất CSV*. Cùng
-> commit đó còn kéo theo `index-backup.html` (84 KB) mà không ai chủ ý tạo.
+> `12fe75e` — một commit có thông điệp nói về *lọc dữ liệu và xuất CSV*.
+> `index-backup.html` (84 KB) cũng bị kéo vào cùng commit nhưng **đã xoá và
+> gitignore** — không còn trong repo.
 >
 > **Hệ quả:** bẫy số 9, 10, 11 bên trên nói về Franken UI và Tailwind CDN —
-> **không còn áp dụng cho mã hiện tại**, chỉ còn giá trị lịch sử. Mô tả giao
-> diện bên dưới cũng có thể lệch.
+> **không còn áp dụng cho mã hiện tại**, chỉ còn giá trị lịch sử. Nếu revert
+> `index.html` về trước `12fe75e` thì vẫn dẫm phải.
 >
 > **Việc phải làm:** đọc thẳng `index.html`, đừng tin mô tả trong file này về
-> phần giao diện. Và quyết định xem có giữ `index-backup.html` không.
+> phần giao diện.
 >
 > **Bài học:** đừng `git add -A` khi không biết chắc từ lần commit trước tới
 > giờ còn ai đụng vào thư mục. Dùng `git status` rồi add từng đường dẫn.
