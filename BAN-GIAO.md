@@ -158,7 +158,7 @@ tin suông**.
 | `danh-muc-cam.json` | 33 hoạt chất cấm |
 | `mrl.json` | **4.322 ngưỡng** · 165 hoạt chất · 455 loại thực phẩm |
 | `anh-xa-cay-thuc-pham.json` | Bảng ánh xạ tên cây → tên thực phẩm, **làm tay** |
-| `../du-lieu-app.json` | Bản gọn app dùng: 5.914 thuốc · 367 cây · 546 dịch hại · 792 KB (gzip 157 KB) |
+| `../du-lieu-app.json` | Bản gọn app dùng: **5.914 thuốc · 345 cây · 488 dịch hại** · 791 KB (gzip 156 KB) |
 | `csv/` | 5 file CSV mở bằng Excel |
 
 Độ phủ: lúa 2.601 · cà phê 933 · lạc 724 · ngô 478 · cam 434 · đậu tương 414 ·
@@ -166,7 +166,7 @@ hồ tiêu 320 · cao su ~270 · điều ~186 · sầu riêng ~65
 
 ---
 
-## 5. Mười một cái bẫy đã gặp — đừng dẫm lại
+## 5. Mười bốn cái bẫy đã gặp — đừng dẫm lại
 
 ### Về PDF
 
@@ -191,8 +191,9 @@ Việt ngắt ở ranh giới TỪ, nối liền thì `"Sữa nguyên liệu"` t
 
 **5. Mã dạng thuốc lọt sang cột cây trồng.** Nguồn ghi `"100SP: sâu cuốn lá/
 lúa; 200WP: …"`. Hai trường hợp: mã đứng một mình thì bỏ; mã nằm giữa
-(`"ngô 600FS: xử lý hạt giống"`) thì cắt lấy phần trước, còn `"ngô"`. Sửa xong:
-800 → 367 tên cây, và số thuốc theo cây *tăng*.
+(`"ngô 600FS: xử lý hạt giống"`) thì cắt lấy phần trước, còn `"ngô"`. Sửa ba vòng: mã ở **đầu** chuỗi → bỏ; mã **giữa** chuỗi kèm `:` → cắt lấy phần trước;
+mã ở **cuối** không có `:` (`"lúa 266SC"`) → cũng cắt. Kết quả 800 → **345** tên cây,
+và số thuốc theo cây *tăng*. Còn sót 4 mục do văn bản gốc viết bất thường.
 
 **6. `get_textbox` từng ô chậm gấp ~50 lần `extract()` cả bảng.** 355 trang:
 hàng giờ so với 73 giây.
@@ -214,15 +215,15 @@ cây xuất khẩu chủ lực.
 
 ### Về giao diện
 
-**9. Franken UI đặt toàn bộ CSS trong `@layer`.** Theo quy tắc CSS, rule **không
+*(Lịch sử — không còn áp dụng, xem cảnh báo đầu mục 6.)* **9. Franken UI đặt toàn bộ CSS trong `@layer`.** Theo quy tắc CSS, rule **không
 có layer luôn thắng** rule có layer, bất kể thứ tự file. Muốn ghi đè token thì
 để trần; muốn làm lưới dự phòng thì phải bọc `@layer`. Để trần nhầm một lần →
 chữ đen trên nền đen, toàn bộ chữ đậm vô hình.
 
-**10. Token của Franken là ba thành phần HSL** (`--foreground: 0 0% 98%`), phải
+*(Lịch sử — không còn áp dụng, xem cảnh báo đầu mục 6.)* **10. Token của Franken là ba thành phần HSL** (`--foreground: 0 0% 98%`), phải
 viết `hsl(var(--foreground))`. Viết `var(--foreground)` là giá trị vô nghĩa.
 
-**11. `utilities.min.css` của Franken là bản dựng TĨNH** — không có class giá
+*(Lịch sử — không còn áp dụng, xem cảnh báo đầu mục 6.)* **11. `utilities.min.css` của Franken là bản dựng TĨNH** — không có class giá
 trị tuỳ ý (`text-[4.5rem]`, `grid-cols-[minmax(...)]`) lẫn `truncate`. Dùng
 Tailwind Play CDN (`cdn.tailwindcss.com`) sinh class lúc chạy, `preflight:false`
 để khỏi đè base của Franken. Khi lên thật thì đổi sang Tailwind CLI build tĩnh.
@@ -265,6 +266,26 @@ từng bản, gộp vào một trang HTML so sánh. Anh chọn bằng mắt nhan
 ---
 
 ## 6. App đang chạy tới đâu
+
+> ### ⚠ ĐỌC TRƯỚC: `index.html` đã bị viết lại NGOÀI phiên làm việc này
+>
+> Giữa hai commit của tôi (20/09 20:56 → 22/09 13:28), `index.html` được một
+> công cụ khác viết lại toàn bộ: **bỏ Franken UI, bỏ Tailwind CDN**, thay bằng
+> CSS tự viết dùng token hex thẳng (`var(--X)` chứ không phải `hsl(var(--X))`).
+>
+> Tôi chạy `git add -A` mà không soát, nên bản viết lại đó bị commit chung vào
+> `12fe75e` — một commit có thông điệp nói về *lọc dữ liệu và xuất CSV*. Cùng
+> commit đó còn kéo theo `index-backup.html` (84 KB) mà không ai chủ ý tạo.
+>
+> **Hệ quả:** bẫy số 9, 10, 11 bên trên nói về Franken UI và Tailwind CDN —
+> **không còn áp dụng cho mã hiện tại**, chỉ còn giá trị lịch sử. Mô tả giao
+> diện bên dưới cũng có thể lệch.
+>
+> **Việc phải làm:** đọc thẳng `index.html`, đừng tin mô tả trong file này về
+> phần giao diện. Và quyết định xem có giữ `index-backup.html` không.
+>
+> **Bài học:** đừng `git add -A` khi không biết chắc từ lần commit trước tới
+> giờ còn ai đụng vào thư mục. Dùng `git status` rồi add từng đường dẫn.
 
 Một file `index.html`, JS thuần, không build. Nạp `du-lieu-app.json` lúc chạy.
 
@@ -309,8 +330,9 @@ Chi tiết trong `VIEC-CAN-LAM.md`. Ngắn gọn, theo thứ tự giá trị:
 
 ### Hai chỗ giao diện Đức đã nêu mà chưa sửa
 
-- Nhãn "gặt được" trong thẻ thửa to hơn số ngày nên ba thẻ không cân
-- Phông IBM Plex Mono vẽ số 0 có gạch chéo, "1240 ngày" nhìn như "124θ"
+- ~~Nhãn "gặt được" to hơn số ngày~~ — bản viết lại ngoài phiên này đã đổi cách
+  trình bày, cần xem lại trên mã hiện tại
+- Phông IBM Plex Mono vẽ số 0 có gạch chéo, "1240 ngày" nhìn như "124θ" — **chưa sửa**
 
 ---
 

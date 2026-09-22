@@ -6964,7 +6964,7 @@
       "rệp sáp"
      ],
      "cay_trong": [
-      "hồ tiêu 60SC"
+      "hồ tiêu"
      ]
     },
     {
@@ -6981,7 +6981,7 @@
     "cam",
     "chè",
     "dưa hấu",
-    "hồ tiêu 60SC",
+    "hồ tiêu",
     "lúa",
     "ngô",
     "thuốc lá",
@@ -9920,7 +9920,7 @@
     {
      "dich_hai": [],
      "cay_trong": [
-      "lúa 266SC"
+      "lúa"
      ]
     },
     {
@@ -9933,8 +9933,7 @@
     }
    ],
    "cay_trong": [
-    "lúa",
-    "lúa 266SC"
+    "lúa"
    ],
    "dich_hai": [
     "nâu"
@@ -14640,7 +14639,7 @@
       "bọ trĩ"
      ],
      "cay_trong": [
-      "lúa 50SC"
+      "lúa"
      ]
     },
     {
@@ -14653,8 +14652,7 @@
     }
    ],
    "cay_trong": [
-    "lúa",
-    "lúa 50SC"
+    "lúa"
    ],
    "dich_hai": [
     "bọ trĩ",
@@ -16248,7 +16246,7 @@
       "sâu đục thân"
      ],
      "cay_trong": [
-      "lúa 100EW",
+      "lúa",
       "sâu đục"
      ]
     },
@@ -16263,7 +16261,6 @@
    ],
    "cay_trong": [
     "lúa",
-    "lúa 100EW",
     "sâu đục"
    ],
    "dich_hai": [
@@ -16770,7 +16767,7 @@
       "rầy lưng trắng"
      ],
      "cay_trong": [
-      "lúa 80EW",
+      "lúa",
       "sâu cuốn"
      ]
     },
@@ -16793,7 +16790,6 @@
    ],
    "cay_trong": [
     "lúa",
-    "lúa 80EW",
     "sâu cuốn"
    ],
    "dich_hai": [
@@ -25959,7 +25955,7 @@
       "rầy lưng trắng"
      ],
      "cay_trong": [
-      "lúa 140WP"
+      "lúa"
      ]
     },
     {
@@ -25972,8 +25968,7 @@
     }
    ],
    "cay_trong": [
-    "lúa",
-    "lúa 140WP"
+    "lúa"
    ],
    "dich_hai": [
     "nâu",
@@ -26498,7 +26493,7 @@
       "rầy nâu"
      ],
      "cay_trong": [
-      "lúa 250EC",
+      "lúa",
       "rầy"
      ]
     },
@@ -26513,7 +26508,6 @@
    ],
    "cay_trong": [
     "lúa",
-    "lúa 250EC",
     "rầy"
    ],
    "dich_hai": [
@@ -45686,7 +45680,7 @@
       "bọ cánh tơ"
      ],
      "cay_trong": [
-      "chè 1.9EC",
+      "chè",
       "bọ trĩ",
       "rầy nâu",
       "sâu cuốn lá",
@@ -45751,7 +45745,7 @@
     "bắp cải",
     "bọ trĩ",
     "cam",
-    "chè 1.9EC",
+    "chè",
     "cà chua",
     "lúa",
     "nhện",
@@ -48014,7 +48008,7 @@
       "tơ"
      ],
      "cay_trong": [
-      "chè 41ME"
+      "chè"
      ]
     },
     {
@@ -48027,7 +48021,7 @@
     }
    ],
    "cay_trong": [
-    "chè 41ME",
+    "chè",
     "lúa"
    ],
    "dich_hai": [
@@ -49308,7 +49302,7 @@
       "lá"
      ],
      "cay_trong": [
-      "lúa 80SC"
+      "lúa"
      ]
     },
     {
@@ -49327,7 +49321,6 @@
     "cà chua",
     "cải xanh",
     "lúa",
-    "lúa 80SC",
     "sâu",
     "đậu tương"
    ],
@@ -60634,7 +60627,7 @@
       "rầy nâu"
      ],
      "cay_trong": [
-      "lúa 200EC",
+      "lúa",
       "bọ"
      ]
     },
@@ -60649,8 +60642,7 @@
    ],
    "cay_trong": [
     "bọ",
-    "lúa",
-    "lúa 200EC"
+    "lúa"
    ],
    "dich_hai": [
     "rầy nâu",
@@ -61019,7 +61011,7 @@
       "rệp vảy"
      ],
      "cay_trong": [
-      "cà phê 100EC",
+      "cà phê",
       "rầy"
      ]
     },
@@ -61051,7 +61043,6 @@
    ],
    "cay_trong": [
     "cà phê",
-    "cà phê 100EC",
     "lúa",
     "rầy",
     "rệp"
@@ -64452,7 +64443,7 @@
       "sâu cuốn lá"
      ],
      "cay_trong": [
-      "lúa 120WP"
+      "lúa"
      ]
     },
     {
@@ -64465,8 +64456,7 @@
     }
    ],
    "cay_trong": [
-    "lúa",
-    "lúa 120WP"
+    "lúa"
    ],
    "dich_hai": [
     "sâu cuốn lá",
@@ -74630,7 +74620,7 @@
      ],
      "cay_trong": [
       "cải bẹ",
-      "dưa chuột 5WP",
+      "dưa chuột",
       "sâu xanh",
       "sâu tơ"
      ]
@@ -74721,7 +74711,6 @@
     "cải bẹ",
     "cải xanh",
     "dưa chuột",
-    "dưa chuột 5WP",
     "dưa hấu",
     "hoa - cây cảnh",
     "hồ tiêu",
@@ -75435,7 +75424,7 @@
       "sâu xanh"
      ],
      "cay_trong": [
-      "cải xanh 5WP",
+      "cải xanh",
       "sâu xanh",
       "sâu tơ"
      ]
@@ -75524,7 +75513,6 @@
     "cà phê",
     "cải bắp",
     "cải xanh",
-    "cải xanh 5WP",
     "dưa chuột",
     "dưa hấu",
     "hoa - cây cảnh",
@@ -79724,7 +79712,7 @@
      "cay_trong": [
       "lúa",
       "mía",
-      "ngô 18SL",
+      "ngô",
       "bọ trĩ",
       "sâu cuốn"
      ]
@@ -79742,7 +79730,7 @@
     "bọ trĩ",
     "lúa",
     "mía",
-    "ngô 18SL",
+    "ngô",
     "sâu cuốn"
    ],
    "dich_hai": [
@@ -115559,7 +115547,7 @@
       "đạo ôn"
      ],
      "cay_trong": [
-      "lúa 525SE",
+      "lúa",
       "lem lép"
      ]
     },
@@ -115574,8 +115562,7 @@
    ],
    "cay_trong": [
     "lem lép",
-    "lúa",
-    "lúa 525SE"
+    "lúa"
    ],
    "dich_hai": [
     "hạt",
@@ -116920,7 +116907,7 @@
       "khô vằn"
      ],
      "cay_trong": [
-      "lúa 250SC"
+      "lúa"
      ]
     },
     {
@@ -116933,8 +116920,7 @@
     }
    ],
    "cay_trong": [
-    "lúa",
-    "lúa 250SC"
+    "lúa"
    ],
    "dich_hai": [
     "hạt",
@@ -117902,7 +117888,7 @@
       "đạo ôn"
      ],
      "cay_trong": [
-      "lúa 425EC",
+      "lúa",
       "lem lép"
      ]
     },
@@ -117917,8 +117903,7 @@
    ],
    "cay_trong": [
     "lem lép",
-    "lúa",
-    "lúa 425EC"
+    "lúa"
    ],
    "dich_hai": [
     "hạt",
@@ -174218,7 +174203,7 @@
      ],
      "cay_trong": [
       "thanh long",
-      "lúa 400WG"
+      "lúa"
      ]
     },
     {
@@ -174233,7 +174218,6 @@
    "cay_trong": [
     "cải bắp",
     "lúa",
-    "lúa 400WG",
     "thanh long"
    ],
    "dich_hai": [
@@ -174520,7 +174504,7 @@
       "trưởng"
      ],
      "cay_trong": [
-      "lúa 20TB"
+      "lúa"
      ]
     },
     {
@@ -174539,7 +174523,6 @@
     "cà phê",
     "hồ tiêu",
     "lúa",
-    "lúa 20TB",
     "nho",
     "thanh long"
    ],
@@ -175028,7 +175011,7 @@
       "kích thích sinh trưởng"
      ],
      "cay_trong": [
-      "lúa 1SL"
+      "lúa"
      ]
     },
     {
@@ -175047,7 +175030,6 @@
     "chè",
     "dưa chuột",
     "lúa",
-    "lúa 1SL",
     "rau cải"
    ],
    "dich_hai": [

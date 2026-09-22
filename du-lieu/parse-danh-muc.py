@@ -42,10 +42,22 @@ RE_RAC = re.compile(r'^\s*\d+(?:[.,]\d+)?\s?[A-Z]{2,4}\b\s*:?\s*$', re.I)
 RE_CAT = re.compile(r'^(.*?)\s*\d+(?:[.,]\d+)?\s?[A-Z]{2,4}\s*:.*$', re.I)
 
 
+# Mã dạng thuốc ở CUỐI chuỗi, không có dấu hai chấm: "lúa 266SC", "hồ tiêu 60SC".
+# Bộ lọc cũ chỉ bắt mã ở đầu hoặc mã kèm ':' nên 26 tên cây vẫn lọt.
+RE_DUOI = re.compile(r'^(.*?\S)\s+\d+(?:[.,]\d+)?\s?[A-Z]{2,4}\s*$')
+
+
 def go_ma_dang(x):
-    """'ngô 600FS: xử lý hạt giống' -> 'ngô'; '100SP' -> '' (bỏ)"""
+    """
+    'ngô 600FS: xử lý hạt giống' -> 'ngô'
+    'lúa 266SC'                  -> 'lúa'
+    '100SP'                      -> ''      (bỏ)
+    """
     x = (x or '').strip()
     m = RE_CAT.match(x)
+    if m:
+        x = m.group(1).strip(' ,;')
+    m = RE_DUOI.match(x)
     if m:
         x = m.group(1).strip(' ,;')
     return '' if (not x or RE_RAC.match(x)) else x

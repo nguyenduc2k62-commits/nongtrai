@@ -15,16 +15,16 @@ Thuốc trừ chuột                       39
 lúa                             2594
 cà phê                           885
 lạc                              676
+ngô                              423
 cam                              422
-ngô                              422
 đậu tương                        396
 lúa gieo thẳng                   396
 bắp cải                          377
 cà chua                          341
-hồ tiêu                          311
+hồ tiêu                          312
 hoa hồng                         301
 cao su                           272
-chè                              269
+chè                              271
 xoài                             266
 dưa hấu                          264
 điều                             193
@@ -93,7 +93,7 @@ xì                                11
 loét sọc mặt                      11
 nhện lông                          9
 
---- TỔNG SỐ TÊN CÂY KHÁC NHAU: 366 ---
+--- TỔNG SỐ TÊN CÂY KHÁC NHAU: 344 ---
 
 --- 25 BẢN GHI KHÔNG RA CÂY (để soi lỗi) ---
   Oncol 5GR, 20EC, 25WP | Thuốc trừ sâu
