@@ -201,13 +201,51 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0
 .bottle-label{width:100%;font-size:.55rem;font-weight:800;text-align:center;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:2px 1px}
 .bottle-band{width:100%;height:5px;border-radius:0 0 4px 4px}
 
-/* ===== PRICE ACCORDION & MARKET ===== */
+/* ===== PRICE ACCORDION & MARKET & STOCK TICKER ===== */
 .price-acc-item{border:1px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:10px;overflow:hidden}
 .price-acc-hdr{width:100%;display:flex;align-items:center;gap:12px;padding:14px 18px;background:none;border:none;cursor:pointer;text-align:left;font-family:inherit}
 .price-acc-hdr:hover{background:var(--accent)}
 .price-acc-body{padding:14px 18px 18px;border-top:1px solid var(--border);background:var(--bg)}
 .live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:livePulse 2s infinite;vertical-align:middle;margin-right:6px}
 @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+
+/* Segmented Toggle Bar */
+.mode-toggle-group{display:inline-flex;background:var(--muted);border:1px solid var(--border);border-radius:10px;padding:3px;gap:3px}
+.mode-toggle-btn{padding:6px 14px;border:none;background:transparent;border-radius:8px;font-size:.8rem;font-weight:600;color:var(--muted-fg);cursor:pointer;transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+.mode-toggle-btn:hover{color:var(--fg)}
+.mode-toggle-btn.active{background:#ffffff;color:var(--primary);font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+
+/* Stock Market Ticker Grid */
+.stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-bottom:20px}
+.stock-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .2s ease;display:flex;flex-direction:column;justify-content:space-between;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.stock-card:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:0 8px 20px rgba(0,0,0,.09)}
+.stock-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.stock-ticker-code{font-family:monospace;font-size:.72rem;font-weight:800;background:var(--muted);padding:2px 6px;border-radius:5px;letter-spacing:.05em;color:var(--muted-fg)}
+.stock-card-title{font-size:.92rem;font-weight:700;color:var(--fg);display:flex;align-items:center;gap:6px}
+.stock-card-price{font-size:1.35rem;font-weight:800;color:var(--fg);margin:4px 0 2px;letter-spacing:-.02em}
+.stock-card-price small{font-size:.72rem;font-weight:500;color:var(--muted-fg);margin-left:3px}
+.stock-badge-up{display:inline-flex;align-items:center;gap:3px;font-size:.74rem;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #bbf7d0;padding:2px 8px;border-radius:6px}
+.stock-badge-down{display:inline-flex;align-items:center;gap:3px;font-size:.74rem;font-weight:700;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:2px 8px;border-radius:6px}
+.stock-badge-flat{display:inline-flex;align-items:center;gap:3px;font-size:.74rem;font-weight:700;color:#b45309;background:#fef3c7;border:1px solid #fde68a;padding:2px 8px;border-radius:6px}
+.stock-sparkline-box{height:28px;width:100%;margin:6px 0 4px}
+.stock-card-footer{display:flex;align-items:center;justify-content:space-between;font-size:.68rem;color:var(--muted-fg);padding-top:8px;border-top:1px dashed var(--border)}
+
+/* Crop Selector Square Tiles */
+.crop-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:14px;margin-bottom:20px}
+.crop-select-tile{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s ease;display:flex;flex-direction:column;align-items:center}
+.crop-select-tile:hover{transform:translateY(-3px);border-color:var(--primary);background:var(--accent);box-shadow:0 8px 18px rgba(0,0,0,.08)}
+.crop-select-tile.active{border-color:var(--primary);background:var(--accent);box-shadow:0 0 0 2px rgba(16,185,129,.3)}
+.crop-tile-icon{font-size:2.4rem;margin-bottom:8px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.1))}
+.crop-tile-name{font-size:.98rem;font-weight:800;color:var(--fg);margin-bottom:4px}
+.crop-tile-sub{font-size:.72rem;color:var(--muted-fg);margin-bottom:10px}
+.crop-tile-price{font-size:.82rem;font-weight:700;color:var(--primary);background:var(--card);border:1px solid var(--border);padding:3px 10px;border-radius:12px;margin-top:auto}
+
+/* Varieties Grid & Cards */
+.variety-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+.variety-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .15s ease;display:flex;flex-direction:column;justify-content:space-between}
+.variety-card:hover{border-color:var(--primary);background:var(--accent)}
+.variety-card.active{border-color:var(--primary);background:var(--accent);box-shadow:0 0 0 2px rgba(16,185,129,.35)}
+
 
 /* ===== SIMULATOR EXPANDED ===== */
 .sim-viewport-lg{width:100%;height:440px;background:#1a2e23;border-radius:14px;overflow:hidden;display:block;box-shadow:inset 0 2px 10px rgba(0,0,0,.5);cursor:crosshair;transition:height .3s ease}
@@ -1935,257 +1973,1850 @@ function initBandoMap(){
   setTimeout(function(){if(bandoMap)bandoMap.invalidateSize()},200);
 }
 
-/* ======================= 5. GIÁ THỊ TRƯỜNG THỜI GIAN THỰC ======================= */
-var GIA_TREE={
-  "congnghiep":{
-    ten:"Cây công nghiệp",
-    icon:"☕",
-    ds:[
-      {id:"caphe", ten:"Cà phê (Coffee)", giaChung:"93.000 – 93.800", dv:"đ/kg nhân xô", xuHuong:"+800 đ",
-       nguonUytin:"giacaphe.com (2.4M lượt truy cập/tháng)",
-       cacGiong:[
-         {giong:"Robusta (Cà phê vối) — Nhân xô Đắk Lắk", gia:"93.500", dv:"đ/kg", note:"Tiêu chuẩn nhân xô xuất khẩu"},
-         {giong:"Robusta (Cà phê vối) — Nhân xô Lâm Đồng (Di Linh)", gia:"93.000", dv:"đ/kg", note:"Thương lái thu mua tại kho"},
-         {giong:"Robusta (Cà phê vối) — Nhân xô Gia Lai", gia:"93.300", dv:"đ/kg", note:"Giá đồng đều các huyện Chư Sê, Đắk Đoa"},
-         {giong:"Robusta (Cà phê vối) — Nhân xô Đắk Nông (Gia Nghĩa)", gia:"93.800", dv:"đ/kg", note:"Giá cao nhất Tây Nguyên"},
-         {giong:"Robusta — Quả tươi hái chín", gia:"19.500 – 21.000", dv:"đ/kg tươi", note:"Yêu cầu tỷ lệ quả chín > 90%"},
-         {giong:"Arabica (Cà phê chè) — Cầu Đất (Đà Lạt)", gia:"118.000 – 125.000", dv:"đ/kg nhân", note:"Chất lượng cao chế biến ướt"},
-         {giong:"Arabica (Cà phê chè) — Sơn La", gia:"98.000 – 105.000", dv:"đ/kg nhân", note:"Thu mua vùng Mộc Châu, Mai Sơn"},
-         {giong:"Cherry (Cà phê mít) — Gia Lai / Kon Tum", gia:"74.000 – 78.000", dv:"đ/kg nhân", note:"Cà phê hạt to chịu hạn"}
-       ]},
-      {id:"tieu", ten:"Hồ tiêu (Black Pepper)", giaChung:"138.000 – 141.000", dv:"đ/kg", xuHuong:"+1.000 đ",
-       nguonUytin:"giatieu.com (1.1M lượt truy cập)",
-       cacGiong:[
-         {giong:"Tiêu đen Gia Lai", gia:"138.000", dv:"đ/kg", note:"Dung tích 500-550g/l"},
-         {giong:"Tiêu đen Đắk Lắk / Đắk Nông", gia:"140.000", dv:"đ/kg", note:"Tiêu đẹp chọn lọc"},
-         {giong:"Tiêu đen Bà Rịa - Vũng Tàu", gia:"141.000", dv:"đ/kg", note:"Giá cao nhất cả nước"},
-         {giong:"Tiêu trắng (Tiêu sọ)", gia:"220.000 – 235.000", dv:"đ/kg", note:"Tiêu sọ xuất khẩu loại 1"}
-       ]},
-      {id:"dieu", ten:"Hạt điều thô (Cashew)", giaChung:"29.000 – 32.500", dv:"đ/kg", xuHuong:"Ổn định",
-       nguonUytin:"Hiệp hội Điều VN (Vinacas)",
-       cacGiong:[
-         {giong:"Điều thô Bình Phước (hạt chuẩn)", gia:"31.500 – 32.500", dv:"đ/kg", note:"Hạt to độ ẩm chuẩn < 10%"},
-         {giong:"Điều thô Đồng Nai", gia:"29.500 – 30.500", dv:"đ/kg", note:"Tại vườn"},
-         {giong:"Nhân điều trắng W320 xuất khẩu", gia:"175.000 – 185.000", dv:"đ/kg nhân", note:"Đã phân loại đóng gói"}
-       ]},
-      {id:"caosu", ten:"Mủ cao su tự nhiên (Rubber)", giaChung:"385 – 395", dv:"đ/độ TSC", xuHuong:"+5 đ",
-       nguonUytin:"Tập đoàn CN Cao su VN (VRG)",
-       cacGiong:[
-         {giong:"Mủ nước Bình Phước (TSC)", gia:"390 – 395", dv:"đ/độ TSC", note:"Thu mua tại điểm cân"},
-         {giong:"Mủ nước Tây Ninh (TSC)", gia:"385 – 390", dv:"đ/độ TSC", note:"Tiêu chuẩn nhà máy"},
-         {giong:"Mủ đông chén / mủ dây", gia:"14.500 – 16.000", dv:"đ/kg tươi", note:"Tùy tỷ lệ tạp chất"}
-       ]},
-      {id:"cacao", ten:"Hạt ca cao lên men", giaChung:"125.000 – 145.000", dv:"đ/kg khô", xuHuong:"+2.000 đ",
-       nguonUytin:"Hiệp hội Cacao Bến Tre",
-       cacGiong:[
-         {giong:"Ca cao lên men sấy khô loại 1", gia:"135.000 – 145.000", dv:"đ/kg", note:"Đạt chuẩn xuất khẩu châu Âu"},
-         {giong:"Ca cao hạt tươi tại vườn", gia:"28.000 – 32.000", dv:"đ/kg tươi", note:"Hái nguyên trái tươi"}
-       ]},
-      {id:"che", ten:"Chè búp tươi (Tea)", giaChung:"35.000 – 75.000", dv:"đ/kg", xuHuong:"Ổn định",
-       nguonUytin:"Hiệp hội Chè VN (Vitas)",
-       cacGiong:[
-         {giong:"Chè Tân Cương Thái Nguyên (1 tôm 2 lá)", gia:"55.000 – 75.000", dv:"đ/kg búp tươi", note:"Chè đặc sản búp mầm"},
-         {giong:"Chè Ô Long Lâm Đồng (Bảo Lộc)", gia:"45.000 – 60.000", dv:"đ/kg búp tươi", note:"Hái chuẩn xuất xưởng"}
-       ]}
+/* ======================= 5. GIÁ THỊ TRƯỜNG THỜI GIAN THỰC & BẢNG ĐIỆN NÔNG SẢN ======================= */
+var cheDoGia = "chitiet"; // "chitiet" (mới mở tab là các ô vuông chọn loại cây) hoặc "coban" (kiểu bảng điện chứng khoán)
+var cayDangChonGia = null; // id cây đang chọn trong tra chi tiết (null: hiện các ô vuông chọn cây)
+var giongDangChonGia = null; // tên giống cụ thể đang xem bảng giá sâu
+var timKiemGiaQuery = "";
+var timGiongTrongCayQuery = "";
+
+function veMiniSparklineSVG(data, chieu, w, h){
+  w = w || 76; h = h || 26;
+  if(!data || data.length < 2) return '';
+  var min = Math.min.apply(null, data);
+  var max = Math.max.apply(null, data);
+  var range = (max - min) || 1;
+  var pts = [];
+  for(var i = 0; i < data.length; i++){
+    var x = Math.round((i / (data.length - 1)) * (w - 8) + 4);
+    var y = Math.round(h - 4 - ((data[i] - min) / range) * (h - 10));
+    pts.push(x + ',' + y);
+  }
+  var color = chieu === 'up' ? '#10b981' : (chieu === 'down' ? '#ef4444' : '#f59e0b');
+  var fillId = 'spk_' + Math.random().toString(36).substr(2, 6);
+  var polyPts = pts.join(' ');
+  var areaPts = pts[0].split(',')[0] + ',' + (h - 2) + ' ' + polyPts + ' ' + pts[pts.length - 1].split(',')[0] + ',' + (h - 2);
+
+  return '<svg width="' + w + '" height="' + h + '" style="overflow:visible;display:block">'
+    + '<defs>'
+    + '<linearGradient id="' + fillId + '" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.32"/>'
+    + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.0"/>'
+    + '</linearGradient>'
+    + '</defs>'
+    + '<polygon points="' + areaPts + '" fill="url(#' + fillId + ')"/>'
+    + '<polyline points="' + polyPts + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '<circle cx="' + pts[pts.length - 1].split(',')[0] + '" cy="' + pts[pts.length - 1].split(',')[1] + '" r="2.8" fill="' + color + '"/>'
+    + '</svg>';
+}
+
+var DANH_SACH_CAY_GIA = [
+  {
+    id: "caphe",
+    code: "CFE",
+    ten: "Cà phê",
+    tenTiengAnh: "Coffee (Robusta & Arabica)",
+    icon: "☕",
+    giaChinh: "93.800",
+    dv: "đ/kg",
+    bienDong: "+800 đ",
+    phanTram: "+0.86%",
+    chieu: "up",
+    giaSan: "91.000",
+    giaTran: "96.500",
+    giaTC: "93.000",
+    sparkline: [91.2, 92.0, 92.5, 92.8, 93.0, 93.0, 93.8],
+    vungTrong: "Đắk Lắk, Lâm Đồng, Gia Lai, Đắk Nông",
+    nguonUytin: "giacaphe.com (2.4M lượt truy cập/tháng)",
+    khoiLuong: "14.500 tấn/ngày",
+    soGiong: "8 chủng loại",
+    cacGiong: [
+      {
+        giong: "Robusta (Cà phê vối) — Nhân xô Đắk Lắk",
+        gia: "93.500",
+        dv: "đ/kg",
+        giaVuon: "92.000 – 92.800 đ/kg",
+        giaKho: "94.500 – 95.200 đ/kg",
+        note: "Tiêu chuẩn nhân xô xuất khẩu R1 (5% đen vỡ)",
+        doAm: "Tối đa 12.5%",
+        tapChat: "Tối đa 0.5%",
+        khuyenNghi: "Nguồn cung khan hiếm, giá duy trì vùng đỉnh lịch sử. Nông dân có thể xuất bán 40% sản lượng để chốt lời an toàn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"93.500", td:"+800 đ", up:true},
+          {ngay:"Hôm qua", gia:"92.700", td:"+200 đ", up:true},
+          {ngay:"20/09", gia:"92.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"92.500", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"92.000", td:"-300 đ", up:false},
+          {ngay:"17/09", gia:"92.300", td:"+800 đ", up:true},
+          {ngay:"16/09", gia:"91.500", td:"+500 đ", up:true}
+        ]
+      },
+      {
+        giong: "Robusta — Nhân xô Lâm Đồng (Di Linh, Bảo Lộc)",
+        gia: "93.000",
+        dv: "đ/kg",
+        giaVuon: "91.500 – 92.200 đ/kg",
+        giaKho: "93.800 – 94.500 đ/kg",
+        note: "Thương lái thu mua tại kho Di Linh",
+        doAm: "12.5%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Thị trường ổn định, giao dịch sôi động tại các đại lý.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"93.000", td:"+700 đ", up:true},
+          {ngay:"Hôm qua", gia:"92.300", td:"+300 đ", up:true},
+          {ngay:"20/09", gia:"92.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"92.000", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"91.500", td:"-200 đ", up:false},
+          {ngay:"17/09", gia:"91.700", td:"+700 đ", up:true},
+          {ngay:"16/09", gia:"91.000", td:"+500 đ", up:true}
+        ]
+      },
+      {
+        giong: "Robusta — Nhân xô Gia Lai (Chư Sê, Đắk Đoa)",
+        gia: "93.300",
+        dv: "đ/kg",
+        giaVuon: "91.800 – 92.500 đ/kg",
+        giaKho: "94.200 – 94.800 đ/kg",
+        note: "Giá đồng đều các huyện Chư Sê, Đắk Đoa",
+        doAm: "12.5%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Nên giữ hàng khô ráo, tránh ẩm mốc cục bộ.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"93.300", td:"+800 đ", up:true},
+          {ngay:"Hôm qua", gia:"92.500", td:"+200 đ", up:true},
+          {ngay:"20/09", gia:"92.300", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"92.300", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"91.800", td:"-300 đ", up:false},
+          {ngay:"17/09", gia:"92.100", td:"+800 đ", up:true},
+          {ngay:"16/09", gia:"91.300", td:"+500 đ", up:true}
+        ]
+      },
+      {
+        giong: "Robusta — Nhân xô Đắk Nông (Gia Nghĩa)",
+        gia: "93.800",
+        dv: "đ/kg",
+        giaVuon: "92.200 – 93.000 đ/kg",
+        giaKho: "94.600 – 95.500 đ/kg",
+        note: "Mức giá cao nhất toàn vùng Tây Nguyên",
+        doAm: "12.5%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Vựa lớn đang gom hàng xuất khẩu.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"93.800", td:"+800 đ", up:true},
+          {ngay:"Hôm qua", gia:"93.000", td:"+300 đ", up:true},
+          {ngay:"20/09", gia:"92.700", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"92.700", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"92.200", td:"-200 đ", up:false},
+          {ngay:"17/09", gia:"92.400", td:"+800 đ", up:true},
+          {ngay:"16/09", gia:"91.600", td:"+600 đ", up:true}
+        ]
+      },
+      {
+        giong: "Robusta — Quả tươi hái chín (>90% chín đỏ)",
+        gia: "20.500",
+        dv: "đ/kg tươi",
+        giaVuon: "19.500 – 20.000 đ/kg",
+        giaKho: "21.000 – 22.000 đ/kg",
+        note: "Yêu cầu tỷ lệ chín đỏ > 90%, không dập nát",
+        doAm: "Quả tươi tự nhiên",
+        tapChat: "< 1%",
+        khuyenNghi: "Bán ngay trong ngày sau khi hái để tránh lên men quả.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"20.500", td:"+500 đ", up:true},
+          {ngay:"Hôm qua", gia:"20.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"20.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"20.000", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"19.500", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"19.500", td:"+500 đ", up:true},
+          {ngay:"16/09", gia:"19.000", td:"+500 đ", up:true}
+        ]
+      },
+      {
+        giong: "Arabica (Cà phê chè) — Cầu Đất (Đà Lạt)",
+        gia: "122.000",
+        dv: "đ/kg nhân",
+        giaVuon: "118.000 – 120.000 đ/kg",
+        giaKho: "124.000 – 128.000 đ/kg",
+        note: "Đặc sản Cầu Đất chế biến ướt xuất khẩu cao cấp",
+        doAm: "12.0%",
+        tapChat: "< 0.2%",
+        khuyenNghi: "Nhu cầu chuỗi cà phê specialty rất cao, giữ vững chất lượng.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"122.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"121.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"120.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"120.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"118.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"118.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"117.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Arabica — Mộc Châu / Mai Sơn (Sơn La)",
+        gia: "102.000",
+        dv: "đ/kg nhân",
+        giaVuon: "98.000 – 100.000 đ/kg",
+        giaKho: "103.000 – 106.000 đ/kg",
+        note: "Thu mua tại các hợp tác xã vùng Tây Bắc",
+        doAm: "12.5%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Thương lái phía Bắc thu mua ổn định.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"102.000", td:"+500 đ", up:true},
+          {ngay:"Hôm qua", gia:"101.500", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"101.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"101.500", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"100.500", td:"-500 đ", up:false},
+          {ngay:"17/09", gia:"101.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"100.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Cherry (Cà phê mít) — Gia Lai / Kon Tum",
+        gia: "76.000",
+        dv: "đ/kg nhân",
+        giaVuon: "73.000 – 74.500 đ/kg",
+        giaKho: "76.500 – 78.000 đ/kg",
+        note: "Cà phê hạt to chịu hạn, vị chua thanh tự nhiên",
+        doAm: "12.5%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Dùng để phối trộn hương vị cà phê truyền thống.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"76.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"76.000", td:"+500 đ", up:true},
+          {ngay:"20/09", gia:"75.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"75.500", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"75.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"75.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"74.000", td:"0 đ", up:null}
+        ]
+      }
     ]
   },
-  "luongthuc":{
-    ten:"Cây lương thực & Lúa gạo",
-    icon:"🌾",
-    ds:[
-      {id:"luatuoi", ten:"Lúa tươi tại ruộng (Paddy)", giaChung:"5.800 – 9.800", dv:"đ/kg tươi", xuHuong:"+150 đ",
-       nguonUytin:"Hiệp hội Lương thực VN (VFA)",
-       cacGiong:[
-         {giong:"Lúa ST25 (Gạo ngon nhất thế giới)", gia:"9.200 – 9.800", dv:"đ/kg lúa tươi", note:"Thương lái đặt cọc tại ruộng"},
-         {giong:"Lúa ST24", gia:"8.800 – 9.200", dv:"đ/kg lúa tươi", note:"Chất lượng hạt dài thơm"},
-         {giong:"Lúa Đài Thơm 8", gia:"6.100 – 6.300", dv:"đ/kg lúa tươi", note:"Cắt máy tại ruộng ĐBSCL"},
-         {giong:"Lúa OM 18", gia:"6.000 – 6.200", dv:"đ/kg lúa tươi", note:"Giống chủ lực vụ này"},
-         {giong:"Lúa OM 5451", gia:"5.800 – 6.000", dv:"đ/kg lúa tươi", note:"Lúa hạt dài dẻo"},
-         {giong:"Lúa Jasmine 85", gia:"6.200 – 6.500", dv:"đ/kg lúa tươi", note:"Thơm hạt tròn"},
-         {giong:"Lúa IR 50404", gia:"5.600 – 5.800", dv:"đ/kg lúa tươi", note:"Lúa nguyên liệu chế biến bún/bánh"},
-         {giong:"Lúa nếp cái hoa vàng (Bắc Bộ)", gia:"11.000 – 12.500", dv:"đ/kg lúa tươi", note:"Nếp tiến vua đặc sản"},
-         {giong:"Lúa nếp Long An", gia:"7.200 – 7.600", dv:"đ/kg lúa tươi", note:"Nếp dẻo thơm hạt bóng"}
-       ]},
-      {id:"ngo", ten:"Bắp / Ngô hạt khô", giaChung:"6.800 – 7.200", dv:"đ/kg", xuHuong:"Ổn định",
-       nguonUytin:"Chợ đầu mối nông sản",
-       cacGiong:[
-         {giong:"Ngô hạt khô Sơn La / Đồng Nai", gia:"6.800 – 7.200", dv:"đ/kg", note:"Độ ẩm < 14.5% dùng thức ăn chăn nuôi"},
-         {giong:"Bắp ngọt / Bắp nếp tươi", gia:"12.000 – 15.000", dv:"đ/kg tươi", note:"Bán chợ đầu mối"}
-       ]},
-      {id:"khoaimi", ten:"Khoai mì / Sắn củ tươi", giaChung:"2.600 – 2.950", dv:"đ/kg", xuHuong:"+50 đ",
-       nguonUytin:"Nhà máy Tinh bột sắn Tây Ninh",
-       cacGiong:[
-         {giong:"Sắn củ tươi trữ bột 30 độ", gia:"2.800 – 2.950", dv:"đ/kg", note:"Giao tại cửa nhà máy"},
-         {giong:"Sắn lát phơi khô", gia:"5.800 – 6.200", dv:"đ/kg", note:"Xuất khẩu sang Trung Quốc"}
-       ]}
+  {
+    id: "luatuoi",
+    code: "LUA",
+    ten: "Lúa gạo",
+    tenTiengAnh: "Paddy Rice (ĐBSCL & Bắc Bộ)",
+    icon: "🌾",
+    giaChinh: "6.200",
+    dv: "đ/kg",
+    bienDong: "+150 đ",
+    phanTram: "+2.48%",
+    chieu: "up",
+    giaSan: "5.800",
+    giaTran: "6.600",
+    giaTC: "6.050",
+    sparkline: [5.8, 5.9, 6.0, 6.0, 6.1, 6.05, 6.2],
+    vungTrong: "An Giang, Kiên Giang, Đồng Tháp, Cần Thơ, Sóc Trăng",
+    nguonUytin: "vietfood.org.vn & Hiệp hội Lương thực VN (VFA)",
+    khoiLuong: "35.000 tấn/ngày",
+    soGiong: "9 giống lúa",
+    cacGiong: [
+      {
+        giong: "Lúa tươi ST25 (Gạo ngon nhất thế giới — cọc tại ruộng)",
+        gia: "9.500",
+        dv: "đ/kg",
+        giaVuon: "9.200 – 9.500 đ/kg",
+        giaKho: "10.000 – 10.500 đ/kg",
+        note: "Thương lái đặt tiền cọc trước ngày cắt máy",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Gạo chất lượng cao phục vụ đơn hàng xuất khẩu châu Âu và Mỹ.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"9.500", td:"+200 đ", up:true},
+          {ngay:"Hôm qua", gia:"9.300", td:"+100 đ", up:true},
+          {ngay:"20/09", gia:"9.200", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"9.200", td:"+100 đ", up:true},
+          {ngay:"18/09", gia:"9.100", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"9.100", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"9.000", td:"+100 đ", up:true}
+        ]
+      },
+      {
+        giong: "Lúa tươi ST24 (Hạt dài thơm dẻo)",
+        gia: "9.000",
+        dv: "đ/kg",
+        giaVuon: "8.800 – 9.000 đ/kg",
+        giaKho: "9.400 – 9.800 đ/kg",
+        note: "Hạt dài chuẩn xuất khẩu, thương lái tranh mua",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Thời điểm bán rất thuận lợi, thương lái thanh toán tiền mặt tại ruộng.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"9.000", td:"+100 đ", up:true},
+          {ngay:"Hôm qua", gia:"8.900", td:"+100 đ", up:true},
+          {ngay:"20/09", gia:"8.800", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"8.800", td:"+100 đ", up:true},
+          {ngay:"18/09", gia:"8.700", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"8.700", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"8.600", td:"+100 đ", up:true}
+        ]
+      },
+      {
+        giong: "Lúa tươi Đài Thơm 8 (Cắt máy ĐBSCL)",
+        gia: "6.200",
+        dv: "đ/kg",
+        giaVuon: "6.100 – 6.250 đ/kg",
+        giaKho: "6.600 – 6.800 đ/kg",
+        note: "Giống lúa thơm chủ lực của các tỉnh miền Tây",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Các doanh nghiệp xuất khẩu gạo đang đẩy mạnh tiến độ thu mua.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"6.200", td:"+100 đ", up:true},
+          {ngay:"Hôm qua", gia:"6.100", td:"+50 đ", up:true},
+          {ngay:"20/09", gia:"6.050", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"6.050", td:"+50 đ", up:true},
+          {ngay:"18/09", gia:"6.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"6.000", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"5.900", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Lúa tươi OM 18 (Giống chủ lực xuất khẩu)",
+        gia: "6.100",
+        dv: "đ/kg",
+        giaVuon: "6.000 – 6.150 đ/kg",
+        giaKho: "6.500 – 6.700 đ/kg",
+        note: "Hạt dài, cơm mềm, kháng rầy và đạo ôn tốt",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Giá thu mua duy trì ổn định tích cực.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"6.100", td:"+100 đ", up:true},
+          {ngay:"Hôm qua", gia:"6.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"6.000", td:"+50 đ", up:true},
+          {ngay:"19/09", gia:"5.950", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"5.950", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"5.950", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"5.850", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Lúa tươi OM 5451 (Hạt dài trắng dẻo)",
+        gia: "5.900",
+        dv: "đ/kg",
+        giaVuon: "5.800 – 5.950 đ/kg",
+        giaKho: "6.300 – 6.500 đ/kg",
+        note: "Phổ biến rộng rãi phục vụ xuất khẩu thị trường châu Á",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Thu hoạch đúng độ chín vàng 85-90% để tránh gãy hạt khi xay xát.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"5.900", td:"+50 đ", up:true},
+          {ngay:"Hôm qua", gia:"5.850", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"5.850", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"5.850", td:"+50 đ", up:true},
+          {ngay:"18/09", gia:"5.800", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"5.800", td:"+50 đ", up:true},
+          {ngay:"16/09", gia:"5.750", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Lúa tươi Jasmine 85 (Hạt tròn thơm)",
+        gia: "6.350",
+        dv: "đ/kg",
+        giaVuon: "6.200 – 6.400 đ/kg",
+        giaKho: "6.700 – 6.900 đ/kg",
+        note: "Thơm hoa lài đặc trưng",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Tiêu thụ nhanh tại các hệ thống siêu thị nội địa.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"6.350", td:"+100 đ", up:true},
+          {ngay:"Hôm qua", gia:"6.250", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"6.250", td:"+50 đ", up:true},
+          {ngay:"19/09", gia:"6.200", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"6.200", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"6.200", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"6.100", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Lúa tươi IR 50404 (Nguyên liệu bún/bánh)",
+        gia: "5.700",
+        dv: "đ/kg",
+        giaVuon: "5.600 – 5.750 đ/kg",
+        giaKho: "6.100 – 6.250 đ/kg",
+        note: "Hạt nở xốp, làm bún phở bánh tráng",
+        doAm: "Lúa tươi cắt máy",
+        tapChat: "< 2%",
+        khuyenNghi: "Nhà máy chế biến lương thực tiêu thụ đều.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"5.700", td:"+50 đ", up:true},
+          {ngay:"Hôm qua", gia:"5.650", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"5.650", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"5.650", td:"+50 đ", up:true},
+          {ngay:"18/09", gia:"5.600", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"5.600", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"5.600", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Lúa nếp cái hoa vàng (Bắc Bộ đặc sản)",
+        gia: "11.800",
+        dv: "đ/kg",
+        giaVuon: "11.200 – 12.000 đ/kg",
+        giaKho: "12.800 – 13.500 đ/kg",
+        note: "Nếp tiến vua, dẻo thơm hạt tròn mẩy",
+        doAm: "Lúa tươi",
+        tapChat: "< 1.5%",
+        khuyenNghi: "Đặc sản giá cao, phục vụ mùa lễ tết và cốm mùa thu.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"11.800", td:"+300 đ", up:true},
+          {ngay:"Hôm qua", gia:"11.500", td:"+200 đ", up:true},
+          {ngay:"20/09", gia:"11.300", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"11.300", td:"+300 đ", up:true},
+          {ngay:"18/09", gia:"11.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"11.000", td:"+500 đ", up:true},
+          {ngay:"16/09", gia:"10.500", td:"+500 đ", up:true}
+        ]
+      },
+      {
+        giong: "Lúa nếp Long An (Nếp hạt cau dẻo bóng)",
+        gia: "7.400",
+        dv: "đ/kg",
+        giaVuon: "7.200 – 7.500 đ/kg",
+        giaKho: "7.800 – 8.200 đ/kg",
+        note: "Chuyên xuất khẩu sang Trung Quốc và Philippines",
+        doAm: "Lúa tươi",
+        tapChat: "< 2%",
+        khuyenNghi: "Được các kho sấy lúa bao tiêu trọn gói.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"7.400", td:"+100 đ", up:true},
+          {ngay:"Hôm qua", gia:"7.300", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"7.300", td:"+100 đ", up:true},
+          {ngay:"19/09", gia:"7.200", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"7.200", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"7.200", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"7.100", td:"0 đ", up:null}
+        ]
+      }
     ]
   },
-  "anqua":{
-    ten:"Cây ăn quả (Trái cây)",
-    icon:"🍈",
-    ds:[
-      {id:"saurieng", ten:"Sầu riêng (Durian)", giaChung:"65.000 – 125.000", dv:"đ/kg", xuHuong:"+3.000 đ",
-       nguonUytin:"Hiệp hội Sầu riêng Đắk Lắk & Chợ Thủ Đức",
-       cacGiong:[
-         {giong:"Sầu riêng Monthong / Dona (Loại 1)", gia:"115.000 – 125.000", dv:"đ/kg", note:"Trái 2.5 - 5kg chuẩn xuất khẩu"},
-         {giong:"Sầu riêng Monthong / Dona (Loại 2 / Xô)", gia:"75.000 – 90.000", dv:"đ/kg", note:"Cơm dày vàng ngọt"},
-         {giong:"Sầu riêng Ri6 (Loại 1)", gia:"85.000 – 95.000", dv:"đ/kg", note:"Cắt già chuẩn xuất khẩu"},
-         {giong:"Sầu riêng Ri6 (Loại xô tại vườn)", gia:"60.000 – 70.000", dv:"đ/kg", note:"Bao tiêu cả vườn"}
-       ]},
-      {id:"camquyt", ten:"Cam, Quýt & Bưởi", giaChung:"12.000 – 45.000", dv:"đ/kg", xuHuong:"Ổn định",
-       nguonUytin:"Chợ Nông sản Thủ Đức",
-       cacGiong:[
-         {giong:"Cam sành Miền Tây (loại 1)", gia:"15.000 – 18.000", dv:"đ/kg", note:"Trái bóng đẹp mọng nước"},
-         {giong:"Cam sành Hàm Yên (Tuyên Quang)", gia:"18.000 – 24.000", dv:"đ/kg", note:"Đặc sản miền Bắc"},
-         {giong:"Cam Vinh (Nghệ An)", gia:"25.000 – 35.000", dv:"đ/kg", note:"Vị ngọt thanh thơm"},
-         {giong:"Quýt đường Miền Tây", gia:"24.000 – 32.000", dv:"đ/kg", note:"Vỏ mỏng múi mọng"},
-         {giong:"Quýt hồng Lai Vung (Đồng Tháp)", gia:"35.000 – 48.000", dv:"đ/kg", note:"Mùa cận Tết"},
-         {giong:"Bưởi da xanh Bến Tre (loại 1)", gia:"30.000 – 40.000", dv:"đ/kg", note:"Ruột hồng tép ráo ngọt"},
-         {giong:"Bưởi Năm Roi Vĩnh Long", gia:"20.000 – 28.000", dv:"đ/kg", note:"Không hạt hoặc hạt lép"}
-       ]},
-      {id:"xoai", ten:"Xoài (Mango)", giaChung:"15.000 – 80.000", dv:"đ/kg", xuHuong:"+2.000 đ",
-       nguonUytin:"Chợ Đầu mối Nông sản Miền Tây",
-       cacGiong:[
-         {giong:"Xoài Cát Hoà Lộc (Loại 1)", gia:"65.000 – 80.000", dv:"đ/kg", note:"Trái > 450g bao bọc trái"},
-         {giong:"Xoài Cát Chu", gia:"28.000 – 38.000", dv:"đ/kg", note:"Thịt thơm dẻo"},
-         {giong:"Xoài Keo / Xoài Đài Loan", gia:"15.000 – 22.000", dv:"đ/kg", note:"Trái to phục vụ ăn xanh"}
-       ]},
-      {id:"thanhlong", ten:"Thanh long (Dragon Fruit)", giaChung:"12.000 – 32.000", dv:"đ/kg", xuHuong:"+1.500 đ",
-       nguonUytin:"Hiệp hội Thanh long Bình Thuận",
-       cacGiong:[
-         {giong:"Thanh long ruột đỏ (loại 1)", gia:"24.000 – 32.000", dv:"đ/kg", note:"Tai xanh cứng xuất khẩu"},
-         {giong:"Thanh long ruột trắng", gia:"12.000 – 16.000", dv:"đ/kg", note:"Hàng đóng thùng"}
-       ]},
-      {id:"bo", ten:"Bơ sáp & Bơ 034", giaChung:"25.000 – 45.000", dv:"đ/kg", xuHuong:"Ổn định",
-       nguonUytin:"Chợ Nông sản Tây Nguyên",
-       cacGiong:[
-         {giong:"Bơ 034 Lâm Đồng (loại 1)", gia:"28.000 – 38.000", dv:"đ/kg", note:"Trái dài cơm vàng sáp dẻo"},
-         {giong:"Bơ Booth (Bơ Mỹ trái tròn)", gia:"32.000 – 45.000", dv:"đ/kg", note:"Vỏ dày quả già"}
-       ]}
+  {
+    id: "cam",
+    code: "CAM",
+    ten: "Cam các loại",
+    tenTiengAnh: "Orange (Cam sành, Cam Vinh, Cam Canh)",
+    icon: "🍊",
+    giaChinh: "18.500",
+    dv: "đ/kg",
+    bienDong: "+500 đ",
+    phanTram: "+2.78%",
+    chieu: "up",
+    giaSan: "15.000",
+    giaTran: "22.000",
+    giaTC: "18.000",
+    sparkline: [16.5, 17.0, 17.5, 17.5, 18.0, 18.0, 18.5],
+    vungTrong: "Tiền Giang, Vĩnh Long, Tuyên Quang, Nghệ An, Hà Giang",
+    nguonUytin: "Chợ Nông sản Thủ Đức & Thương lái Miền Tây",
+    khoiLuong: "12.800 tấn/ngày",
+    soGiong: "5 giống cam",
+    cacGiong: [
+      {
+        giong: "Cam sành Miền Tây — Loại 1 (Trái bóng, cành lá đẹp)",
+        gia: "18.500",
+        dv: "đ/kg",
+        giaVuon: "15.000 – 16.500 đ/kg",
+        giaKho: "18.500 – 21.000 đ/kg",
+        note: "Trái 250 - 350g, cuống lá tươi, không sẹo loét",
+        doAm: "Tươi nguyên cành",
+        tapChat: "Không bầm dập",
+        khuyenNghi: "Nhu cầu tiêu thụ tại TP.HCM và miền Trung đang phục hồi mạnh.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"18.500", td:"+500 đ", up:true},
+          {ngay:"Hôm qua", gia:"18.000", td:"+500 đ", up:true},
+          {ngay:"20/09", gia:"17.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"17.500", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"17.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"17.000", td:"+500 đ", up:true},
+          {ngay:"16/09", gia:"16.500", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Cam sành Miền Tây — Hàng xô vắt nước tại vườn",
+        gia: "13.000",
+        dv: "đ/kg",
+        giaVuon: "12.000 – 13.500 đ/kg",
+        giaKho: "14.500 – 16.000 đ/kg",
+        note: "Trái nhỏ hơn, dùng cho quán nước và chế biến nước ép",
+        doAm: "Mọng nước",
+        tapChat: "Đạt độ brix > 10",
+        khuyenNghi: "Cắt đều tay để tránh rụng cuống non đợt sau.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"13.000", td:"+500 đ", up:true},
+          {ngay:"Hôm qua", gia:"12.500", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"12.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"12.500", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"12.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"12.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"12.000", td:"+500 đ", up:true}
+        ]
+      },
+      {
+        giong: "Cam sành Hàm Yên (Tuyên Quang — Vụ chính)",
+        gia: "21.000",
+        dv: "đ/kg",
+        giaVuon: "18.000 – 20.000 đ/kg",
+        giaKho: "22.000 – 25.000 đ/kg",
+        note: "Đặc sản núi đá, vị ngọt đậm thơm mát",
+        doAm: "Quả già mọng",
+        tapChat: "Chuẩn VietGAP",
+        khuyenNghi: "Bảo quản bằng màng bao trái để giữ tươi lâu khi chuyển về xuôi.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"21.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"20.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"20.000", td:"+1.000 đ", up:true},
+          {ngay:"19/09", gia:"19.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"19.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"19.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"18.000", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Cam Vinh / Cam Xã Đoài (Nghệ An)",
+        gia: "32.000",
+        dv: "đ/kg",
+        giaVuon: "28.000 – 30.000 đ/kg",
+        giaKho: "33.000 – 38.000 đ/kg",
+        note: "Trái tròn, vỏ vàng óng, vị ngọt thanh mát",
+        doAm: "Tươi",
+        tapChat: "Chỉ dẫn địa lý OCOP 4 sao",
+        khuyenNghi: "Hàng quà biếu cao cấp, giá giữ rất tốt.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"32.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"32.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"31.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"31.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"30.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"30.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"30.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Cam Canh ngọt sạch VietGAP (Hà Nội, Bắc Giang)",
+        gia: "38.000",
+        dv: "đ/kg",
+        giaVuon: "34.000 – 36.000 đ/kg",
+        giaKho: "40.000 – 46.000 đ/kg",
+        note: "Vỏ mỏng dóc, mọng nước, múi ngọt đậm không xơ",
+        doAm: "Tươi",
+        tapChat: "Chuẩn VietGAP",
+        khuyenNghi: "Thời vụ thu hoạch rộ cận Tết Nguyên Đán.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"38.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"37.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"37.000", td:"+1.000 đ", up:true},
+          {ngay:"19/09", gia:"36.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"36.000", td:"+1.000 đ", up:true},
+          {ngay:"17/09", gia:"35.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"35.000", td:"+1.000 đ", up:true}
+        ]
+      }
     ]
   },
-  "raumau":{
-    ten:"Rau màu & Cây gia vị",
-    icon:"🌶️",
-    ds:[
-      {id:"ot", ten:"Ớt chỉ thiên xuất khẩu", giaChung:"28.000 – 38.000", dv:"đ/kg", xuHuong:"+2.000 đ",
-       nguonUytin:"Chợ Đầu mối Nông sản Tiền Giang",
-       cacGiong:[
-         {giong:"Ớt chỉ thiên cuống thẳng (loại 1)", gia:"32.000 – 38.000", dv:"đ/kg", note:"Xuất khẩu Đông Bắc Á"},
-         {giong:"Ớt chuông Đà Lạt (đỏ/vàng)", gia:"45.000 – 55.000", dv:"đ/kg", note:"Trồng nhà kính VietGAP"}
-       ]},
-      {id:"cachua", ten:"Cà chua Đà Lạt", giaChung:"16.000 – 26.000", dv:"đ/kg", xuHuong:"Ổn định",
-       nguonUytin:"Chợ Nông sản Đà Lạt",
-       cacGiong:[
-         {giong:"Cà chua thịt tròn to", gia:"16.000 – 20.000", dv:"đ/kg", note:"Vận chuyển khắp cả nước"},
-         {giong:"Cà chua bi / Cà chua socola", gia:"35.000 – 48.000", dv:"đ/kg", note:"Đặc sản cao cấp"}
-       ]},
-      {id:"hanhtoi", ten:"Hành tím & Tỏi đặc sản", giaChung:"35.000 – 160.000", dv:"đ/kg", xuHuong:"+5.000 đ",
-       nguonUytin:"Hợp tác xã Tỏi Lý Sơn",
-       cacGiong:[
-         {giong:"Tỏi Lý Sơn chính gốc (khô)", gia:"120.000 – 160.000", dv:"đ/kg", note:"Tỏi nhiều tép thơm nồng đặc sản"},
-         {giong:"Hành tím Vĩnh Châu (Sóc Trăng)", gia:"35.000 – 48.000", dv:"đ/kg", note:"Hành củ chắc để lâu"}
-       ]}
+  {
+    id: "chanh",
+    code: "CHH",
+    ten: "Chanh & Bưởi",
+    tenTiengAnh: "Lime, Lemon & Pomelo (Bến Tre, Long An)",
+    icon: "🍋",
+    giaChinh: "22.000",
+    dv: "đ/kg",
+    bienDong: "-1.000 đ",
+    phanTram: "-4.35%",
+    chieu: "down",
+    giaSan: "19.000",
+    giaTran: "26.000",
+    giaTC: "23.000",
+    sparkline: [25.0, 24.5, 24.0, 23.5, 23.0, 23.0, 22.0],
+    vungTrong: "Long An (Bến Lức), Bến Tre, Tiền Giang, Vĩnh Long",
+    nguonUytin: "HTX Nông nghiệp Bến Tre & Chợ Đầu Mối Thủ Đức",
+    khoiLuong: "9.200 tấn/ngày",
+    soGiong: "6 giống chanh & bưởi",
+    cacGiong: [
+      {
+        giong: "Chanh không hạt Long An — Loại 1 (Vỏ xanh bóng xuất khẩu)",
+        gia: "22.000",
+        dv: "đ/kg",
+        giaVuon: "18.000 – 19.500 đ/kg",
+        giaKho: "22.000 – 24.000 đ/kg",
+        note: "Trái 12-16 quả/kg, vỏ mỏng nhiều nước, chuẩn GlobalGAP",
+        doAm: "Tươi mọng",
+        tapChat: "Không sần sùi",
+        khuyenNghi: "Sản lượng vụ mùa thu đang dồi dào, giá điều chỉnh nhẹ nhưng giao dịch đều đặn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"22.000", td:"-1.000 đ", up:false},
+          {ngay:"Hôm qua", gia:"23.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"23.000", td:"-500 đ", up:false},
+          {ngay:"19/09", gia:"23.500", td:"-500 đ", up:false},
+          {ngay:"18/09", gia:"24.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"24.000", td:"-500 đ", up:false},
+          {ngay:"16/09", gia:"24.500", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Chanh không hạt — Hàng xô tại vườn",
+        gia: "15.000",
+        dv: "đ/kg",
+        giaVuon: "14.000 – 15.500 đ/kg",
+        giaKho: "16.500 – 18.000 đ/kg",
+        note: "Bao tiêu nguyên vườn, không phân cỡ",
+        doAm: "Tươi",
+        tapChat: "Bình thường",
+        khuyenNghi: "Thương lái cắt định kỳ 10 ngày/lần.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"15.000", td:"-500 đ", up:false},
+          {ngay:"Hôm qua", gia:"15.500", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"15.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"15.500", td:"-500 đ", up:false},
+          {ngay:"18/09", gia:"16.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"16.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"16.000", td:"-500 đ", up:false}
+        ]
+      },
+      {
+        giong: "Chanh giấy Miền Tây (Có hạt, thơm đậm)",
+        gia: "19.000",
+        dv: "đ/kg",
+        giaVuon: "17.000 – 18.500 đ/kg",
+        giaKho: "20.000 – 22.000 đ/kg",
+        note: "Tinh dầu vỏ thơm nồng, được các quán ăn chuộng",
+        doAm: "Tươi",
+        tapChat: "Sạch",
+        khuyenNghi: "Tiêu thụ nội địa rất ổn định.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"19.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"19.000", td:"-500 đ", up:false},
+          {ngay:"20/09", gia:"19.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"19.500", td:"-500 đ", up:false},
+          {ngay:"18/09", gia:"20.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"20.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"20.000", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Chanh đào miền Bắc (Chuyên ngâm mật ong)",
+        gia: "28.000",
+        dv: "đ/kg",
+        giaVuon: "24.000 – 26.000 đ/kg",
+        giaKho: "29.000 – 33.000 đ/kg",
+        note: "Ruột hồng đào, vỏ vàng thơm mát",
+        doAm: "Tươi",
+        tapChat: "Đặc sản thu đông",
+        khuyenNghi: "Chính vụ tháng 9 - 10, nhu cầu người dân ngâm ho rất lớn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"28.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"27.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"26.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"26.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"25.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"25.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"24.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Bưởi da xanh Bến Tre — Loại 1 (Ruột hồng tép ráo)",
+        gia: "36.000",
+        dv: "đ/kg",
+        giaVuon: "32.000 – 35.000 đ/kg",
+        giaKho: "38.000 – 42.000 đ/kg",
+        note: "Trái 1.4 - 2.0kg, da xanh bóng, tép hồng ngọt đậm",
+        doAm: "Tươi",
+        tapChat: "Chuẩn xuất khẩu",
+        khuyenNghi: "Thị trường xuất khẩu Mỹ và EU đang mở rộng hạn ngạch.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"36.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"35.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"35.000", td:"+1.000 đ", up:true},
+          {ngay:"19/09", gia:"34.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"34.000", td:"+1.000 đ", up:true},
+          {ngay:"17/09", gia:"33.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"33.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Bưởi Năm Roi Vĩnh Long (Tép vàng mọng không hạt)",
+        gia: "24.000",
+        dv: "đ/kg",
+        giaVuon: "20.000 – 22.000 đ/kg",
+        giaKho: "25.000 – 28.000 đ/kg",
+        note: "Vị ngọt chua thanh mát, tróc múi dễ ăn",
+        doAm: "Tươi",
+        tapChat: "Chuẩn VietGAP",
+        khuyenNghi: "Tiêu thụ nội địa ổn định tại các siêu thị lớn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"24.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"24.000", td:"+500 đ", up:true},
+          {ngay:"20/09", gia:"23.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"23.500", td:"+500 đ", up:true},
+          {ngay:"18/09", gia:"23.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"23.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"23.000", td:"+500 đ", up:true}
+        ]
+      }
+    ]
+  },
+  {
+    id: "saurieng",
+    code: "SRI",
+    ten: "Sầu riêng",
+    tenTiengAnh: "Durian (Monthong & Ri6)",
+    icon: "🍈",
+    giaChinh: "125.000",
+    dv: "đ/kg",
+    bienDong: "+3.000 đ",
+    phanTram: "+2.46%",
+    chieu: "up",
+    giaSan: "115.000",
+    giaTran: "135.000",
+    giaTC: "122.000",
+    sparkline: [115, 118, 120, 120, 122, 122, 125],
+    vungTrong: "Đắk Lắk, Tiền Giang, Bến Tre, Đồng Nai, Gia Lai",
+    nguonUytin: "Hiệp hội Sầu riêng Đắk Lắk & banggianongsan.com",
+    khoiLuong: "16.000 tấn/ngày",
+    soGiong: "5 giống sầu riêng",
+    cacGiong: [
+      {
+        giong: "Sầu riêng Monthong / Dona — Loại 1 (2.5 – 5.0kg)",
+        gia: "125.000",
+        dv: "đ/kg",
+        giaVuon: "115.000 – 122.000 đ/kg",
+        giaKho: "125.000 – 132.000 đ/kg",
+        note: "4-5 hộc múi, cơm vàng dày ráo, chuẩn xuất khẩu Trung Quốc",
+        doAm: "Trái già cắt chuẩn",
+        tapChat: "Không sâu mọt, không nứt",
+        khuyenNghi: "Các container xuất khẩu đóng hàng liên tục, giá neo ở mức rất cao.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"125.000", td:"+3.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"122.000", td:"+2.000 đ", up:true},
+          {ngay:"20/09", gia:"120.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"120.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"118.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"118.000", td:"+3.000 đ", up:true},
+          {ngay:"16/09", gia:"115.000", td:"+3.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Sầu riêng Monthong — Hàng xô cắt tại vườn",
+        gia: "85.000",
+        dv: "đ/kg",
+        giaVuon: "80.000 – 88.000 đ/kg",
+        giaKho: "90.000 – 96.000 đ/kg",
+        note: "Bao tiêu nguyên vườn, thương lái tự hái",
+        doAm: "Trái già",
+        tapChat: "Bình thường",
+        khuyenNghi: "Bán xô giúp thu hồi vốn nhanh, không rủi ro phân loại.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"85.000", td:"+2.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"83.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"82.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"82.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"80.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"80.000", td:"+2.000 đ", up:true},
+          {ngay:"16/09", gia:"78.000", td:"+2.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Sầu riêng Ri6 — Loại 1 (Cơm vàng hạt lép)",
+        gia: "92.000",
+        dv: "đ/kg",
+        giaVuon: "85.000 – 90.000 đ/kg",
+        giaKho: "93.000 – 98.000 đ/kg",
+        note: "Múi vàng tươi, vị ngọt béo đậm đà, cuống tươi",
+        doAm: "Già cây",
+        tapChat: "Đạt chuẩn VietGAP",
+        khuyenNghi: "Nhu cầu tiêu dùng nội địa và xuất khẩu đều hút hàng.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"92.000", td:"+2.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"90.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"89.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"89.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"87.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"87.000", td:"+2.000 đ", up:true},
+          {ngay:"16/09", gia:"85.000", td:"+2.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Sầu riêng Ri6 — Hàng xô bao vườn",
+        gia: "68.000",
+        dv: "đ/kg",
+        giaVuon: "62.000 – 68.000 đ/kg",
+        giaKho: "72.000 – 76.000 đ/kg",
+        note: "Trái đều, thương lái tự leo cắt",
+        doAm: "Trái già",
+        tapChat: "Tiêu chuẩn vựa",
+        khuyenNghi: "Thích hợp cho các vườn diện tích lớn cần thu hoạch đồng loạt.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"68.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"67.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"66.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"66.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"65.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"65.000", td:"+2.000 đ", up:true},
+          {ngay:"16/09", gia:"63.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Sầu riêng Musang King trồng thử nghiệm",
+        gia: "195.000",
+        dv: "đ/kg",
+        giaVuon: "180.000 – 195.000 đ/kg",
+        giaKho: "210.000 – 230.000 đ/kg",
+        note: "Giống Malaysia trồng tại Đắk Lắk & Lâm Đồng",
+        doAm: "Trái rụng / cắt già",
+        tapChat: "Cao cấp",
+        khuyenNghi: "Hàng hiếm, giá luôn ở mức đỉnh phân khúc cao cấp.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"195.000", td:"+5.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"190.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"190.000", td:"+5.000 đ", up:true},
+          {ngay:"19/09", gia:"185.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"185.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"185.000", td:"+5.000 đ", up:true},
+          {ngay:"16/09", gia:"180.000", td:"+5.000 đ", up:true}
+        ]
+      }
+    ]
+  },
+  {
+    id: "tieu",
+    code: "TIE",
+    ten: "Hồ tiêu",
+    tenTiengAnh: "Black & White Pepper",
+    icon: "🫑",
+    giaChinh: "140.000",
+    dv: "đ/kg",
+    bienDong: "+1.000 đ",
+    phanTram: "+0.72%",
+    chieu: "up",
+    giaSan: "135.000",
+    giaTran: "146.000",
+    giaTC: "139.000",
+    sparkline: [134, 136, 137, 138, 139, 139, 140],
+    vungTrong: "Gia Lai, Đắk Lắk, Đắk Nông, Bình Phước, Bà Rịa - Vũng Tàu",
+    nguonUytin: "giatieu.com (1.1M lượt truy cập)",
+    khoiLuong: "5.400 tấn/ngày",
+    soGiong: "4 loại tiêu",
+    cacGiong: [
+      {
+        giong: "Tiêu đen Gia Lai (Dung tích 500 – 550g/l)",
+        gia: "138.000",
+        dv: "đ/kg",
+        giaVuon: "136.000 – 137.500 đ/kg",
+        giaKho: "139.000 – 141.000 đ/kg",
+        note: "Hạt đen đều, độ ẩm khô chuẩn bảo quản",
+        doAm: "< 13.0%",
+        tapChat: "< 1.0%",
+        khuyenNghi: "Giá tiêu duy trì đà tăng mạnh, có thể giữ hàng chờ nhịp tăng mới.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"138.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"137.000", td:"+500 đ", up:true},
+          {ngay:"20/09", gia:"136.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"136.500", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"135.500", td:"-500 đ", up:false},
+          {ngay:"17/09", gia:"136.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"135.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Tiêu đen Đắk Lắk / Đắk Nông",
+        gia: "140.000",
+        dv: "đ/kg",
+        giaVuon: "138.000 – 139.500 đ/kg",
+        giaKho: "141.000 – 143.000 đ/kg",
+        note: "Tiêu chọn hạt chắc nặng, dung tích cao",
+        doAm: "< 12.5%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Được các đại lý lớn ưu tiên thu mua tiền mặt.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"140.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"139.000", td:"+500 đ", up:true},
+          {ngay:"20/09", gia:"138.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"138.500", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"137.500", td:"-500 đ", up:false},
+          {ngay:"17/09", gia:"138.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"137.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Tiêu đen Bà Rịa - Vũng Tàu (Đỉnh giá cả nước)",
+        gia: "141.000",
+        dv: "đ/kg",
+        giaVuon: "139.000 – 140.500 đ/kg",
+        giaKho: "142.500 – 145.000 đ/kg",
+        note: "Tiêu hạt to đen bóng, chất lượng xuất khẩu châu Âu",
+        doAm: "< 12.0%",
+        tapChat: "< 0.2%",
+        khuyenNghi: "Mức giá cao kỷ lục trong 5 năm gần đây.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"141.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"140.000", td:"+500 đ", up:true},
+          {ngay:"20/09", gia:"139.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"139.500", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"138.500", td:"-500 đ", up:false},
+          {ngay:"17/09", gia:"139.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"138.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Tiêu trắng (Tiêu sọ loại 1 xuất khẩu)",
+        gia: "230.000",
+        dv: "đ/kg",
+        giaVuon: "220.000 – 228.000 đ/kg",
+        giaKho: "235.000 – 245.000 đ/kg",
+        note: "Đã bóc vỏ sạch sẽ, hạt trắng ngà mẩy đẹp",
+        doAm: "< 12.0%",
+        tapChat: "< 0.2%",
+        khuyenNghi: "Hàng xuất khẩu đặc thù giá trị kinh tế rất cao.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"230.000", td:"+2.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"228.000", td:"+3.000 đ", up:true},
+          {ngay:"20/09", gia:"225.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"225.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"223.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"223.000", td:"+3.000 đ", up:true},
+          {ngay:"16/09", gia:"220.000", td:"+2.000 đ", up:true}
+        ]
+      }
+    ]
+  },
+  {
+    id: "dieu",
+    code: "DIE",
+    ten: "Hạt điều",
+    tenTiengAnh: "Cashew Nut (Bình Phước, Đồng Nai)",
+    icon: "🌰",
+    giaChinh: "32.000",
+    dv: "đ/kg",
+    bienDong: "0 đ",
+    phanTram: "0.00%",
+    chieu: "flat",
+    giaSan: "30.000",
+    giaTran: "34.000",
+    giaTC: "32.000",
+    sparkline: [31.5, 31.8, 32.0, 32.0, 32.0, 32.0, 32.0],
+    vungTrong: "Bình Phước, Đồng Nai, Bình Thuận",
+    nguonUytin: "Hiệp hội Điều Việt Nam (VINACAS)",
+    khoiLuong: "4.800 tấn/ngày",
+    soGiong: "3 loại hạt điều",
+    cacGiong: [
+      {
+        giong: "Điều thô Bình Phước (Hạt to độ ẩm <10%)",
+        gia: "32.000",
+        dv: "đ/kg",
+        giaVuon: "31.200 – 32.200 đ/kg",
+        giaKho: "33.000 – 34.000 đ/kg",
+        note: "Hạt chắc, tỷ lệ thu hồi nhân cao",
+        doAm: "< 10%",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Nhà máy chế biến thu mua đều đặn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"32.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"32.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"32.000", td:"+200 đ", up:true},
+          {ngay:"19/09", gia:"31.800", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"31.800", td:"+300 đ", up:true},
+          {ngay:"17/09", gia:"31.500", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"31.500", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Điều thô Đồng Nai (Thu mua tại vườn)",
+        gia: "30.000",
+        dv: "đ/kg",
+        giaVuon: "29.500 – 30.500 đ/kg",
+        giaKho: "31.500 – 32.500 đ/kg",
+        note: "Hạt đều, giao dịch tại điểm cân",
+        doAm: "< 10%",
+        tapChat: "< 1.0%",
+        khuyenNghi: "Giá ổn định không có biến động lớn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"30.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"30.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"30.000", td:"+200 đ", up:true},
+          {ngay:"19/09", gia:"29.800", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"29.800", td:"+300 đ", up:true},
+          {ngay:"17/09", gia:"29.500", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"29.500", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Nhân điều trắng W320 xuất khẩu đóng gói",
+        gia: "180.000",
+        dv: "đ/kg nhân",
+        giaVuon: "172.000 – 178.000 đ/kg",
+        giaKho: "182.000 – 188.000 đ/kg",
+        note: "Đã tách vỏ lụa, phân loại kích cỡ chuẩn W320",
+        doAm: "< 5%",
+        tapChat: "< 0.05%",
+        khuyenNghi: "Các đơn hàng sang châu Âu và Trung Đông ổn định.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"180.000", td:"+2.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"178.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"178.000", td:"+1.000 đ", up:true},
+          {ngay:"19/09", gia:"177.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"177.000", td:"+2.000 đ", up:true},
+          {ngay:"17/09", gia:"175.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"175.000", td:"0 đ", up:null}
+        ]
+      }
+    ]
+  },
+  {
+    id: "caosu",
+    code: "CSU",
+    ten: "Mủ cao su",
+    tenTiengAnh: "Natural Rubber (Mủ nước & Mủ đông)",
+    icon: "🌳",
+    giaChinh: "392",
+    dv: "đ/độ TSC",
+    bienDong: "+5 đ",
+    phanTram: "+1.29%",
+    chieu: "up",
+    giaSan: "380",
+    giaTran: "405",
+    giaTC: "387",
+    sparkline: [382, 384, 385, 386, 387, 388, 392],
+    vungTrong: "Bình Phước, Tây Ninh, Bình Dương, Gia Lai",
+    nguonUytin: "Tập đoàn CN Cao su VN (VRG)",
+    khoiLuong: "11.000 tấn/ngày",
+    soGiong: "3 loại mủ",
+    cacGiong: [
+      {
+        giong: "Mủ nước Bình Phước (Điểm cân TSC)",
+        gia: "392",
+        dv: "đ/độ TSC",
+        giaVuon: "388 – 393 đ/độ",
+        giaKho: "395 – 400 đ/độ",
+        note: "Độ mủ kiểm tra tại phòng lab nhà máy",
+        doAm: "Mủ tươi",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Giá cao su thế giới phục hồi hỗ trợ giá mủ trong nước.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"392", td:"+4 đ", up:true},
+          {ngay:"Hôm qua", gia:"388", td:"+1 đ", up:true},
+          {ngay:"20/09", gia:"387", td:"+1 đ", up:true},
+          {ngay:"19/09", gia:"386", td:"+1 đ", up:true},
+          {ngay:"18/09", gia:"385", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"385", td:"+2 đ", up:true},
+          {ngay:"16/09", gia:"383", td:"+1 đ", up:true}
+        ]
+      },
+      {
+        giong: "Mủ nước Tây Ninh (Chế biến SVR)",
+        gia: "388",
+        dv: "đ/độ TSC",
+        giaVuon: "384 – 389 đ/độ",
+        giaKho: "392 – 396 đ/độ",
+        note: "Tiêu chuẩn nhà máy cao su 30-4",
+        doAm: "Mủ tươi",
+        tapChat: "< 0.5%",
+        khuyenNghi: "Giao dịch tăng trong các phiên gần đây.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"388", td:"+3 đ", up:true},
+          {ngay:"Hôm qua", gia:"385", td:"+1 đ", up:true},
+          {ngay:"20/09", gia:"384", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"384", td:"+1 đ", up:true},
+          {ngay:"18/09", gia:"383", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"383", td:"+2 đ", up:true},
+          {ngay:"16/09", gia:"381", td:"+1 đ", up:true}
+        ]
+      },
+      {
+        giong: "Mủ đông chén / mủ dây tạp chất thấp",
+        gia: "15.800",
+        dv: "đ/kg tươi",
+        giaVuon: "15.000 – 16.000 đ/kg",
+        giaKho: "16.500 – 17.500 đ/kg",
+        note: "Mủ đông tự nhiên chén cạo, tỷ lệ tạp chất < 5%",
+        doAm: "Khô ráo",
+        tapChat: "< 5%",
+        khuyenNghi: "Thu gom nhanh tránh để mưa làm giảm chất lượng mủ.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"15.800", td:"+300 đ", up:true},
+          {ngay:"Hôm qua", gia:"15.500", td:"+200 đ", up:true},
+          {ngay:"20/09", gia:"15.300", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"15.300", td:"+300 đ", up:true},
+          {ngay:"18/09", gia:"15.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"15.000", td:"+300 đ", up:true},
+          {ngay:"16/09", gia:"14.700", td:"+200 đ", up:true}
+        ]
+      }
+    ]
+  },
+  {
+    id: "xoai",
+    code: "XOI",
+    ten: "Xoài các loại",
+    tenTiengAnh: "Mango (Cát Hoà Lộc, Cát Chu)",
+    icon: "🥭",
+    giaChinh: "68.000",
+    dv: "đ/kg",
+    bienDong: "+2.000 đ",
+    phanTram: "+3.03%",
+    chieu: "up",
+    giaSan: "60.000",
+    giaTran: "75.000",
+    giaTC: "66.000",
+    sparkline: [62, 64, 65, 65, 66, 66, 68],
+    vungTrong: "Đồng Tháp, Tiền Giang, An Giang, Khánh Hòa",
+    nguonUytin: "Chợ Đầu mối Nông sản Miền Tây",
+    khoiLuong: "7.500 tấn/ngày",
+    soGiong: "3 giống xoài",
+    cacGiong: [
+      {
+        giong: "Xoài Cát Hoà Lộc — Loại 1 (>450g/trái bao bọc)",
+        gia: "75.000",
+        dv: "đ/kg",
+        giaVuon: "68.000 – 74.000 đ/kg",
+        giaKho: "78.000 – 85.000 đ/kg",
+        note: "Trái bao túi sạch đẹp, không tì vết, ngọt thanh dẻo",
+        doAm: "Tươi",
+        tapChat: "Chuẩn xuất khẩu",
+        khuyenNghi: "Nhu cầu thị trường Hàn Quốc và Nhật Bản duy trì rất mạnh.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"75.000", td:"+2.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"73.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"72.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"72.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"70.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"70.000", td:"+2.000 đ", up:true},
+          {ngay:"16/09", gia:"68.000", td:"+2.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Xoài Cát Chu Cao Lãnh (Thịt thơm dẻo)",
+        gia: "34.000",
+        dv: "đ/kg",
+        giaVuon: "30.000 – 33.000 đ/kg",
+        giaKho: "35.000 – 39.000 đ/kg",
+        note: "Vị ngọt đậm, thịt màu vàng cam hấp dẫn",
+        doAm: "Tươi",
+        tapChat: "VietGAP",
+        khuyenNghi: "Tiêu thụ nội địa và làm xoài sấy dẻo xuất khẩu rất tốt.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"34.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"33.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"33.000", td:"+1.000 đ", up:true},
+          {ngay:"19/09", gia:"32.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"32.000", td:"+1.000 đ", up:true},
+          {ngay:"17/09", gia:"31.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"31.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Xoài Keo / Xoài Đài Loan xanh giòn",
+        gia: "18.000",
+        dv: "đ/kg",
+        giaVuon: "15.000 – 17.500 đ/kg",
+        giaKho: "19.000 – 22.000 đ/kg",
+        note: "Trái to nặng 600g - 1kg, ăn xanh giòn ngọt",
+        doAm: "Tươi già",
+        tapChat: "Sạch",
+        khuyenNghi: "Cung cấp cho các chợ đầu mối trái cây tươi.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"18.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"18.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"17.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"17.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"16.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"16.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"16.000", td:"+1.000 đ", up:true}
+        ]
+      }
+    ]
+  },
+  {
+    id: "thanhlong",
+    code: "THL",
+    ten: "Thanh long",
+    tenTiengAnh: "Dragon Fruit (Bình Thuận, Long An)",
+    icon: "🐉",
+    giaChinh: "26.000",
+    dv: "đ/kg",
+    bienDong: "+1.500 đ",
+    phanTram: "+6.12%",
+    chieu: "up",
+    giaSan: "22.000",
+    giaTran: "29.000",
+    giaTC: "24.500",
+    sparkline: [21, 22, 23, 24, 24.5, 24.5, 26],
+    vungTrong: "Bình Thuận, Long An, Tiền Giang",
+    nguonUytin: "Hiệp hội Thanh long Bình Thuận",
+    khoiLuong: "8.600 tấn/ngày",
+    soGiong: "2 loại thanh long",
+    cacGiong: [
+      {
+        giong: "Thanh long ruột đỏ — Loại 1 tai xanh cứng xuất khẩu",
+        gia: "28.000",
+        dv: "đ/kg",
+        giaVuon: "25.000 – 28.000 đ/kg",
+        giaKho: "30.000 – 34.000 đ/kg",
+        note: "Trái 450 - 600g, tai xanh dày cứng, màu đỏ đậm",
+        doAm: "Tươi",
+        tapChat: "Chuẩn GlobalGAP",
+        khuyenNghi: "Xe tải lạnh thu mua xuất khẩu thông quan thuận lợi tại các cửa khẩu phía Bắc.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"28.000", td:"+1.500 đ", up:true},
+          {ngay:"Hôm qua", gia:"26.500", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"25.500", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"25.500", td:"+1.500 đ", up:true},
+          {ngay:"18/09", gia:"24.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"24.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"23.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Thanh long ruột trắng Bình Thuận (Đóng thùng xốp)",
+        gia: "14.500",
+        dv: "đ/kg",
+        giaVuon: "13.000 – 14.500 đ/kg",
+        giaKho: "16.000 – 18.000 đ/kg",
+        note: "Vị chua ngọt thanh mát, tai thẳng đẹp",
+        doAm: "Tươi",
+        tapChat: "VietGAP",
+        khuyenNghi: "Sản lượng đèn vụ nghịch đang cho thu hoạch lứa đầu.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"14.500", td:"+500 đ", up:true},
+          {ngay:"Hôm qua", gia:"14.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"14.000", td:"+500 đ", up:true},
+          {ngay:"19/09", gia:"13.500", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"13.500", td:"+500 đ", up:true},
+          {ngay:"17/09", gia:"13.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"13.000", td:"+500 đ", up:true}
+        ]
+      }
+    ]
+  },
+  {
+    id: "bo",
+    code: "BOS",
+    ten: "Bơ sáp & Bơ 034",
+    tenTiengAnh: "Avocado (Bơ 034, Bơ Booth Tây Nguyên)",
+    icon: "🥑",
+    giaChinh: "32.000",
+    dv: "đ/kg",
+    bienDong: "0 đ",
+    phanTram: "0.00%",
+    chieu: "flat",
+    giaSan: "28.000",
+    giaTran: "36.000",
+    giaTC: "32.000",
+    sparkline: [32, 31, 32, 32, 33, 32, 32],
+    vungTrong: "Lâm Đồng (Bảo Lộc, Di Linh), Đắk Lắk",
+    nguonUytin: "Chợ Nông sản Tây Nguyên",
+    khoiLuong: "3.200 tấn/ngày",
+    soGiong: "2 giống bơ",
+    cacGiong: [
+      {
+        giong: "Bơ 034 Lâm Đồng — Loại 1 (Trái dài cơm sáp vàng)",
+        gia: "34.000",
+        dv: "đ/kg",
+        giaVuon: "30.000 – 34.000 đ/kg",
+        giaKho: "36.000 – 42.000 đ/kg",
+        note: "Trái dài 25-35cm, cơm vàng dẻo béo ngậy, hạt lép",
+        doAm: "Quả già cây",
+        tapChat: "Không sâu đục",
+        khuyenNghi: "Hái quả già độ bóng để bơ chín đều không bị nhũn đầu.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"34.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"34.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"33.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"33.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"32.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"32.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"31.000", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Bơ Booth Mỹ (Trái tròn vụ thu hoạch muộn)",
+        gia: "38.000",
+        dv: "đ/kg",
+        giaVuon: "34.000 – 38.000 đ/kg",
+        giaKho: "42.000 – 48.000 đ/kg",
+        note: "Vỏ dày, cơm vàng óng dẻo quánh, để được lâu",
+        doAm: "Quả già",
+        tapChat: "Sạch",
+        khuyenNghi: "Vụ thu hoạch rộ từ tháng 9 đến tháng 11.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"38.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"38.000", td:"+2.000 đ", up:true},
+          {ngay:"20/09", gia:"36.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"36.000", td:"+2.000 đ", up:true},
+          {ngay:"18/09", gia:"34.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"34.000", td:"+2.000 đ", up:true},
+          {ngay:"16/09", gia:"32.000", td:"0 đ", up:null}
+        ]
+      }
+    ]
+  },
+  {
+    id: "ot",
+    code: "OTG",
+    ten: "Ớt & Rau gia vị",
+    tenTiengAnh: "Chili & Spices (Tiền Giang, Đà Lạt, Lý Sơn)",
+    icon: "🌶️",
+    giaChinh: "35.000",
+    dv: "đ/kg",
+    bienDong: "+2.000 đ",
+    phanTram: "+6.06%",
+    chieu: "up",
+    giaSan: "30.000",
+    giaTran: "40.000",
+    giaTC: "33.000",
+    sparkline: [29, 31, 32, 33, 33, 33, 35],
+    vungTrong: "Tiền Giang, Đồng Tháp, Đà Lạt, Quảng Ngãi (Lý Sơn)",
+    nguonUytin: "Chợ Đầu mối Nông sản Tiền Giang & HTX Lý Sơn",
+    khoiLuong: "6.100 tấn/ngày",
+    soGiong: "4 loại ớt & gia vị",
+    cacGiong: [
+      {
+        giong: "Ớt chỉ thiên cuống thẳng — Loại 1 xuất khẩu",
+        gia: "36.000",
+        dv: "đ/kg",
+        giaVuon: "32.000 – 35.000 đ/kg",
+        giaKho: "38.000 – 42.000 đ/kg",
+        note: "Trái đỏ tươi, cay nồng, cuống xanh thẳng",
+        doAm: "Tươi",
+        tapChat: "Không sâu thối",
+        khuyenNghi: "Nhu cầu đóng thùng xuất khẩu sang Trung Quốc và Hàn Quốc đang tăng mạnh.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"36.000", td:"+2.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"34.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"33.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"33.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"32.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"32.000", td:"+2.000 đ", up:true},
+          {ngay:"16/09", gia:"30.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Ớt chuông Đà Lạt (Đỏ/Vàng nhà kính VietGAP)",
+        gia: "48.000",
+        dv: "đ/kg",
+        giaVuon: "42.000 – 46.000 đ/kg",
+        giaKho: "50.000 – 56.000 đ/kg",
+        note: "Trái vuông vức, thịt dày giòn ngọt",
+        doAm: "Tươi",
+        tapChat: "VietGAP",
+        khuyenNghi: "Cung cấp cho các chuỗi siêu thị và nhà hàng cao cấp.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"48.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"47.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"47.000", td:"+1.000 đ", up:true},
+          {ngay:"19/09", gia:"46.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"46.000", td:"+1.000 đ", up:true},
+          {ngay:"17/09", gia:"45.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"45.000", td:"+1.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Tỏi Lý Sơn khô chính gốc (Nhiều tép thơm nồng)",
+        gia: "135.000",
+        dv: "đ/kg",
+        giaVuon: "125.000 – 135.000 đ/kg",
+        giaKho: "145.000 – 165.000 đ/kg",
+        note: "Tép nhỏ chắc mẩy, cay dịu thơm thanh đặc trưng",
+        doAm: "< 10%",
+        tapChat: "< 0.1%",
+        khuyenNghi: "Thương hiệu quốc gia, giá trị kinh tế bền vững.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"135.000", td:"+5.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"130.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"130.000", td:"+5.000 đ", up:true},
+          {ngay:"19/09", gia:"125.000", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"125.000", td:"+5.000 đ", up:true},
+          {ngay:"17/09", gia:"120.000", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"120.000", td:"+5.000 đ", up:true}
+        ]
+      },
+      {
+        giong: "Hành tím Vĩnh Châu (Sóc Trăng củ chắc)",
+        gia: "42.000",
+        dv: "đ/kg",
+        giaVuon: "36.000 – 40.000 đ/kg",
+        giaKho: "44.000 – 48.000 đ/kg",
+        note: "Củ tím đậm, chắc thịt, bảo quản được lâu không óp",
+        doAm: "Khô ráo",
+        tapChat: "< 1%",
+        khuyenNghi: "Xuất khẩu đều đặn sang các nước Đông Nam Á.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"42.000", td:"+1.000 đ", up:true},
+          {ngay:"Hôm qua", gia:"41.000", td:"+1.000 đ", up:true},
+          {ngay:"20/09", gia:"40.000", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"40.000", td:"+1.000 đ", up:true},
+          {ngay:"18/09", gia:"39.000", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"39.000", td:"+1.000 đ", up:true},
+          {ngay:"16/09", gia:"38.000", td:"0 đ", up:null}
+        ]
+      }
+    ]
+  },
+  {
+    id: "ngo",
+    code: "NGO",
+    ten: "Bắp / Ngô hạt",
+    tenTiengAnh: "Maize / Corn (Sơn La, Đồng Nai)",
+    icon: "🌽",
+    giaChinh: "7.000",
+    dv: "đ/kg",
+    bienDong: "0 đ",
+    phanTram: "0.00%",
+    chieu: "flat",
+    giaSan: "6.700",
+    giaTran: "7.400",
+    giaTC: "7.000",
+    sparkline: [6.9, 7.0, 7.0, 7.1, 7.0, 7.0, 7.0],
+    vungTrong: "Sơn La, Đồng Nai, Đắk Lắk",
+    nguonUytin: "Chợ Đầu mối Nông sản Thức ăn chăn nuôi",
+    khoiLuong: "19.000 tấn/ngày",
+    soGiong: "2 loại ngô",
+    cacGiong: [
+      {
+        giong: "Ngô hạt khô Sơn La / Đồng Nai (Độ ẩm <14.5%)",
+        gia: "7.000",
+        dv: "đ/kg",
+        giaVuon: "6.800 – 7.100 đ/kg",
+        giaKho: "7.200 – 7.500 đ/kg",
+        note: "Dùng làm nguyên liệu sản xuất thức ăn chăn nuôi",
+        doAm: "< 14.5%",
+        tapChat: "< 1.5%",
+        khuyenNghi: "Các nhà máy thức ăn chăn nuôi bao tiêu khối lượng lớn.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"7.000", td:"0 đ", up:null},
+          {ngay:"Hôm qua", gia:"7.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"7.000", td:"+100 đ", up:true},
+          {ngay:"19/09", gia:"6.900", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"6.900", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"6.900", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"6.800", td:"0 đ", up:null}
+        ]
+      },
+      {
+        giong: "Bắp nếp / Bắp ngọt tươi tại vựa",
+        gia: "13.500",
+        dv: "đ/kg",
+        giaVuon: "12.000 – 13.000 đ/kg",
+        giaKho: "14.000 – 16.000 đ/kg",
+        note: "Bắp tươi vỏ xanh, hạt căng bóng đều",
+        doAm: "Tươi",
+        tapChat: "Sạch",
+        khuyenNghi: "Tiêu thụ chợ đầu mối trong ngày.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"13.500", td:"+500 đ", up:true},
+          {ngay:"Hôm qua", gia:"13.000", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"13.000", td:"+500 đ", up:true},
+          {ngay:"19/09", gia:"12.500", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"12.500", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"12.500", td:"+500 đ", up:true},
+          {ngay:"16/09", gia:"12.000", td:"0 đ", up:null}
+        ]
+      }
+    ]
+  },
+  {
+    id: "khoaimi",
+    code: "KMI",
+    ten: "Khoai mì / Sắn",
+    tenTiengAnh: "Cassava / Tapioca (Tây Ninh, Bình Phước)",
+    icon: "🥔",
+    giaChinh: "2.850",
+    dv: "đ/kg",
+    bienDong: "+50 đ",
+    phanTram: "+1.79%",
+    chieu: "up",
+    giaSan: "2.600",
+    giaTran: "3.100",
+    giaTC: "2.800",
+    sparkline: [2.7, 2.75, 2.8, 2.8, 2.8, 2.8, 2.85],
+    vungTrong: "Tây Ninh, Bình Phước, Gia Lai, Phú Yên",
+    nguonUytin: "Nhà máy Tinh bột sắn Tây Ninh",
+    khoiLuong: "22.000 tấn/ngày",
+    soGiong: "2 loại sắn",
+    cacGiong: [
+      {
+        giong: "Sắn củ tươi trữ bột 30 độ (Cửa nhà máy)",
+        gia: "2.850",
+        dv: "đ/kg",
+        giaVuon: "2.650 – 2.780 đ/kg",
+        giaKho: "2.900 – 3.050 đ/kg",
+        note: "Đo chữ bột tại cổng nhà máy chế biến tinh bột",
+        doAm: "Củ tươi",
+        tapChat: "< 2%",
+        khuyenNghi: "Nhà máy đang chạy hết công suất vụ ép củ tươi.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"2.850", td:"+50 đ", up:true},
+          {ngay:"Hôm qua", gia:"2.800", td:"0 đ", up:null},
+          {ngay:"20/09", gia:"2.800", td:"+50 đ", up:true},
+          {ngay:"19/09", gia:"2.750", td:"0 đ", up:null},
+          {ngay:"18/09", gia:"2.750", td:"+50 đ", up:true},
+          {ngay:"17/09", gia:"2.700", td:"0 đ", up:null},
+          {ngay:"16/09", gia:"2.700", td:"+50 đ", up:true}
+        ]
+      },
+      {
+        giong: "Sắn lát phơi khô xuất khẩu",
+        gia: "6.050",
+        dv: "đ/kg",
+        giaVuon: "5.700 – 5.900 đ/kg",
+        giaKho: "6.100 – 6.400 đ/kg",
+        note: "Lát sắn trắng khô đạt chuẩn xuất khẩu sang Trung Quốc",
+        doAm: "< 14%",
+        tapChat: "< 2%",
+        khuyenNghi: "Nhu cầu nhập khẩu làm cồn sinh học duy trì mức cao.",
+        lichSu: [
+          {ngay:"Hôm nay", gia:"6.050", td:"+50 đ", up:true},
+          {ngay:"Hôm qua", gia:"6.000", td:"+100 đ", up:true},
+          {ngay:"20/09", gia:"5.900", td:"0 đ", up:null},
+          {ngay:"19/09", gia:"5.900", td:"+50 đ", up:true},
+          {ngay:"18/09", gia:"5.850", td:"0 đ", up:null},
+          {ngay:"17/09", gia:"5.850", td:"+100 đ", up:true},
+          {ngay:"16/09", gia:"5.750", td:"0 đ", up:null}
+        ]
+      }
     ]
   }
-};
-
-var timKiemGiaQuery="";
-var openAccs={"caphe":true,"luatuoi":true,"saurieng":true};
+];
 
 function pGia(){
-  var today=dmy(NAY);
-  var nowHour=new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+  var today = dmy(NAY);
+  var nowHour = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
 
-  var h='<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">'
-    +'<div><span class="live-dot"></span><b style="color:var(--primary);font-size:.9rem">Hệ thống Giá Nông Sản Trực Tuyến</b>'
-    +'<span style="font-size:.78rem;color:var(--muted-fg);margin-left:8px">Cập nhật lúc: <b>'+nowHour+' hôm nay ('+today+')</b> · Chu kỳ 30 phút/lần</span></div>'
-    +'<button type="button" id="btnRefreshGia" class="btn" style="font-size:.78rem;padding:5px 12px">🔄 Làm mới giá ngay</button>'
-    +'</div>';
+  // Top header with Title + Toggle Buttons + Refresh Button
+  var h = '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">'
+    + '<div>'
+    + '<span class="live-dot"></span><b style="color:var(--primary);font-size:.92rem">Hệ thống Giá Nông Sản Trực Tuyến</b>'
+    + '<span style="font-size:.78rem;color:var(--muted-fg);margin-left:8px">Cập nhật: <b>' + nowHour + ' hôm nay (' + today + ')</b> · Chu kỳ 30 phút/lần</span>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;gap:10px">'
+    + '<div class="mode-toggle-group">'
+    + '<button type="button" class="mode-toggle-btn ' + (cheDoGia === 'chitiet' ? 'active' : '') + '" data-chedogia="chitiet">'
+    + '🔍 Tra chi tiết (Theo cây)'
+    + '</button>'
+    + '<button type="button" class="mode-toggle-btn ' + (cheDoGia === 'coban' ? 'active' : '') + '" data-chedogia="coban">'
+    + '📈 Tra cơ bản (Kiểu chứng khoán)'
+    + '</button>'
+    + '</div>'
+    + '<button type="button" id="btnRefreshGia" class="btn" style="font-size:.78rem;padding:6px 12px">🔄 Làm mới giá ngay</button>'
+    + '</div>'
+    + '</div>';
 
-  /* THANH TÌM KIẾM GIÁ NHANH */
-  h+='<div class="card" style="padding:14px;margin-bottom:20px">'
-    +'<div style="display:flex;gap:10px;align-items:center">'
-    +'<span style="font-size:1.2rem">🔍</span>'
-    +'<input type="search" id="timGiaNongSan" value="'+esc(timKiemGiaQuery)+'" placeholder="Tìm nhanh bất kỳ cây nào: arabica, robusta, st25, sầu riêng ri6, cam sành, tiêu, điều, cao su…" style="flex:1">'
-    +(timKiemGiaQuery?'<button type="button" id="btnClearTimGia" class="btn" style="font-size:.75rem">Xoá tìm</button>':'')
-    +'</div></div>';
+  if(cheDoGia === "coban"){
+    /* ================= CHẾ ĐỘ 1: TRA CƠ BẢN (KIỂU CHỨNG KHOÁN) ================= */
+    // Market Overview Ticker Banner
+    h += '<div class="card" style="padding:14px 18px;margin-bottom:16px;background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(37,99,235,.05));border-color:rgba(16,185,129,.3)">'
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">'
+      + '<div>'
+      + '<span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">CHỈ SỐ THỊ TRƯỜNG NÔNG SẢN VN-AGRI</span>'
+      + '<div style="display:flex;align-items:baseline;gap:10px;margin-top:2px">'
+      + '<span style="font-size:1.4rem;font-weight:900;letter-spacing:-.02em;color:var(--fg)">1,286.42</span>'
+      + '<span class="stock-badge-up" style="font-size:.82rem">▲ +8.35 (+0.65%)</span>'
+      + '<span style="font-size:.78rem;color:var(--muted-fg);margin-left:6px">Tổng khối lượng giao dịch vựa: <b>18.500 tấn</b></span>'
+      + '</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;font-size:.75rem">'
+      + '<span style="padding:4px 8px;border-radius:6px;background:#dcfce7;color:#15803d;font-weight:700">9 TĂNG ▲</span>'
+      + '<span style="padding:4px 8px;border-radius:6px;background:#fef3c7;color:#b45309;font-weight:700">4 THAM CHIẾU ●</span>'
+      + '<span style="padding:4px 8px;border-radius:6px;background:#fee2e2;color:#b91c1c;font-weight:700">1 GIẢM ▼</span>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
 
-  /* BẢNG ĐỐI SOÁT CÁC NGUỒN UY TÍN TRÊN MẠNG */
-  var nguonDoiSoat=[
-    {nguon:"giacaphe.com", uyTin:"5.0 ★★★★★", luot:"2.4M lượt/tháng", chuyen:"Cà phê & Nông sản Tây Nguyên", danhGia:"Nguồn chuẩn nhất cho cà phê"},
-    {nguon:"giatieu.com", uyTin:"5.0 ★★★★★", luot:"1.1M lượt/tháng", chuyen:"Hồ tiêu & Gia vị xuất khẩu", danhGia:"Số 1 ngành tiêu"},
-    {nguon:"vietfood.org.vn", uyTin:"4.9 ★★★★★", luot:"500K lượt/tháng", chuyen:"Hiệp hội Lương thực VN", danhGia:"Giá gạo & lúa chính thống"},
-    {nguon:"banggianongsan.com", uyTin:"4.8 ★★★★★", luot:"850K lượt/tháng", chuyen:"Sầu riêng, Lúa, Trái cây ĐBSCL", danhGia:"Tổng hợp đối soát đa sàn"},
-    {nguon:"Chợ Đầu Mối Thủ Đức", uyTin:"5.0 ★★★★★", luot:"Giao dịch thực", chuyen:"Trái cây, Rau củ, Nông sản tươi", danhGia:"Giá khớp thực tế tại vựa"}
-  ];
-  var dsHtml='<div class="tbl-w"><table style="min-width:650px"><thead><tr>'
-    +'<th>Nguồn đối soát</th><th>Độ uy tín</th><th>Lượng truy cập</th><th>Chuyên ngành</th><th>Đánh giá kiểm chứng</th>'
-    +'</tr></thead><tbody>';
-  for(var n=0;n<nguonDoiSoat.length;n++){
-    dsHtml+='<tr><td><b>'+esc(nguonDoiSoat[n].nguon)+'</b></td>'
-      +'<td><span style="color:#d97706;font-weight:700">'+nguonDoiSoat[n].uyTin+'</span></td>'
-      +'<td class="mono">'+nguonDoiSoat[n].luot+'</td>'
-      +'<td>'+esc(nguonDoiSoat[n].chuyen)+'</td>'
-      +'<td><span class="tag tag-ok">'+esc(nguonDoiSoat[n].danhGia)+'</span></td></tr>';
-  }
-  dsHtml+='</tbody></table></div>'
-    +'<p style="margin:10px 0 0;font-size:.75rem;color:var(--muted-fg)">* Thuật toán tự động đối soát biên độ giá giữa các nguồn uy tín nhất. Nếu một website báo giá chênh lệch > 5%, hệ thống sẽ loại trừ để tránh giá ảo.</p>';
+    // Global Search
+    h += '<div class="card" style="padding:12px 14px;margin-bottom:16px">'
+      + '<div style="display:flex;gap:10px;align-items:center">'
+      + '<span style="font-size:1.15rem">🔍</span>'
+      + '<input type="search" id="timGiaNongSan" value="' + esc(timKiemGiaQuery) + '" placeholder="Lọc nhanh mã cổ phiếu nông sản: CFE (Cà phê), LUA (Lúa), CAM, CHH (Chanh/Bưởi), SRI (Sầu riêng)..." style="flex:1">'
+      + (timKiemGiaQuery ? '<button type="button" id="btnClearTimGia" class="btn" style="font-size:.75rem">Xoá lọc</button>' : '')
+      + '</div></div>';
 
-  h+=sec("Đối soát nguồn uy tín kiểm chứng",card('<div style="padding:16px 20px">'+dsHtml+'</div>'));
+    // Grid of Stock Ticker Cards
+    var q = timKiemGiaQuery.toLowerCase().trim();
+    var stockCardsHtml = '<div class="stock-grid">';
+    var matchCount = 0;
 
-  /* DANH SÁCH 4 NHÓM NÔNG SẢN VỚI ACCORDION XỔ XUỐNG CHI TIẾT */
-  var q=timKiemGiaQuery.toLowerCase().trim();
-  var catKeys=Object.keys(GIA_TREE);
-
-  for(var c=0;c<catKeys.length;c++){
-    var cat=GIA_TREE[catKeys[c]],items=cat.ds,renderedCatItems='';
-    for(var it=0;it<items.length;it++){
-      var crop=items[it];
-      var matchQuery=!q || crop.ten.toLowerCase().indexOf(q)>=0;
-      if(!matchQuery){
-        for(var g=0;g<crop.cacGiong.length;g++){
-          if(crop.cacGiong[g].giong.toLowerCase().indexOf(q)>=0){matchQuery=true;break}
+    for(var i = 0; i < DANH_SACH_CAY_GIA.length; i++){
+      var c = DANH_SACH_CAY_GIA[i];
+      var match = !q || c.ten.toLowerCase().indexOf(q) >= 0 || c.code.toLowerCase().indexOf(q) >= 0 || c.tenTiengAnh.toLowerCase().indexOf(q) >= 0;
+      if(!match){
+        for(var g = 0; g < c.cacGiong.length; g++){
+          if(c.cacGiong[g].giong.toLowerCase().indexOf(q) >= 0){ match = true; break; }
         }
       }
-      if(!matchQuery)continue;
+      if(!match) continue;
+      matchCount++;
 
-      var isOpen=openAccs[crop.id] || q.length>0;
+      var badgeClass = c.chieu === 'up' ? 'stock-badge-up' : (c.chieu === 'down' ? 'stock-badge-down' : 'stock-badge-flat');
+      var badgeIcon = c.chieu === 'up' ? '▲' : (c.chieu === 'down' ? '▼' : '●');
+      var sparklineSvg = veMiniSparklineSVG(c.sparkline, c.chieu, 76, 26);
 
-      var tableRows='';
-      for(var r=0;r<crop.cacGiong.length;r++){
-        var sub=crop.cacGiong[r];
-        tableRows+='<tr>'
-          +'<td><b>'+esc(sub.giong)+'</b></td>'
-          +'<td class="r mono" style="font-size:1.05rem;font-weight:700;color:var(--primary)">'+sub.gia+' <span style="font-size:.72rem;font-weight:400;color:var(--muted-fg)">'+esc(sub.dv)+'</span></td>'
-          +'<td style="font-size:.75rem;color:var(--muted-fg)">'+esc(sub.note)+'</td>'
-          +'</tr>';
-      }
+      stockCardsHtml += '<div class="stock-card" data-choncaygia="' + c.id + '" title="Bấm vào để xem phân tích chi tiết từng giống ' + esc(c.ten) + '">'
+        + '<div>'
+        + '<div class="stock-card-hdr">'
+        + '<div class="stock-card-title">'
+        + '<span style="font-size:1.25rem">' + c.icon + '</span>'
+        + '<span>' + esc(c.ten) + '</span>'
+        + '</div>'
+        + '<span class="stock-ticker-code">' + c.code + '</span>'
+        + '</div>'
+        + '<div class="stock-card-price mono">' + c.giaChinh + '<small>' + esc(c.dv) + '</small></div>'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">'
+        + '<span class="' + badgeClass + '">' + badgeIcon + ' ' + c.bienDong + ' (' + c.phanTram + ')</span>'
+        + '<div class="stock-sparkline-box" style="width:76px">' + sparklineSvg + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="stock-card-footer">'
+        + '<span>Sàn: ' + c.giaSan + '</span>'
+        + '<span>TC: ' + c.giaTC + '</span>'
+        + '<span>Trần: ' + c.giaTran + '</span>'
+        + '</div>'
+        + '</div>';
+    }
+    stockCardsHtml += '</div>';
 
-      renderedCatItems+='<div class="price-acc-item">'
-        +'<button type="button" class="price-acc-hdr" data-togacc="'+crop.id+'">'
-        +'<span style="font-size:1.3rem;width:24px;text-align:center">'+(isOpen?'▾':'▸')+'</span>'
-        +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:.95rem;font-weight:800;color:var(--fg)">'+esc(crop.ten)+'</div>'
-        +'<div style="font-size:.72rem;color:var(--muted-fg)">Nguồn: '+esc(crop.nguonUytin)+'</div></div>'
-        +'<div style="text-align:right">'
-        +'<div class="mono" style="font-size:1.15rem;font-weight:800;color:var(--primary)">'+crop.giaChung+' <span style="font-size:.72rem;font-weight:400;color:var(--muted-fg)">'+esc(crop.dv)+'</span></div>'
-        +'<span class="tag tag-ok" style="font-size:.65rem;padding:1px 6px">'+crop.xuHuong+'</span></div>'
-        +'</button>';
-
-      if(isOpen){
-        renderedCatItems+='<div class="price-acc-body">'
-          +'<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:8px">Bảng giá chi tiết từng giống & chủng loại:</div>'
-          +'<div class="tbl-w"><table style="min-width:580px"><thead><tr>'
-          +'<th>Chủng loại / Giống / Địa phương</th><th class="r">Giá thu mua hôm nay</th><th>Ghi chú tiêu chuẩn</th>'
-          +'</tr></thead><tbody>'+tableRows+'</tbody></table></div>'
-          +'</div>';
-      }
-      renderedCatItems+='</div>';
+    if(matchCount === 0){
+      stockCardsHtml = '<div class="card" style="padding:30px;text-align:center;color:var(--muted-fg)">Không tìm thấy nông sản nào khớp từ khoá "' + esc(timKiemGiaQuery) + '".</div>';
     }
 
-    if(renderedCatItems){
-      h+=sec(cat.icon+' '+cat.ten,renderedCatItems);
+    h += sec("BẢNG GIÁ ĐIỆN TỬ NÔNG SẢN VIỆT NAM (STOCK TICKER)", stockCardsHtml);
+
+    // Reliable Sources table
+    var nguonDoiSoat = [
+      {nguon:"giacaphe.com", uyTin:"5.0 ★★★★★", luot:"2.4M lượt/tháng", chuyen:"Cà phê & Nông sản Tây Nguyên", danhGia:"Nguồn chuẩn nhất cho cà phê"},
+      {nguon:"giatieu.com", uyTin:"5.0 ★★★★★", luot:"1.1M lượt/tháng", chuyen:"Hồ tiêu & Gia vị xuất khẩu", danhGia:"Số 1 ngành tiêu"},
+      {nguon:"vietfood.org.vn", uyTin:"4.9 ★★★★★", luot:"500K lượt/tháng", chuyen:"Hiệp hội Lương thực VN", danhGia:"Giá gạo & lúa chính thống"},
+      {nguon:"banggianongsan.com", uyTin:"4.8 ★★★★★", luot:"850K lượt/tháng", chuyen:"Sầu riêng, Lúa, Trái cây ĐBSCL", danhGia:"Tổng hợp đối soát đa sàn"},
+      {nguon:"Chợ Đầu Mối Thủ Đức", uyTin:"5.0 ★★★★★", luot:"Giao dịch thực", chuyen:"Trái cây, Cam, Chanh, Rau củ", danhGia:"Giá khớp thực tế tại vựa"}
+    ];
+    var dsHtml = '<div class="tbl-w"><table style="min-width:650px"><thead><tr>'
+      + '<th>Nguồn đối soát</th><th>Độ uy tín</th><th>Lượng truy cập</th><th>Chuyên ngành</th><th>Đánh giá kiểm chứng</th>'
+      + '</tr></thead><tbody>';
+    for(var n = 0; n < nguonDoiSoat.length; n++){
+      dsHtml += '<tr><td><b>' + esc(nguonDoiSoat[n].nguon) + '</b></td>'
+        + '<td><span style="color:#d97706;font-weight:700">' + nguonDoiSoat[n].uyTin + '</span></td>'
+        + '<td class="mono">' + nguonDoiSoat[n].luot + '</td>'
+        + '<td>' + esc(nguonDoiSoat[n].chuyen) + '</td>'
+        + '<td><span class="tag tag-ok">' + esc(nguonDoiSoat[n].danhGia) + '</span></td></tr>';
+    }
+    dsHtml += '</tbody></table></div>'
+      + '<p style="margin:10px 0 0;font-size:.75rem;color:var(--muted-fg)">* Thuật toán tự động đối soát biên độ giá giữa các nguồn uy tín nhất. Nếu một website báo giá chênh lệch > 5%, hệ thống sẽ loại trừ để tránh giá ảo.</p>';
+
+    h += sec("Đối soát nguồn uy tín kiểm chứng", card('<div style="padding:16px 20px">' + dsHtml + '</div>'));
+
+  } else {
+    /* ================= CHẾ ĐỘ 2: TRA CHI TIẾT (THEO LOẠI CÂY & GIỐNG) ================= */
+    if(!cayDangChonGia){
+      // Bước 1: Hiện các ô vuông chọn loại cây
+      h += '<div class="card" style="padding:16px 20px;margin-bottom:18px;background:var(--accent);border-color:rgba(16,185,129,.35)">'
+        + '<div style="font-size:1.05rem;font-weight:800;color:var(--primary);margin-bottom:4px">🌾 CHỌN Ô VUÔNG LOẠI CÂY TRỒNG CẦN TRA CỨU GIÁ</div>'
+        + '<div style="font-size:.82rem;color:var(--fg)">Bấm vào một ô vuông loại cây bên dưới (Cà phê, Lúa, Cam, Chanh & Bưởi, Sầu riêng, Hồ tiêu...) để mở rộng danh sách giống và bảng giá thu mua chi tiết.</div>'
+        + '</div>';
+
+      // Thanh tìm kiếm cây
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:18px">'
+        + '<div style="display:flex;gap:10px;align-items:center">'
+        + '<span style="font-size:1.15rem">🔍</span>'
+        + '<input type="search" id="timGiaNongSan" value="' + esc(timKiemGiaQuery) + '" placeholder="Tìm nhanh loại cây: cà phê, lúa, cam, chanh, bưởi, sầu riêng, hồ tiêu, điều, cao su..." style="flex:1">'
+        + (timKiemGiaQuery ? '<button type="button" id="btnClearTimGia" class="btn" style="font-size:.75rem">Xoá tìm</button>' : '')
+        + '</div></div>';
+
+      // Lưới các ô vuông loại cây
+      var q = timKiemGiaQuery.toLowerCase().trim();
+      var gridTilesHtml = '<div class="crop-select-grid">';
+      var matchCount = 0;
+
+      for(var i = 0; i < DANH_SACH_CAY_GIA.length; i++){
+        var c = DANH_SACH_CAY_GIA[i];
+        var match = !q || c.ten.toLowerCase().indexOf(q) >= 0 || c.tenTiengAnh.toLowerCase().indexOf(q) >= 0;
+        if(!match){
+          for(var g = 0; g < c.cacGiong.length; g++){
+            if(c.cacGiong[g].giong.toLowerCase().indexOf(q) >= 0){ match = true; break; }
+          }
+        }
+        if(!match) continue;
+        matchCount++;
+
+        gridTilesHtml += '<div class="crop-select-tile" data-choncaygia="' + c.id + '">'
+          + '<div class="crop-tile-icon">' + c.icon + '</div>'
+          + '<div class="crop-tile-name">' + esc(c.ten) + '</div>'
+          + '<div class="crop-tile-sub">' + esc(c.soGiong) + ' · ' + esc(c.vungTrong.split(',')[0]) + '</div>'
+          + '<div class="crop-tile-price">Từ ' + c.giaChinh + ' ' + esc(c.dv) + '</div>'
+          + '</div>';
+      }
+      gridTilesHtml += '</div>';
+
+      if(matchCount === 0){
+        gridTilesHtml = '<div class="card" style="padding:30px;text-align:center;color:var(--muted-fg)">Không tìm thấy loại cây nào khớp từ khoá "' + esc(timKiemGiaQuery) + '".</div>';
+      }
+
+      h += sec("DANH MỤC CÁC LOẠI CÂY TRỒNG NÔNG NGHIỆP", gridTilesHtml);
+
+    } else {
+      // Bước 2: Đã chọn 1 loại cây -> Hiện chi tiết cây đó kèm thanh tìm kiếm con
+      var cropObj = null;
+      for(var i = 0; i < DANH_SACH_CAY_GIA.length; i++){
+        if(DANH_SACH_CAY_GIA[i].id === cayDangChonGia){ cropObj = DANH_SACH_CAY_GIA[i]; break; }
+      }
+      if(!cropObj) cropObj = DANH_SACH_CAY_GIA[0];
+
+      // Nút quay lại
+      h += '<div style="margin-bottom:14px">'
+        + '<button type="button" class="btn" data-backtogiacay="1" style="font-size:.85rem;padding:7px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px">'
+        + '← Quay lại danh mục tất cả cây trồng'
+        + '</button>'
+        + '</div>';
+
+      // Banner Header của cây được chọn
+      var badgeClass = cropObj.chieu === 'up' ? 'stock-badge-up' : (cropObj.chieu === 'down' ? 'stock-badge-down' : 'stock-badge-flat');
+      var badgeIcon = cropObj.chieu === 'up' ? '▲' : (cropObj.chieu === 'down' ? '▼' : '●');
+
+      h += '<div class="card" style="padding:18px 22px;margin-bottom:18px;border-left:4px solid var(--primary)">'
+        + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px">'
+        + '<div style="display:flex;align-items:center;gap:14px">'
+        + '<span style="font-size:2.8rem;filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))">' + cropObj.icon + '</span>'
+        + '<div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="font-size:1.35rem;font-weight:900;color:var(--fg)">' + esc(cropObj.ten) + '</span>'
+        + '<span class="stock-ticker-code">' + cropObj.code + '</span>'
+        + '</div>'
+        + '<div style="font-size:.8rem;color:var(--muted-fg);margin-top:2px">Vùng trồng trọng điểm: <b>' + esc(cropObj.vungTrong) + '</b></div>'
+        + '<div style="font-size:.75rem;color:var(--muted-fg)">Nguồn đối soát: <b style="color:var(--primary)">' + esc(cropObj.nguonUytin) + '</b></div>'
+        + '</div>'
+        + '</div>'
+        + '<div style="text-align:right">'
+        + '<div style="font-size:.72rem;color:var(--muted-fg);font-weight:700;text-transform:uppercase">Giá thị trường hôm nay</div>'
+        + '<div class="mono" style="font-size:1.6rem;font-weight:900;color:var(--primary)">' + cropObj.giaChinh + ' <small style="font-size:.82rem;font-weight:500;color:var(--muted-fg)">' + esc(cropObj.dv) + '</small></div>'
+        + '<span class="' + badgeClass + '" style="margin-top:2px">' + badgeIcon + ' ' + cropObj.bienDong + ' (' + cropObj.phanTram + ')</span>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+
+      // Thanh tìm kiếm con lọc giống
+      h += '<div class="card" style="padding:12px 14px;margin-bottom:16px">'
+        + '<div style="display:flex;gap:10px;align-items:center">'
+        + '<span style="font-size:1.15rem">🔍</span>'
+        + '<input type="search" id="timGiongTrongCay" value="' + esc(timGiongTrongCayQuery) + '" placeholder="Tìm nhanh chủng loại / giống của cây ' + esc(cropObj.ten) + ' (vd: ' + cropObj.cacGiong.slice(0, 3).map(function(g){ return g.giong.split('—')[0].split('(')[0].trim(); }).join(', ') + '...)" style="flex:1">'
+        + (timGiongTrongCayQuery ? '<button type="button" id="btnClearTimGiong" class="btn" style="font-size:.75rem">Xoá tìm</button>' : '')
+        + '</div>'
+        + '</div>';
+
+      // Lưới các ô vuông / thẻ các giống của cây đó
+      var qGiong = timGiongTrongCayQuery.toLowerCase().trim();
+      var varietyCardsHtml = '<div class="variety-grid">';
+      var matchGiongCount = 0;
+
+      for(var g = 0; g < cropObj.cacGiong.length; g++){
+        var vi = cropObj.cacGiong[g];
+        if(qGiong && vi.giong.toLowerCase().indexOf(qGiong) < 0 && vi.note.toLowerCase().indexOf(qGiong) < 0) continue;
+        matchGiongCount++;
+
+        var isSelected = giongDangChonGia === vi.giong;
+
+        varietyCardsHtml += '<div class="variety-card ' + (isSelected ? 'active' : '') + '" data-chongionggia="' + esc(vi.giong) + '">'
+          + '<div>'
+          + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">'
+          + '<b style="font-size:.9rem;color:var(--fg);line-height:1.35">' + esc(vi.giong) + '</b>'
+          + (isSelected ? '<span class="tag tag-ok" style="font-size:.68rem;padding:2px 6px">Đang xem</span>' : '')
+          + '</div>'
+          + '<div style="font-size:.75rem;color:var(--muted-fg);margin-bottom:8px">' + esc(vi.note) + '</div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:8px;border-top:1px dashed var(--border)">'
+          + '<div>'
+          + '<span style="font-size:.65rem;color:var(--muted-fg);display:block">Giá thu mua:</span>'
+          + '<span class="mono" style="font-size:1.15rem;font-weight:800;color:var(--primary)">' + vi.gia + ' <span style="font-size:.72rem;font-weight:400;color:var(--muted-fg)">' + esc(vi.dv) + '</span></span>'
+          + '</div>'
+          + '<button type="button" class="btn ' + (isSelected ? 'btn-p' : '') + '" style="font-size:.74rem;padding:4px 10px" data-chongionggia="' + esc(vi.giong) + '">'
+          + (isSelected ? '✓ Đang xem' : 'Xem giá sâu ▸')
+          + '</button>'
+          + '</div>'
+          + '</div>';
+      }
+      varietyCardsHtml += '</div>';
+
+      if(matchGiongCount === 0){
+        varietyCardsHtml = '<div class="card" style="padding:24px;text-align:center;color:var(--muted-fg)">Không tìm thấy giống nào khớp từ khoá "' + esc(timGiongTrongCayQuery) + '".</div>';
+      }
+
+      h += sec("DANH SÁCH CÁC CHỦNG LOẠI & GIỐNG " + cropObj.ten.toUpperCase(), varietyCardsHtml);
+
+      // Bước 3: Nếu người dùng đã chọn 1 loại giống cụ thể -> Hiện bảng giá chi tiết sâu
+      if(giongDangChonGia){
+        var giongObj = null;
+        for(var g = 0; g < cropObj.cacGiong.length; g++){
+          if(cropObj.cacGiong[g].giong === giongDangChonGia){ giongObj = cropObj.cacGiong[g]; break; }
+        }
+        if(!giongObj) giongObj = cropObj.cacGiong[0];
+
+        var lichSuRows = '';
+        if(giongObj.lichSu && giongObj.lichSu.length){
+          for(var ls = 0; ls < giongObj.lichSu.length; ls++){
+            var row = giongObj.lichSu[ls];
+            var col = row.up === true ? '#15803d' : (row.up === false ? '#b91c1c' : 'var(--muted-fg)');
+            var iconLs = row.up === true ? '▲' : (row.up === false ? '▼' : '●');
+            lichSuRows += '<tr>'
+              + '<td><b>' + row.ngay + '</b></td>'
+              + '<td class="r mono" style="font-weight:700">' + row.gia + ' ' + esc(giongObj.dv) + '</td>'
+              + '<td class="r" style="font-weight:700;color:' + col + '">' + iconLs + ' ' + row.td + '</td>'
+              + '</tr>';
+          }
+        }
+
+        var deepDetailHtml = '<div id="bangGiaChiTietGiong" class="card" style="padding:20px;border-color:var(--primary);box-shadow:0 6px 20px rgba(16,185,129,.12)">'
+          + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">'
+          + '<div>'
+          + '<span class="tag tag-ok" style="font-size:.7rem">BẢNG GIÁ CHI TIẾT SÂU</span>'
+          + '<h3 style="margin:4px 0 2px;font-size:1.15rem;color:var(--fg)">' + esc(giongObj.giong) + '</h3>'
+          + '<div style="font-size:.78rem;color:var(--muted-fg)">Quy chuẩn & phân loại: ' + esc(giongObj.note) + '</div>'
+          + '</div>'
+          + '<div style="text-align:right">'
+          + '<div style="font-size:.7rem;color:var(--muted-fg)">Khớp lệnh vựa hôm nay</div>'
+          + '<div class="mono" style="font-size:1.65rem;font-weight:900;color:var(--primary)">' + giongObj.gia + ' <span style="font-size:.82rem;font-weight:400;color:var(--muted-fg)">' + esc(giongObj.dv) + '</span></div>'
+          + '</div>'
+          + '</div>'
+
+          // 2 Card so sánh giá: Giá tại vườn vs Giá giao kho
+          + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:18px">'
+          + '<div style="background:var(--accent);padding:14px 16px;border-radius:12px;border:1px solid rgba(16,185,129,.3)">'
+          + '<span style="font-size:.72rem;font-weight:700;color:var(--muted-fg);text-transform:uppercase">Giá thương lái thu mua tại vườn</span>'
+          + '<div class="mono" style="font-size:1.25rem;font-weight:800;color:var(--primary);margin:4px 0">' + (giongObj.giaVuon || (giongObj.gia + ' ' + giongObj.dv)) + '</div>'
+          + '<div style="font-size:.75rem;color:var(--fg)">Thương lái tự mang xe vào bốc dỡ, thanh toán tiền mặt ngay.</div>'
+          + '</div>'
+          + '<div style="background:var(--card);padding:14px 16px;border-radius:12px;border:1px solid var(--border)">'
+          + '<span style="font-size:.72rem;font-weight:700;color:var(--muted-fg);text-transform:uppercase">Giá giao tại kho vựa xuất khẩu</span>'
+          + '<div class="mono" style="font-size:1.25rem;font-weight:800;color:var(--fg);margin:4px 0">' + (giongObj.giaKho || (giongObj.gia + ' ' + giongObj.dv)) + '</div>'
+          + '<div style="font-size:.75rem;color:var(--fg)">Nông dân tự vận chuyển đến kho vựa, cân và kiểm tra độ ẩm.</div>'
+          + '</div>'
+          + '</div>'
+
+          // Tiêu chuẩn kỹ thuật
+          + '<div style="background:var(--muted);padding:12px 16px;border-radius:10px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:16px">'
+          + '<div><span style="font-size:.7rem;color:var(--muted-fg);display:block">ĐỘ ẨM YÊU CẦU:</span><b style="font-size:.85rem">' + esc(giongObj.doAm || "Theo tiêu chuẩn") + '</b></div>'
+          + '<div><span style="font-size:.7rem;color:var(--muted-fg);display:block">TẠP CHẤT TỐI ĐA:</span><b style="font-size:.85rem">' + esc(giongObj.tapChat || "< 1.0%") + '</b></div>'
+          + '<div><span style="font-size:.7rem;color:var(--muted-fg);display:block">NGUỒN KIỂM CHỨNG:</span><b style="font-size:.85rem;color:var(--primary)">' + esc(cropObj.nguonUytin) + '</b></div>'
+          + '</div>'
+
+          // Lịch sử biến động giá 7 ngày
+          + (lichSuRows ? '<div style="margin-bottom:18px">'
+            + '<div style="font-size:.78rem;font-weight:700;color:var(--fg);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">LỊCH SỬ BIẾN ĐỘNG GIÁ 7 PHIÊN QUA:</div>'
+            + '<div class="tbl-w"><table style="min-width:380px"><thead><tr>'
+            + '<th>Thời điểm</th><th class="r">Mức giá ghi nhận</th><th class="r">Biến động</th>'
+            + '</tr></thead><tbody>' + lichSuRows + '</tbody></table></div>'
+            + '</div>' : '')
+
+          // Khuyến cáo nhà nông
+          + (giongObj.khuyenNghi ? '<div class="abox abox-ok" style="margin:0">'
+            + '<span style="font-size:1.3rem">💡</span>'
+            + '<div><div class="abox-t">Khuyến nghị thời điểm bán cho nhà nông:</div>'
+            + '<div class="abox-b">' + esc(giongObj.khuyenNghi) + '</div></div>'
+            + '</div>' : '')
+
+          + '</div>';
+
+        h += sec("KẾT QUẢ BẢNG GIÁ CHI TIẾT CHO: " + giongObj.giong.toUpperCase(), deepDetailHtml);
+      }
     }
   }
 
@@ -2962,7 +4593,7 @@ function pSo(){
 
 /* ======================= EVENT DELEGATION ======================= */
 document.addEventListener("click",function(ev){
-  var el=ev.target.closest("button, a, [data-go], [data-nav], [data-chothua], [data-setcay], [data-setbophan], [data-setmode], [data-chondonbenh], [data-loaitrubenh], [data-chonthuocbenh], [data-locloai], [data-togacc], [data-bo], [data-pha], [data-simtool], [data-panpoly], [data-delpoly], [data-xoathua], [data-pandiem]");
+  var el=ev.target.closest("button, a, [data-go], [data-nav], [data-chothua], [data-setcay], [data-setbophan], [data-setmode], [data-chondonbenh], [data-loaitrubenh], [data-chonthuocbenh], [data-locloai], [data-togacc], [data-bo], [data-pha], [data-simtool], [data-panpoly], [data-delpoly], [data-xoathua], [data-pandiem], [data-chedogia], [data-choncaygia], [data-backtogiacay], [data-chongionggia]");
   if(!el)return;
 
   var v;
@@ -3111,6 +4742,21 @@ document.addEventListener("click",function(ev){
   }
   if(el.id==="btnRefreshGia"){alert("🟢 Đã đồng bộ giá trực tiếp từ các sàn!");ve();return}
   if(el.id==="btnClearTimGia"){timKiemGiaQuery="";ve();return}
+  if(el.id==="btnClearTimGiong"){timGiongTrongCayQuery="";ve();return}
+  var cdogia=el.getAttribute("data-chedogia");
+  if(cdogia){cheDoGia=cdogia;ve();return}
+  var choncay=el.getAttribute("data-choncaygia");
+  if(choncay){cayDangChonGia=choncay;giongDangChonGia=null;timGiongTrongCayQuery="";cheDoGia="chitiet";ve();return}
+  if(el.getAttribute("data-backtogiacay")){cayDangChonGia=null;giongDangChonGia=null;timGiongTrongCayQuery="";ve();return}
+  var chongiong=el.getAttribute("data-chongionggia");
+  if(chongiong){
+    giongDangChonGia=chongiong;ve();
+    setTimeout(function(){
+      var elB=document.getElementById("bangGiaChiTietGiong");
+      if(elB) elB.scrollIntoView({behavior:"smooth",block:"start"});
+    },60);
+    return;
+  }
   if(el.id==="btnThemThuaQuick"){
     var ten=prompt("Tên lô đất mới (vd: Lô 3 — Vườn Bưởi Da Xanh):");
     if(!ten)return;
@@ -3166,7 +4812,12 @@ document.addEventListener("input",function(ev){
   if(id==="timGiaNongSan"){
     timKiemGiaQuery=ev.target.value;
     clearTimeout(window._giaTimer);
-    window._giaTimer=setTimeout(function(){ve()},250);
+    window._giaTimer=setTimeout(function(){ve()},200);
+  }
+  if(id==="timGiongTrongCay"){
+    timGiongTrongCayQuery=ev.target.value;
+    clearTimeout(window._giaTimer);
+    window._giaTimer=setTimeout(function(){ve()},180);
   }
   if(id==="timThuoc"){
     var ds=locThuoc(ev.target.value,30),o2=document.getElementById("kqThuoc");
