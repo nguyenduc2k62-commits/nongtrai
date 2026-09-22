@@ -589,7 +589,7 @@ function veMap(){
  return s+"</svg>"}
 
 /* ======================= CÁC TRANG ======================= */
-var bw={cay:null,dh:null,thuoc:null,thua:THUA.length?THUA[0].id:null},chonPha=[];
+var bw={cay:null,dh:null,thuoc:null,thua:THUA.length?THUA[0].id:null},chonPha=[],grpOpen=null;
 
 /* ===== FORM THÊM THỬA ===== */
 var themThua={dang:false};
@@ -927,127 +927,177 @@ function tr2(cells){
  return "<tr>"+h+"</tr>"}
 
 function pBenh(){
- if(!D)return sec("Tra bệnh",card('<p style="padding:32px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Đang nạp danh mục thuốc…</p>'));
- var i,L="",ten=["Cây trồng","Dịch hại","Chọn thuốc","Ghi sổ"];
- var bn=bw.thuoc?3:(bw.dh!=null?2:(bw.cay?1:0));
+ if(!D)return sec("Tra cứu thuốc BVTV",card('<p style="padding:32px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Đang nạp danh mục thuốc…</p>'));
+ var i,h='';
 
- L+='<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:20px;gap:2px">';
- for(i=0;i<4;i++)L+='<span style="position:relative;padding-bottom:10px;padding-right:18px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:'
-  +(i===bn?"var(--primary)":"var(--muted-fg)")+'">'+(i+1)+". "+ten[i]
-  +(i===bn?'<span style="position:absolute;bottom:-1px;left:0;right:18px;height:2px;background:var(--primary);border-radius:1px"></span>':"")+  "</span>";
- L+="</div>";
+ /* === FILTER BAR === */
+ h+='<div class="card" style="padding:20px;margin-bottom:20px">';
+ h+='<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">';
 
- if(!bw.cay){
-  L+='<p style="margin:0 0 12px;max-width:56ch;font-size:.88rem;color:var(--muted-fg)">Chọn cây đang bị hại. Danh mục phủ '
-   +D.bang.cay.length+' loại cây.</p><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">';
-  var daCo={};
-  for(i=0;i<THUA.length;i++){
-   if(daCo[THUA[i].cay])continue; daCo[THUA[i].cay]=1;
-   var ci0=cayId(THUA[i].cay),sl=ci0<0?0:dichHaiCuaCay(ci0).length;
-   L+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(THUA[i].cay)
-    +'</span><span style="display:block;font-size:.78rem;color:var(--muted-fg)">thửa '+esc(THUA[i].ten)+" · "+sl
-    +" dịch hại có thuốc đăng ký</span></span>"+ARROW,'data-cay="'+esc(THUA[i].cay)+'"');
-  }
-  L+='</div><label for="timCay" style="display:block;margin-bottom:6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg)">Hoặc tìm cây khác</label>'
-   +'<input id="timCay" type="search" placeholder="gõ tên cây: sầu riêng, hồ tiêu, cao su…" autocomplete="off" style="width:100%">'
-   +'<div id="kqCay" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>';
-
- }else if(bw.dh==null){
-  var ci=cayId(bw.cay),ds=dichHaiCuaCay(ci);
-  L+=back("cay","Chọn lại cây")
-   +'<p style="margin:0 0 12px;max-width:58ch;font-size:.88rem;color:var(--muted-fg)"><b style="color:var(--fg)">'+esc(bw.cay)
-   +'</b> có '+ds.length+' dịch hại được đăng ký thuốc. Số bên phải là số thuốc đăng ký cho dịch hại đó.</p>'
-   +'<div class="scr" style="display:flex;max-height:30rem;flex-direction:column;gap:6px;overflow-y:auto;padding-right:4px">';
-  for(i=0;i<ds.length;i++)
-   L+=rowBtn('<span style="min-width:0;flex:1;font-size:.88rem;font-weight:600">'+esc(ds[i].ten)+'</span>'
-    +'<span class="mono" style="flex-shrink:0;font-size:.78rem;color:var(--muted-fg)">'+ds[i].n+"</span>",'data-dh="'+ds[i].id+'"');
-  L+='</div><p class="hint">Tên dịch hại lấy nguyên từ Thông tư. App chưa có ảnh đối chiếu — đó là việc còn phải làm.</p>';
-
- }else if(!bw.thuoc){
-  var ci2=cayId(bw.cay),ds2=thuocCho(ci2,bw.dh);
-  L+=back("dh","Chọn lại dịch hại")
-   +'<p style="margin:0 0 12px;max-width:58ch;font-size:.88rem;color:var(--muted-fg)"><b style="color:var(--fg)">'
-   +esc(D.bang.dich_hai[bw.dh])+'</b> trên <b style="color:var(--fg)">'+esc(bw.cay)+'</b> — '
-   +ds2.length+' thuốc được phép dùng.</p>'
-   +'<div class="scr" style="display:flex;max-height:30rem;flex-direction:column;gap:8px;overflow-y:auto;padding-right:4px">';
-  for(i=0;i<Math.min(ds2.length,120);i++){
-   var t=ds2[i],hc=D.bang.hoat_chat[t.h],cm=laCam(hc);
-   L+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(t.t)+'</span>'
-    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(hc)+'</span>'
-    +(cm?'<span class="tag tag-bad" style="margin-top:4px">HOẠT CHẤT CẤM</span>':'')+'</span>'
-    +'<span style="flex-shrink:0;font-size:.68rem;color:var(--muted-fg)">'
-    +esc((D.nhom[t.n]||"").replace("Thuốc ",""))+"</span>",'data-thuoc="'+esc(t.t)+'"');
-  }
-  if(!ds2.length)L+='<div style="border:1px dashed var(--border);border-radius:12px;padding:20px;text-align:center;font-size:.88rem;color:var(--muted-fg)">'
-   +'Không có thuốc nào đăng ký cho cặp này trong Thông tư 75/2025.<br><b style="color:var(--fg)">chưa được phép dùng</b> — không phải app thiếu dữ liệu.</div>';
-  if(ds2.length>120)L+='<p style="padding:8px;text-align:center;font-size:.78rem;color:var(--muted-fg)">… và '+(ds2.length-120)+" thuốc nữa</p>";
-  L+="</div>";
-
+ /* Cây trồng */
+ h+='<div style="flex:1;min-width:180px">';
+ h+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);margin-bottom:8px">🌾 Cây trồng</div>';
+ if(bw.cay){
+  h+='<div style="display:flex;align-items:center;gap:8px">'
+   +'<span class="tag tag-ok" style="font-size:.88rem">'+esc(bw.cay)+'</span>'
+   +'<button type="button" data-back="cay" class="btn" style="font-size:.72rem;padding:4px 10px">Đổi</button></div>';
  }else{
+  h+='<input id="timCay" type="search" placeholder="gõ tên cây…" autocomplete="off" style="width:100%;margin-bottom:8px">'
+   +'<div id="kqCay"></div>';
+  var daCo={};
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">';
+  for(i=0;i<THUA.length;i++){
+   if(daCo[THUA[i].cay])continue;daCo[THUA[i].cay]=1;
+   h+='<button type="button" data-cay="'+esc(THUA[i].cay)+'" style="cursor:pointer;font-size:.82rem;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-weight:600">'+esc(THUA[i].cay)+'</button>';
+  }
+  h+='</div>';
+ }
+ h+='</div>';
+
+ /* Dịch hại */
+ if(bw.cay){
+  h+='<div style="flex:1;min-width:180px">';
+  h+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);margin-bottom:8px">🐛 Dịch hại</div>';
+  if(bw.dh!=null){
+   h+='<div style="display:flex;align-items:center;gap:8px">'
+    +'<span class="tag tag-inf" style="font-size:.88rem">'+esc(D.bang.dich_hai[bw.dh])+'</span>'
+    +'<button type="button" data-back="dh" class="btn" style="font-size:.72rem;padding:4px 10px">Đổi</button></div>';
+  }else{
+   h+='<span style="font-size:.78rem;color:var(--muted-fg)">← chọn bên dưới</span>';
+  }
+  h+='</div>';
+ }
+
+ /* Thuốc đã chọn */
+ if(bw.thuoc){
+  h+='<div style="flex:1;min-width:180px">';
+  h+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);margin-bottom:8px">💊 Thuốc</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px">'
+   +'<span class="tag" style="font-size:.88rem;background:var(--primary);color:var(--primary-fg)">'+esc(bw.thuoc)+'</span>'
+   +'<button type="button" data-back="thuoc" class="btn" style="font-size:.72rem;padding:4px 10px">Đổi</button></div>';
+  h+='</div>';
+ }
+ h+='</div></div>';
+
+ /* === CONTENT === */
+ if(bw.cay&&bw.dh==null){
+  /* Disease grid */
+  var ci=cayId(bw.cay),ds=dichHaiCuaCay(ci);
+  h+='<p style="margin:0 0 12px;font-size:.88rem;color:var(--muted-fg)"><b style="color:var(--fg)">'+esc(bw.cay)+'</b> có <b class="mono" style="color:var(--fg)">'+ds.length+'</b> dịch hại có thuốc đăng ký. Chọn một dịch hại:</p>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">';
+  for(i=0;i<ds.length;i++){
+   h+='<button type="button" data-dh="'+ds[i].id+'" class="card" style="padding:14px;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s">'
+    +'<span style="font-size:.85rem;font-weight:600;min-width:0">'+esc(ds[i].ten)+'</span>'
+    +'<span class="mono" style="flex-shrink:0;font-size:.72rem;color:var(--muted-fg);background:var(--accent);padding:3px 8px;border-radius:10px;margin-left:8px">'+ds[i].n+'</span></button>';
+  }
+  h+='</div>';
+
+ }else if(bw.cay&&bw.dh!=null&&!bw.thuoc){
+  /* Grouped results */
+  var ci2=cayId(bw.cay),ds2=thuocCho(ci2,bw.dh);
+  if(!ds2.length){
+   h+='<div style="border:1px dashed var(--border);border-radius:12px;padding:24px;text-align:center;font-size:.88rem;color:var(--muted-fg)">'
+    +'Không có thuốc nào đăng ký cho cặp này trong Thông tư 75/2025.<br><b style="color:var(--fg)">Chưa được phép dùng</b> — không phải app thiếu dữ liệu.</div>';
+  }else{
+   var grp={},keys;
+   for(i=0;i<ds2.length;i++){
+    var hk=String(ds2[i].h);
+    if(!grp[hk])grp[hk]={ten:D.bang.hoat_chat[ds2[i].h],ds:[],cam:laCam(D.bang.hoat_chat[ds2[i].h])};
+    grp[hk].ds.push(ds2[i]);
+   }
+   keys=Object.keys(grp).sort(function(a,b){return grp[b].ds.length-grp[a].ds.length});
+
+   h+='<p style="margin:0 0 16px;font-size:.88rem;color:var(--muted-fg)"><b class="mono" style="color:var(--fg)">'+ds2.length+'</b> thuốc cho <b style="color:var(--fg)">'+esc(D.bang.dich_hai[bw.dh])+'</b>, nhóm theo <b class="mono" style="color:var(--fg)">'+keys.length+'</b> hoạt chất. Bấm nhóm để xem sản phẩm.</p>';
+
+   for(i=0;i<keys.length;i++){
+    var g=grp[keys[i]],isOpen=grpOpen===keys[i];
+    h+='<div class="card" style="margin-bottom:8px;overflow:hidden">';
+    h+='<button type="button" data-grp="'+keys[i]+'" style="width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:none;border:none;text-align:left;cursor:pointer;font-family:inherit">'
+     +'<span style="font-size:.82rem;color:var(--primary);flex-shrink:0;width:16px">'+(isOpen?'▾':'▸')+'</span>'
+     +'<span style="flex:1;min-width:0;font-size:.88rem;font-weight:700">'+esc(g.ten)+'</span>'
+     +'<span class="mono" style="flex-shrink:0;font-size:.72rem;color:var(--muted-fg);background:var(--accent);padding:3px 8px;border-radius:10px">'+g.ds.length+' sp</span>'
+     +(g.cam?'<span class="tag tag-bad" style="flex-shrink:0;font-size:.66rem">CẤM</span>':'')
+     +'</button>';
+    if(isOpen){
+     for(var j=0;j<g.ds.length;j++){
+      var t=g.ds[j],tcm=laCam(D.bang.hoat_chat[t.h]);
+      h+='<div style="display:flex;align-items:center;gap:12px;padding:10px 16px 10px 44px;border-top:1px solid var(--border)">'
+       +'<span style="flex:1;min-width:0"><span style="display:block;font-size:.85rem;font-weight:600">'+esc(t.t)+'</span>'
+       +'<span style="display:block;font-size:.72rem;color:var(--muted-fg)">'+esc(D.bang.cong_ty[t.y])
+       +' · '+esc((D.nhom[t.n]||"").replace("Thuốc ",""))+'</span></span>'
+       +(tcm?'<span class="tag tag-bad" style="flex-shrink:0;font-size:.66rem">CẤM</span>':'')
+       +'<button type="button" data-thuoc="'+esc(t.t)+'" class="btn btn-p" style="flex-shrink:0;font-size:.72rem;padding:6px 12px">Chi tiết →</button></div>';
+     }
+    }
+    h+='</div>';
+   }
+  }
+
+ }else if(bw.thuoc){
+  /* Detail + ghi sổ */
   var t2=null;
   for(i=0;i<D.thuoc.length;i++)if(D.thuoc[i].t===bw.thuoc){t2=D.thuoc[i];break}
   var hc2=t2?D.bang.hoat_chat[t2.h]:"",cm2=laCam(hc2);
-  L+=back("thuoc","Chọn lại thuốc")
-   +'<div style="font-size:1.1rem;font-weight:700;letter-spacing:-.01em">'+esc(bw.thuoc)+'</div>'
+
+  h+='<div class="card" style="padding:20px">';
+  h+='<div style="font-size:1.1rem;font-weight:700;letter-spacing:-.01em">'+esc(bw.thuoc)+'</div>'
    +'<div style="margin-bottom:4px;font-size:.78rem;color:var(--muted-fg)">'+esc(hc2)+'</div>';
-  if(t2)L+='<div style="margin-bottom:12px;font-size:.78rem;color:var(--muted-fg)">Đăng ký bởi '+esc(D.bang.cong_ty[t2.y])+"</div>";
-  if(cm2)L+=alertBox("bad",ICO_X,"Hoạt chất bị cấm sử dụng","<b>"+esc(cm2)
+  if(t2)h+='<div style="margin-bottom:12px;font-size:.78rem;color:var(--muted-fg)">Đăng ký bởi '+esc(D.bang.cong_ty[t2.y])+'</div>';
+  if(cm2)h+=alertBox("bad",ICO_X,"Hoạt chất bị cấm sử dụng","<b>"+esc(cm2)
    +"</b> nằm trong Danh mục cấm (Phụ lục II Thông tư 75/2025). Không dùng.");
 
   var mr=mrlCho(hc2,bw.cay);
-  L+=lbl2("Ngưỡng dư lượng tối đa (MRL)");
+  h+=lbl2("Ngưỡng dư lượng tối đa (MRL)");
   if(mr&&mr.muc){
-   L+='<div style="display:flex;flex-direction:column;gap:6px">';
+   h+='<div style="display:flex;flex-direction:column;gap:6px">';
    for(i=0;i<mr.muc.length;i++)
-    L+='<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 12px">'
+    h+='<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 12px">'
      +'<span style="min-width:0;flex:1;font-size:.88rem">'+esc(mr.muc[i].mon)+'</span>'
      +'<span class="mono" style="font-size:.88rem;font-weight:600">'+mr.muc[i].mrl
      +' <span style="font-size:.78rem;font-weight:400;color:var(--muted-fg)">mg/kg</span></span></div>';
-   L+='</div><p class="hint">Theo Thông tư 50/2016/TT-BYT. Hàng xuất khẩu phải theo ngưỡng của nước nhập.</p>';
+   h+='</div><p class="hint">Theo Thông tư 50/2016/TT-BYT. Hàng xuất khẩu phải theo ngưỡng của nước nhập.</p>';
   }else{
-   L+='<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;font-size:.88rem;color:var(--muted-fg)">'
+   h+='<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;font-size:.88rem;color:var(--muted-fg)">'
     +'<b>Chưa có ngưỡng trong luật Việt Nam.</b> '
     +((mr&&mr.ly_do==="cay")
-       ?"Thông tư 50/2016 không có ngưỡng riêng cho "+esc(bw.cay)+"."
-       :"Hoạt chất này không nằm trong Thông tư 50/2016 — văn bản đó chỉ phủ 165 hoạt chất lấy từ CODEX 2016.")
-    +" Nếu xuất khẩu, tra ngưỡng của nước nhập.</div>";
+     ?"Thông tư 50/2016 không có ngưỡng riêng cho "+esc(bw.cay)+"."
+     :"Hoạt chất này không nằm trong Thông tư 50/2016.")
+    +' Nếu xuất khẩu, tra ngưỡng của nước nhập.</div>';
   }
 
   var cu=PHI[bw.thuoc];
-  L+=lbl2("Thời gian cách ly (PHI)")
+  h+=lbl2("Thời gian cách ly (PHI)")
    +'<div style="border:1px solid var(--border);border-radius:12px;padding:14px">'
-   +'<p style="margin:0 0 10px;font-size:.88rem;color:var(--muted-fg)">Số ngày này <b style="color:var(--fg)">in trên nhãn chai thuốc</b>, '
-   +'không có trong Thông tư nào. Xem nhãn rồi nhập vào đây — app sẽ nhớ cho lần sau.</p>'
+   +'<p style="margin:0 0 10px;font-size:.88rem;color:var(--muted-fg)">Số ngày này <b style="color:var(--fg)">in trên nhãn chai thuốc</b>, không có trong Thông tư nào.</p>'
    +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">'
    +'<input id="phiIn" type="number" min="0" max="120" value="'+(cu!=null?cu:"")+'" placeholder="số ngày" style="width:100px">'
    +'<span style="font-size:.88rem;color:var(--muted-fg)">ngày</span>'
-   +(cu!=null?'<span class="tag tag-ok">đã nhớ từ lần trước</span>':'')+  '</div>'
-   +'<div id="phiLoi" style="margin-top:8px;font-size:.78rem"></div>'
-   +'<p style="margin:8px 0 0;font-size:.78rem;color:var(--muted-fg)">Bỏ trống cũng ghi được — chỉ là thửa đó không có đồng hồ đếm ngược. '
-   +"Thà thiếu còn hơn bịa một con số.</p></div>";
+   +(cu!=null?'<span class="tag tag-ok">đã nhớ</span>':'')+'</div>'
+   +'<div id="phiLoi" style="margin-top:8px;font-size:.78rem"></div></div>';
 
-  L+=lbl2("Xịt cho thửa nào")+'<div style="display:flex;flex-direction:column;gap:8px">';
+  h+=lbl2("Xịt cho thửa nào")+'<div style="display:flex;flex-direction:column;gap:8px">';
   for(i=0;i<THUA.length;i++){
    var th=THUA[i],hop=th.cay===bw.cay;
-   L+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(th.ten)+'</span>'
-    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+th.dt+" sào · "+esc(th.cay)+" · "+esc(th.giong)+'</span></span>'
+   h+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(th.ten)+'</span>'
+    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+th.dt+' sào · '+esc(th.cay)+'</span></span>'
     +(hop?'':'<span class="tag tag-wait" style="flex-shrink:0">khác cây</span>'),'data-thua="'+th.id+'"',bw.thua===th.id);
   }
-  L+='</div><button type="button" id="btnGhi" class="btn btn-p" style="width:100%;margin-top:16px">Ghi vào nhật ký</button>';
+  h+='</div><button type="button" id="btnGhi" class="btn btn-p" style="width:100%;margin-top:16px">Ghi vào nhật ký</button>';
+  h+='</div>';
  }
 
+ /* Sidebar */
  var R=lbl2("Dữ liệu đang dùng",1)
   +'<div style="border:1px solid var(--border);border-radius:12px;padding:14px;font-size:.78rem;line-height:1.7;color:var(--muted-fg)">'
   +'<div style="margin-bottom:8px"><b class="mono" style="color:var(--fg)">'+D.thuoc.length
   +'</b> thuốc · <b class="mono" style="color:var(--fg)">'+D.bang.cay.length
   +'</b> cây · <b class="mono" style="color:var(--fg)">'+D.bang.dich_hai.length+'</b> dịch hại</div>'
-  +'Thông tư 75/2025 + sửa đổi 28/2026 — danh mục thuốc<br>'
+  +'Thông tư 75/2025 + sửa đổi 28/2026<br>'
   +'Thông tư 50/2016 — ngưỡng dư lượng<br>'
-  +'Phụ lục II Thông tư 75/2025 — '+D.cam.length+' hoạt chất cấm</div>'
-  +'<p class="hint">Thiếu: thời gian cách ly và ảnh bệnh. PHI phải đọc trên nhãn; ảnh sẽ lấy từ PlantDoc và Bugwood.</p>';
+  +'Phụ lục II — '+D.cam.length+' hoạt chất cấm</div>';
 
- return sec("Tra theo cây và dịch hại",
-  '<div class="g-2col"><div>'+L+'</div><div>'+R+"</div></div>");
+ return sec("Tra cứu thuốc BVTV",
+  '<div class="g-2col"><div>'+h+'</div><div>'+R+'</div></div>');
 }
 function back(k,t){return '<button type="button" data-back="'+k+'" style="display:block;margin-bottom:12px;font-size:.78rem;font-weight:600;color:var(--muted-fg);background:none;border:none;padding:0;cursor:pointer">‹ '+t+"</button>"}
 function lbl2(t,first){return '<div style="margin-bottom:10px;'+(first?"":"margin-top:24px;")+'font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg)">'+t+"</div>"}
@@ -1071,14 +1121,31 @@ function pSo(){
 
 function pPha(){
  if(!D)return sec("Pha thuốc",card('<p style="padding:32px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Đang nạp danh mục thuốc…</p>'));
- var i,L='<p style="margin:0 0 12px;max-width:58ch;font-size:.88rem;color:var(--muted-fg)">'
-  +'Tìm hai thuốc định đổ chung một bình. Gõ tên thương phẩm hoặc hoạt chất.</p>'
+ var i,L='';
+
+ /* Thuốc đã dùng gần đây */
+ var daDung=[];
+ for(i=so.length-1;i>=0&&daDung.length<6;i--){
+  if(so[i].thuoc&&daDung.indexOf(so[i].thuoc)<0)daDung.push(so[i].thuoc);
+ }
+ if(daDung.length){
+  L+='<div style="margin-bottom:16px"><div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);margin-bottom:8px">Thuốc đã dùng gần đây</div>';
+  L+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  for(i=0;i<daDung.length;i++){
+   var sel=chonPha.indexOf(daDung[i])>=0;
+   L+='<button type="button" data-pha="'+esc(daDung[i])+'" style="font-size:.82rem;padding:6px 14px;border-radius:20px;border:1px solid '+(sel?'var(--primary)':'var(--border)')+';background:'+(sel?'var(--accent)':'var(--card)')+';font-weight:'+(sel?'700':'500')+';cursor:pointer">'+esc(daDung[i])+'</button>';
+  }
+  L+='</div></div>';
+ }
+
+ L+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);margin-bottom:8px">Tìm thuốc</div>'
+  +'<p style="margin:0 0 8px;font-size:.82rem;color:var(--muted-fg)">Chọn 2 thuốc định đổ chung 1 bình. Gõ tên thương phẩm hoặc hoạt chất.</p>'
   +'<input id="timThuoc" type="search" placeholder="ví dụ: Tervigo, Abamectin, đồng…" autocomplete="off" style="width:100%">'
   +'<div id="kqThuoc" class="scr" style="margin-top:8px;display:flex;max-height:18rem;flex-direction:column;gap:6px;overflow-y:auto;padding-right:4px"></div>';
 
- L+=lbl2("Đang chọn");
+ L+=lbl2("Đang chọn"+(chonPha.length?(" ("+chonPha.length+"/2)"):""));
  if(!chonPha.length){
-  L+='<p style="border:1px dashed var(--border);border-radius:12px;padding:12px;font-size:.88rem;color:var(--muted-fg)">Chưa chọn thuốc nào.</p>';
+  L+='<p style="border:1px dashed var(--border);border-radius:12px;padding:14px;font-size:.88rem;color:var(--muted-fg);text-align:center">Chưa chọn thuốc nào. Bấm thuốc ở trên hoặc tìm kiếm.</p>';
  }else{
   L+='<div style="display:flex;flex-direction:column;gap:8px">';
   for(i=0;i<chonPha.length;i++){
@@ -1086,15 +1153,16 @@ function pPha(){
    if(!t)continue;
    L+='<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--primary);border-radius:12px;padding:12px;background:var(--accent)">'
     +'<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(t.t)+'</span>'
-    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(D.bang.hoat_chat[t.h])+"</span></span>"
+    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(D.bang.hoat_chat[t.h])+'</span></span>'
     +'<button type="button" data-bo="'+esc(t.t)+'" class="btn" style="flex-shrink:0">Bỏ</button></div>';
   }
-  L+="</div>";
+  L+='</div>';
  }
 
+ /* Result panel */
  var R="";
  if(chonPha.length<2){
-  R+=card('<p style="padding:36px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Chọn đủ hai thuốc để kiểm tra.</p>');
+  R+=card('<p style="padding:40px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Chọn đủ <b style="color:var(--fg)">2 thuốc</b> bên trái để kiểm tra tương kỵ.</p>');
  }else{
   var a=timThuocTen(chonPha[0]),b=timThuocTen(chonPha[1]),va=null;
   if(a&&b){
@@ -1107,28 +1175,26 @@ function pPha(){
      +esc(D.bang.hoat_chat[b.h])+')<br><br>'+esc(va.ly));
    else R+=alertBox("ok",ICO_OK,"Không thấy tương kỵ đã biết",
      'Giữa <b>'+esc(a.t)+'</b> và <b>'+esc(b.t)+'</b> không khớp quy tắc tương kỵ nào trong '
-     +KY.length+' quy tắc app đang có. Vẫn nên thử một ít trước khi pha cả bình.');
+     +KY.length+' quy tắc app đang có.<br><br>⚠️ Vẫn nên thử một ít trước khi pha cả bình.');
   }
  }
 
- R+='<div style="margin-top:16px;border:1px dashed var(--wait-bd);border-radius:12px;padding:12px;font-size:.78rem;line-height:1.7;color:var(--muted-fg)">'
-  +'<b class="c-wait">Mức tin cậy.</b> App phân nhóm hoạt chất bằng cách đọc TÊN hoạt chất '
-  +'(thấy "đồng" thì xếp nhóm đồng, thấy "Bacillus" thì xếp nhóm sinh học…), không phải theo phân loại chính thức. '
-  +'Bốn quy tắc dưới đây là nguyên lý chung, không phải bảng tương kỵ của nhà sản xuất. '
-  +'Không có cảnh báo KHÔNG có nghĩa là chắc chắn pha được.</div>';
+ R+='<div style="margin-top:16px;border:1px dashed var(--bad-bd);border-radius:12px;padding:14px;font-size:.78rem;line-height:1.7;color:var(--muted-fg);background:var(--bad-bg)">'
+  +'<b style="color:var(--bad)">⚠️ Mức tin cậy thấp.</b> App chỉ có <b>'+KY.length+' quy tắc</b> phân nhóm bằng TÊN hoạt chất. '
+  +'Không phải bảng tương kỵ chính thức. <b style="color:var(--fg)">Không có cảnh báo ≠ chắc chắn pha được.</b></div>';
 
- R+=lbl2("Bốn quy tắc đang áp dụng")+'<div style="display:flex;flex-direction:column;gap:8px">';
+ R+='<details style="margin-top:16px"><summary style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);cursor:pointer;margin-bottom:10px">'+KY.length+' quy tắc đang áp dụng</summary>'
+  +'<div style="display:flex;flex-direction:column;gap:8px">';
  for(i=0;i<KY.length;i++)
   R+='<div style="display:flex;align-items:flex-start;gap:12px;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--card)">'
    +'<span class="b-bad" style="margin-top:4px;width:3px;height:32px;flex-shrink:0;border-radius:2px"></span><span style="min-width:0">'
    +'<span style="display:block;font-size:.88rem;font-weight:600">'+nt(KY[i].a)+' + '+nt(KY[i].b)+'</span>'
-   +'<span style="display:block;margin-top:3px;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">'+esc(KY[i].ly)+"</span></span></div>";
- R+="</div>";
+   +'<span style="display:block;margin-top:3px;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">'+esc(KY[i].ly)+'</span></span></div>';
+ R+='</div></details>';
 
  return sec("Kiểm tra pha chung",
-  '<div class="g-2col-eq"><div>'+L+'</div><div>'+R+"</div></div>");
+  '<div class="g-2col-eq"><div>'+L+'</div><div>'+R+'</div></div>');
 }
-
 function timThuocTen(ten){
  if(!D)return null;
  for(var i=0;i<D.thuoc.length;i++)if(D.thuoc[i].t===ten)return D.thuoc[i];
@@ -1508,7 +1574,7 @@ document.addEventListener("click",function(ev){
  if(ev.target&&ev.target.id==="btnTao"){taoThua();return}
  if(ev.target&&ev.target.id==="btnHuy"){themThua.dang=false;ve();return}
  if(ev.target&&ev.target.id==="btnThemThua"){themThua.dang=true;ve();return}
- var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool],[data-fcay],[data-dat],[data-fgd],[data-xoathua],[data-sthua]";
+ var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool],[data-fcay],[data-dat],[data-fgd],[data-xoathua],[data-sthua],[data-grp]";
  var el=ev.target.closest?ev.target.closest(S):null;if(!el)return;
  var v;
  if((v=el.getAttribute("data-nav"))){di(v);return}
@@ -1530,6 +1596,7 @@ document.addEventListener("click",function(ev){
  if((v=el.getAttribute("data-gia"))){giaCur=v;ve();return}
  if((v=el.getAttribute("data-tool"))&&SIM){SIM.tool=+v;veTools();return}
  if((v=el.getAttribute("data-sthua"))){thuaCur=v;ve();return}
+ if((v=el.getAttribute("data-grp"))){grpOpen=grpOpen===v?null:v;ve();return}
  if((v=el.getAttribute("data-fcay"))){fCay=v;var cc=document.getElementById("fCayChon");
   if(cc)cc.innerHTML='<span class="tag tag-ok">'+esc(v)+'</span>';
   var kq=document.getElementById("fKqCay");if(kq)kq.innerHTML="";veGd(v);return}
