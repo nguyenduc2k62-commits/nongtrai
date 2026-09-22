@@ -1,6 +1,6 @@
 # Sổ Ruộng — việc cần làm và chức năng
 
-Cập nhật 20/09/2026.
+Cập nhật 22/09/2026. Xem thêm `BAN-GIAO.md` để nắm nguồn dữ liệu và các bẫy đã gặp.
 
 ---
 
@@ -27,12 +27,15 @@ tay gửi Zalo. Một HTX gật đầu là có ngay vài chục hộ dùng.
 
 | Chức năng | Trạng thái |
 |---|---|
-| Đồng hồ đếm ngược ngày được gặt, tính từ PHI | Xong |
-| Lịch cách ly theo thửa (biểu đồ thời gian) | Xong |
-| Tra bệnh 4 bước theo triệu chứng | Xong, dùng sơ đồ vẽ tay |
-| Gợi ý thuốc → ghi thẳng vào nhật ký | Xong, dữ liệu mẫu |
-| Cảnh báo tương kỵ khi pha chung bình | Xong, 4 quy tắc |
-| Nhật ký canh tác + xuất hồ sơ | Xong, mã QR còn là chỗ trống |
+| Đồng hồ đếm ngược ngày được gặt | Xong. PHI do người dùng nhập từ nhãn |
+| Lịch cách ly theo thửa (biểu đồ) | Xong |
+| Tra bệnh: cây → dịch hại → thuốc → ghi sổ | Xong, **dữ liệu thật** 5.914 thuốc / 367 cây |
+| Chặn hoạt chất cấm | Xong, 33 hoạt chất theo Phụ lục II |
+| Hiện ngưỡng dư lượng MRL | Xong. Không có ngưỡng thì báo "chưa có", không đoán |
+| Cảnh báo tương kỵ khi pha chung bình | Xong, tìm trong 5.914 thuốc thật, 4 quy tắc |
+| Nhật ký canh tác + xuất hồ sơ | Xong, mã QR còn là ô trống |
+| Đa cây trồng | Xong. 3 thửa mẫu: 2 lúa + 1 cà phê |
+| Ảnh bệnh đối chiếu | **Chưa có** — sơ đồ vẽ tay đã bỏ vì 546 dịch hại |
 | Bản đồ điểm bán | Sơ đồ vẽ tay, chưa phải bản đồ thật |
 | Giá thị trường | Dữ liệu mẫu |
 | Mô phỏng đồng ruộng (cellular automata) | Xong, là đồ trình diễn |
@@ -48,33 +51,26 @@ trang. Chưa có tài khoản, chưa có máy chủ.
 Ba việc này là **chặn cứng**. Chưa xong thì băng cảnh báo "số liệu chưa thẩm
 định" phải giữ nguyên trên mọi trang.
 
-### 2.1 Thay dữ liệu thuốc giả bằng dữ liệu thật — ĐANG LÀM
+### 2.1 Dữ liệu thuốc thật — ĐÃ XONG PHẦN DANH MỤC
 
-**Đã xong phần danh mục.** Xem `du-lieu/` — 5.651 sản phẩm parse từ Phụ lục I
-Thông tư 75/2025, gồm hoạt chất, tên thương phẩm, cây trồng, dịch hại, công ty
-đăng ký. Đủ cho lúa, cà phê, hồ tiêu, cao su, điều, sầu riêng, đậu và hơn 100
-cây khác.
+Đã parse và nối vào app. Xem `du-lieu/` và `BAN-GIAO.md` mục 3.
 
-**Chưa xong phần PHI** — thời gian cách ly không nằm trong Thông tư, in trên
-nhãn từng thuốc. Đây mới là thứ đồng hồ đếm ngược cần. Vẫn phải gom tay.
+| Bộ | Số lượng | Nguồn |
+|---|---|---|
+| Danh mục thuốc | **5.929** | Thông tư 75/2025 + sửa đổi 28/2026 |
+| Hoạt chất cấm | 33 | Phụ lục II Thông tư 75/2025 |
+| Ngưỡng dư lượng MRL | 4.322 | Thông tư 50/2016 (Bộ Y tế) |
+| Dịch hại | 546 | Rút từ chính danh mục |
+| Cây trồng | 367 | Rút từ chính danh mục |
 
-Còn lại: gộp sửa đổi từ Thông tư 28/2026, chuẩn hoá tên cây, nối JSON vào app
-thay dữ liệu mẫu.
+**Còn thiếu ba thứ:**
 
-<details><summary>Ghi chú gốc</summary>
-
-Nguồn: **Thông tư 75/2025/TT-BNNMT** (hiệu lực 10/02/2026) và **Thông tư
-28/2026/TT-BNNMT** (hiệu lực 15/08/2026, sửa Phụ lục I).
-
-Cần bảng: hoạt chất — tên thương phẩm — cây trồng đăng ký — đối tượng phòng trừ
-— **thời gian cách ly (PHI)** — nhóm độc.
-
-PHI không nằm trong Thông tư mà in trên nhãn từng thuốc, nên phần này phải gom
-tay. Bắt đầu bằng ~30 thuốc phổ biến nhất trên lúa, không cần làm hết danh mục.
-
-Ước lượng: 2–3 ngày parse + 3–5 ngày gom PHI.
-**Đây là phần không copy được từ đâu, nên cũng là phần đáng giá nhất.**
-</details>
+1. **PHI** — không nằm trong Thông tư nào, in trên nhãn từng chai. App đang để
+   người dùng tự nhập và nhớ lại. Gom sẵn cho nhóm thuốc phổ biến thì tốt hơn.
+2. **Người thẩm định bản parse.** Số liệu là thật nhưng bản parse chưa ai soát.
+   Nhờ một thầy bộ môn BVTV soi qua thì gỡ được nửa câu cảnh báo.
+3. **Chuẩn hoá tên cây** — còn ~1% lặp ("Lạc" vs "lạc") và vài mục ngoài nông
+   nghiệp (đê, đập, nền móng — mục tiêu thuốc trừ mối).
 
 ### 2.2 Cơ chế cập nhật khi Thông tư đổi
 
@@ -186,7 +182,9 @@ Ghi ra đây để sau này không ai lôi lại.
 
 ## 7. Mốc gần nhất
 
-Nếu chỉ chọn được một việc để làm tiếp: **mục 2.1 — dữ liệu thuốc thật.**
+Mục 2.1 đã xong phần danh mục. Việc đáng làm tiếp, theo thứ tự:
 
-Nó gỡ được băng cảnh báo, biến bản mẫu thành thứ dùng được, và là phần duy
-nhất trong toàn dự án không copy được từ đâu.
+1. **Nhờ thầy BVTV thẩm định bản parse** — rẻ nhất, gỡ được nửa câu cảnh báo
+2. **Gom PHI** cho nhóm thuốc phổ biến — đây là thứ đồng hồ đếm ngược cần
+3. **Ảnh bệnh thật** từ PlantDoc (CC BY 4.0) + Bugwood
+4. **PWA chạy offline** — điều kiện để dùng được ngoài đồng
