@@ -247,9 +247,25 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0
 .variety-card.active{border-color:var(--primary);background:var(--accent);box-shadow:0 0 0 2px rgba(16,185,129,.35)}
 
 
-/* ===== SIMULATOR EXPANDED ===== */
-.sim-viewport-lg{width:100%;height:440px;background:#1a2e23;border-radius:14px;overflow:hidden;display:block;box-shadow:inset 0 2px 10px rgba(0,0,0,.5);cursor:crosshair;transition:height .3s ease}
-.sim-viewport-lg.sim-expanded{height:600px}
+/* ===== SIMULATOR EXPANDED & BOTANICAL CROP SIMULATION ===== */
+.sim-viewport-lg{width:100%;height:480px;background:#0d1b14;border-radius:14px;overflow:hidden;display:block;box-shadow:inset 0 2px 14px rgba(0,0,0,.6), 0 4px 20px rgba(0,0,0,.08);cursor:crosshair;transition:height .3s ease;position:relative}
+.sim-viewport-lg.sim-expanded{height:650px}
+.crop-sim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+.crop-sim-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s ease;text-align:left}
+.crop-sim-card:hover{border-color:var(--primary);background:var(--accent);transform:translateY(-1px)}
+.crop-sim-card.active{border-color:var(--primary);background:linear-gradient(135deg,#ecfdf5 0%,#f0fdf4 100%);box-shadow:0 0 0 2px rgba(16,185,129,.35);position:relative}
+.crop-sim-icon{font-size:1.8rem;flex-shrink:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.12);border-radius:10px}
+.stage-stepper-box{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px;overflow-x:auto;margin-bottom:12px}
+.stage-step-btn{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-size:.78rem;font-weight:600;white-space:nowrap;color:var(--muted-fg);transition:all .15s ease}
+.stage-step-btn:hover{background:var(--accent);color:var(--fg)}
+.stage-step-btn.active{background:var(--primary);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(16,185,129,.35)}
+.stage-step-btn .step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.25);font-size:.68rem;font-weight:800}
+.sim-weather-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:8px;font-size:.75rem;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s ease}
+.sim-weather-chip:hover{border-color:var(--primary);background:var(--accent)}
+.sim-weather-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
+.sim-tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:.74rem;font-weight:600;transition:all .15s ease;text-align:center}
+.sim-tool-btn:hover{border-color:var(--primary);background:var(--accent);transform:translateY(-1px)}
+.sim-tool-btn.active{border-color:var(--primary);background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);color:#065f46;box-shadow:0 2px 8px rgba(16,185,129,.3);font-weight:700}
 .gauge-chip{flex:1;min-width:130px;border-radius:10px;background:var(--card);border:1px solid var(--border);padding:10px 12px}
 
 /* ===== TABLES & SCROLL ===== */
@@ -4183,318 +4199,1457 @@ function locThuoc(tu,gioi){
 }
 
 /* ======================= 7. MÔ PHỎNG ĐỒNG RUỘNG MỞ RỘNG ======================= */
-var SIM=null,AIR=0,SOIL=1,WATER=2,FERT=3,ROOT=4,STEM=5,LEAF=6,FUNG=7,SPRAY=8,DEAD=9;
-var SIM_TOOLS=[
-  {id:WATER, ten:"Tưới nước", icon:"💧", c:"#3b82f6"},
-  {id:FERT, ten:"Phân N-P-K", icon:"🧪", c:"#eab308"},
-  {id:ROOT, ten:"Gieo hạt giống", icon:"🌱", c:"#84cc16"},
-  {id:SPRAY, ten:"Xịt thuốc BVTV", icon:"🛡️", c:"#10b981"},
-  {id:FUNG, ten:"Thả sâu bệnh", icon:"🐛", c:"#a855f7"},
-  {id:SOIL, ten:"Thêm đất mùn", icon:"🪴", c:"#78350f"},
-  {id:AIR, ten:"Gôm / Xóa", icon:"🧹", c:"#94a3b8"}
+var SIM_CROPS = {
+  lua: {
+    id: "lua", ten: "Lúa nước Đồng Bằng", giong: "ST25 / Đài Thơm 8", icon: "🌾",
+    dat: "Đất phù sa ngập nước sông Cửu Long",
+    moTaDat: "Mặt ruộng ngập nước phù sa láng bóng 3-5cm, rễ chùm trắng muốt bám bùn sâu, hấp thu dinh dưỡng phù sa màu mỡ.",
+    stages: [
+      {t: "Mạ non", d: 15, sub: "Bụi mạ xanh mướt cao 15cm, rễ chùm nhú đều"},
+      {t: "Đẻ nhánh", d: 35, sub: "Bụi lúa nở to 8-12 dảnh, lá lúa vươn dài xanh nõn"},
+      {t: "Làm đòng", d: 55, sub: "Đòng non hình thành bên trong bẹ lá, lá đòng đứng thẳng"},
+      {t: "Trổ bông", d: 75, sub: "Bông lúa trổ đều, thụ phấn, hạt vào sữa mẩy tròn"},
+      {t: "Chín vàng", d: 95, sub: "Bông lúa uốn cong trĩu hạt vàng óng, sẵn sàng gặt"}
+    ],
+    doAmLyTuong: [75, 95], npkLyTuong: [50, 85], nangSuat: "6.8 Tấn / ha",
+    groundType: "water_paddy"
+  },
+  caphe: {
+    id: "caphe", ten: "Cà phê Robusta Tây Nguyên", giong: "Robusta Đắk Lắk (TR4/TR9)", icon: "☕",
+    dat: "Đất đỏ Bazan Tây Nguyên tầng dày >70cm",
+    moTaDat: "Đất đỏ Bazan tơi xốp giàu oxit sắt, rễ cọc đâm sâu 1.5 - 2m hút nước ngầm, rễ ngang tỏa rộng tầng mặt.",
+    stages: [
+      {t: "Cây con bầu đất", d: 45, sub: "Thân mầm gỗ non, 4-6 cặp lá tròn dày xanh bóng"},
+      {t: "Phát triển cành tán", d: 120, sub: "Thân gỗ chắc nịch, phân các tầng cành cấp 1 đối xứng"},
+      {t: "Nở hoa trắng", d: 180, sub: "Hoa cà phê nở trắng xóa như tuyết ở các nách lá, hương thơm dịu"},
+      {t: "Đậu quả non", d: 240, sub: "Hàng trăm chùm quả non xanh bóng bám chi chít ở các đốt cành"},
+      {t: "Chín đỏ ruby", d: 300, sub: "Quả chuyển sang đỏ ruby mọng nước, hạt nhân no chắc"}
+    ],
+    doAmLyTuong: [55, 68], npkLyTuong: [60, 90], nangSuat: "3.8 Tấn nhân / ha",
+    groundType: "red_basalt"
+  },
+  cam: {
+    id: "cam", ten: "Cam sành Miền Tây", giong: "Cam sành Tam Bình / Tiền Giang", icon: "🍊",
+    dat: "Mô đất vườn xẻ rãnh liếp thoát nước",
+    moTaDat: "Đất lên mô hình bán cầu cao 50cm, rãnh liếp trữ nước ngọt, rễ tơ ăn cạn bề mặt đất mô màu mỡ.",
+    stages: [
+      {t: "Cây giống ghép", d: 40, sub: "Mầm ghép đâm tược non xanh mướt, rễ tơ bung đều"},
+      {t: "Tán dù sum sê", d: 110, sub: "Phân cành cấp 2 cấp 3 tạo thành vòm tán hình bán cầu"},
+      {t: "Ra hoa đậu trái", d: 170, sub: "Hoa cam 5 cánh trắng tinh khôi điểm nhụy vàng, đài hoa rụng"},
+      {t: "Trái lớn da sần", d: 230, sub: "Trái cam lớn nhanh, vỏ xanh đậm sần sùi với các túi tinh dầu"},
+      {t: "Chín vàng mọng nước", d: 290, sub: "Quả cam to tròn đầm tay, vỏ xanh sành ngả sắc vàng ươm"}
+    ],
+    doAmLyTuong: [60, 72], npkLyTuong: [55, 80], nangSuat: "32 Tấn / ha",
+    groundType: "mound_garden"
+  },
+  saurieng: {
+    id: "saurieng", ten: "Sầu riêng Ri6", giong: "Ri6 cơm vàng hạt lép", icon: "🍈",
+    dat: "Đất đắp mô cao thoát nước triệt để",
+    moTaDat: "Gốc cây đắp mô đất cao ráo, tuyệt đối không đọng nước quanh cổ rễ tránh nấm Phytophthora.",
+    stages: [
+      {t: "Cây tơ 1 năm", d: 60, sub: "Thân gỗ non cao 1.2m, cành nhánh bắt đầu vươn ngang"},
+      {t: "Tán tầng cành cấp 1", d: 150, sub: "Thân vươn cao lớn, các cành ngang cấp 1 to khỏe chịu lực"},
+      {t: "Mắt cua & Xổ nhụy", d: 210, sub: "Từng chùm hoa sầu riêng bung nở từ dạ dưới cành gỗ"},
+      {t: "Trái non chạy gai", d: 270, sub: "Trái non hình quả trứng bọc đầy gai xanh nhọn"},
+      {t: "Trái già cơm vàng", d: 330, sub: "Trái to 3-5 kg, gai nở đều, rãnh múi rõ, cơm vàng ngọt béo"}
+    ],
+    doAmLyTuong: [55, 65], npkLyTuong: [65, 95], nangSuat: "25 Tấn / ha",
+    groundType: "high_mound"
+  },
+  bap: {
+    id: "bap", ten: "Bắp ngô vụ hè thu", giong: "Ngô ngọt Sugar 75 / Ngô nếp tím", icon: "🌽",
+    dat: "Đất bãi bồi lên luống tơi xốp",
+    moTaDat: "Đất lên luống cao 25cm, thoát nước tốt, tơi xốp giúp rễ chân kiềng ăn sâu chống đổ ngã.",
+    stages: [
+      {t: "Mầm ngô 3-5 lá", d: 12, sub: "Thân mầm mập mạp nhú lên từ hạt ngô vàng, rễ mầm ăn sâu"},
+      {t: "Vươn lóng phát triển", d: 30, sub: "Thân đốt to tròn vươn cao, bẹ lá to bản lượn sóng xòe rộng"},
+      {t: "Trổ cờ phun râu", d: 45, sub: "Cờ bắp tỏa nhánh ở ngọn rắc phấn vàng, râu bắp nhú mềm mại"},
+      {t: "Ngô ngậm sữa", d: 60, sub: "Bắp ngô to mập, hạt ngô căng tròn chứa dịch sữa ngọt lịm"},
+      {t: "Thu hoạch bắp tươi", d: 75, sub: "Bắp ngô đầy đặn nặng trĩu, râu ngô khô nâu đỏ, hạt vàng bóng"}
+    ],
+    doAmLyTuong: [60, 75], npkLyTuong: [55, 80], nangSuat: "8.5 Tấn / ha",
+    groundType: "ridge_field"
+  }
+};
+
+var SIM_TOOLS = [
+  {id: "water", ten: "Tưới nước", icon: "💧", c: "#3b82f6"},
+  {id: "fert", ten: "Phân N-P-K", icon: "🧪", c: "#eab308"},
+  {id: "spray", ten: "Xịt thuốc BVTV", icon: "🛡️", c: "#10b981"},
+  {id: "pest", ten: "Thả sâu hại", icon: "🐛", c: "#a855f7"},
+  {id: "prune", ten: "Tỉa cành / Lá", icon: "✂️", c: "#f97316"},
+  {id: "soil", ten: "Thêm đất mùn", icon: "🪴", c: "#78350f"}
 ];
 
+var SIM = {
+  crop: "caphe",
+  stage: 4,
+  day: 245,
+  weather: "sun",
+  doAm: 62,
+  npk: 72,
+  health: 98,
+  ton: 0,
+  tool: "water",
+  run: true,
+  loop: false,
+  tick: 0,
+  cv: null,
+  ctx: null,
+  W: 1100,
+  H: 560,
+  particles: [],
+  pests: [],
+  floatTexts: [],
+  pointerDown: false
+};
+
 function pSim(){
-  var L='<div class="card" style="padding:16px;overflow:hidden">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-    +'<div style="font-size:.85rem;font-weight:700">🔬 Lát cắt sinh thái đồng ruộng (Toàn màn hình)</div>'
-    +'<div style="display:flex;gap:6px">'
-    +'<button type="button" id="simWeatherSun" class="btn" style="padding:4px 8px;font-size:.75rem">☀️ Nắng ấm</button>'
-    +'<button type="button" id="simWeatherRain" class="btn" style="padding:4px 8px;font-size:.75rem">🌧️ Mưa rào</button>'
-    +'<button type="button" id="simWeatherStorm" class="btn" style="padding:4px 8px;font-size:.75rem">⛈️ Dông bão</button>'
-    +'<button type="button" id="simToggleExpand" class="btn" style="padding:4px 8px;font-size:.75rem">⛶ Phóng to / Thu nhỏ</button>'
-    +'</div></div>'
-    +'<canvas id="simCv" width="360" height="200" class="sim-viewport-lg"></canvas>'
-    +'<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
-    +btn("⏸️ Dừng",'id="simRun"')
-    +btn("🌧️ Cho mưa đều",'id="simMua"')
-    +btn("⚡ Tăng tốc qua 1 ngày",'id="simNgay"')
-    +btn("🔄 Đặt lại từ đầu",'id="simReset"')
-    +'<span id="simDayTxt" class="mono" style="margin-left:auto;font-size:.82rem;font-weight:700;color:var(--primary)">Ngày thứ: 1</span>'
-    +'</div></div>';
+  var curCrop = SIM_CROPS[SIM.crop] || SIM_CROPS.caphe;
 
-  var R='<div style="display:flex;flex-direction:column;gap:12px">'
-    +'<div class="card" style="padding:16px">'
-    +'<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:8px">Công cụ thao tác trực tiếp trên ruộng</div>'
-    +'<div id="simToolsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:6px"></div>'
-    +'</div>'
-    +'<div class="card" style="padding:16px">'
-    +'<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:8px">Đồng hồ chỉ số sinh thái thời gian thực</div>'
-    +'<div id="simMetersBox" style="display:flex;flex-direction:column;gap:8px"></div>'
-    +'</div>'
-    +'<div class="card" style="padding:14px;font-size:.75rem;line-height:1.6;color:var(--muted-fg)">'
-    +'<b>Hướng dẫn:</b> Chọn công cụ và rê chuột/ngón tay lên màn hình mô phỏng để tưới nước, rải phân hoặc trị sâu bệnh. Quan sát rễ cây vươn dài hút dưỡng chất và sinh khối trổ bông.'
-    +'</div></div>';
+  // 1. Crop Switcher Grid
+  var cropCards = '<div class="crop-sim-grid">';
+  var cropKeys = ["lua", "caphe", "cam", "saurieng", "bap"];
+  for (var i = 0; i < cropKeys.length; i++) {
+    var k = cropKeys[i];
+    var c = SIM_CROPS[k];
+    var act = SIM.crop === k ? " active" : "";
+    cropCards += '<div class="crop-sim-card' + act + '" data-simcrop="' + k + '">'
+      + '<div class="crop-sim-icon">' + c.icon + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-weight:700;font-size:.84rem;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.ten) + '</div>'
+      + '<div style="font-size:.7rem;color:var(--muted-fg);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.giong) + '</div>'
+      + '</div>'
+      + (SIM.crop === k ? '<span style="font-size:.68rem;background:#10b981;color:#fff;padding:2px 6px;border-radius:10px;font-weight:700">Đang chọn</span>' : '')
+      + '</div>';
+  }
+  cropCards += '</div>';
 
-  return sec("Mô phỏng sinh thái đồng ruộng mở rộng",
-    '<div class="g-sim"><div>'+L+'</div><div>'+R+'</div></div>');
+  // 2. Growth Stage Stepper
+  var stageSteps = '<div class="stage-stepper-box">'
+    + '<span style="font-size:.75rem;font-weight:700;color:var(--muted-fg);margin-right:6px;display:flex;align-items:center;gap:4px">🌱 Giai đoạn:</span>';
+  for (var s = 0; s < curCrop.stages.length; s++) {
+    var st = curCrop.stages[s];
+    var sNum = s + 1;
+    var sAct = SIM.stage === sNum ? " active" : "";
+    stageSteps += '<button type="button" class="stage-step-btn' + sAct + '" data-simstage="' + sNum + '">'
+      + '<span class="step-num">' + sNum + '</span>'
+      + '<span>' + esc(st.t) + '</span>'
+      + '</button>';
+  }
+  stageSteps += '</div>';
+
+  // 3. Canvas & Direct Viewport Controls
+  var L = '<div class="card" style="padding:16px;overflow:hidden">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">'
+    + '<div style="display:flex;align-items:center;gap:8px">'
+    + '<span style="font-size:1.4rem">' + curCrop.icon + '</span>'
+    + '<div>'
+    + '<div style="font-size:.88rem;font-weight:800;color:var(--fg)">' + esc(curCrop.ten) + ' — <span style="color:#059669">' + esc(curCrop.giong) + '</span></div>'
+    + '<div style="font-size:.72rem;color:var(--muted-fg)">' + esc(curCrop.dat) + '</div>'
+    + '</div>'
+    + '</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">'
+    + '<button type="button" id="simWeatherSun" class="sim-weather-chip' + (SIM.weather === "sun" ? " active" : "") + '">☀️ Nắng ấm</button>'
+    + '<button type="button" id="simWeatherRain" class="sim-weather-chip' + (SIM.weather === "rain" ? " active" : "") + '">🌧️ Mưa rào</button>'
+    + '<button type="button" id="simWeatherStorm" class="sim-weather-chip' + (SIM.weather === "storm" ? " active" : "") + '">⛈️ Dông bão</button>'
+    + '<button type="button" id="simToggleExpand" class="btn" style="padding:4px 8px;font-size:.75rem">⛶ To / Nhỏ</button>'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="position:relative">'
+    + '<canvas id="simCv" width="1100" height="560" class="sim-viewport-lg"></canvas>'
+    + '<div style="position:absolute;bottom:10px;left:12px;background:rgba(15,23,42,.75);backdrop-filter:blur(6px);color:#fff;font-size:.72rem;padding:4px 10px;border-radius:8px;display:flex;gap:12px;pointer-events:none">'
+    + '<span>🌾 <b>Giai đoạn:</b> ' + esc(curCrop.stages[SIM.stage - 1].t) + '</span>'
+    + '<span>📅 <b>Ngày thứ:</b> <span id="simDayTxtBadge">' + SIM.day + '</span></span>'
+    + '<span>🍃 <b>Gió:</b> ' + (SIM.weather === "storm" ? "Mạnh 12m/s" : "Nhẹ 2.5m/s") + '</span>'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
+    + btn(SIM.run ? "⏸️ Tạm dừng" : "▶️ Tiếp tục", 'id="simRun"')
+    + btn("⚡ Tăng tốc qua 1 ngày", 'id="simNgay" class="btn btn-p"')
+    + btn("⏩ Tua nhanh 7 ngày", 'id="simWeek"')
+    + btn("🌧️ Mưa tưới tự nhiên", 'id="simMua"')
+    + btn("🔄 Đặt lại vụ mới", 'id="simReset"')
+    + '<span id="simDayTxt" class="mono" style="margin-left:auto;font-size:.85rem;font-weight:800;color:var(--primary)">Vụ mùa: Ngày thứ ' + SIM.day + '</span>'
+    + '</div></div>';
+
+  // 4. Tools & Real-Time Gauges & AI Agronomist
+  var curStageObj = curCrop.stages[SIM.stage - 1];
+  var aiTip = getSimAITip(SIM.crop, SIM.stage, SIM.doAm, SIM.npk, SIM.health);
+
+  var R = '<div style="display:flex;flex-direction:column;gap:12px">'
+    // Tools
+    + '<div class="card" style="padding:16px">'
+    + '<div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-fg);margin-bottom:8px">Công cụ thao tác trực tiếp lên đồng ruộng</div>'
+    + '<div id="simToolsGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>'
+    + '<div style="margin-top:8px;font-size:.72rem;color:var(--muted-fg);line-height:1.4">👉 <i>Chọn công cụ rồi nhấp / rê chuột trên khung hình cây để tưới, bón phân hoặc trị sâu bệnh.</i></div>'
+    + '</div>'
+
+    // Ecological Meters
+    + '<div class="card" style="padding:16px">'
+    + '<div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-fg);margin-bottom:8px">Chỉ số sinh thái thực địa</div>'
+    + '<div id="simMetersBox" style="display:flex;flex-direction:column;gap:10px"></div>'
+    + '</div>'
+
+    // AI Agronomist Advisory
+    + '<div class="card" style="padding:14px;background:linear-gradient(135deg,#ecfdf5 0%,#f0fdf4 100%);border:1px solid #a7f3d0">'
+    + '<div style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;color:#047857">'
+    + '<span>👨‍🌾 Cố vấn nông học AI thời gian thực</span>'
+    + '</div>'
+    + '<div id="simAiDoctorBox" style="font-size:.78rem;color:#065f46;margin-top:6px;line-height:1.5">'
+    + aiTip
+    + '</div>'
+    + '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #86efac;font-size:.72rem;color:#047857;display:flex;justify-content:space-between">'
+    + '<span>Năng suất mục tiêu: <b>' + esc(curCrop.nangSuat) + '</b></span>'
+    + '<span>Độ an toàn: <b>' + (SIM.ton < 10 ? 'Chuẩn VietGAP 🌟' : 'Cách ly') + '</b></span>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+
+  return sec("Mô phỏng sinh thái đồng ruộng đa cây trồng",
+    cropCards + stageSteps + '<div class="g-sim"><div>' + L + '</div><div>' + R + '</div></div>');
+}
+
+function getSimAITip(cropId, stage, doAm, npk, health){
+  var c = SIM_CROPS[cropId];
+  if(!c) return "Theo dõi diễn biến đồng ruộng và chăm sóc kịp thời.";
+  var stageName = c.stages[stage - 1].t;
+
+  if (health < 70) {
+    return "⚠️ <b>Cảnh báo sâu bệnh:</b> Cây " + c.ten + " đang bị nấm/sâu hại làm suy giảm sức đề kháng! Hãy dùng ngay công cụ <b>🛡️ Xịt thuốc BVTV</b> hoặc <b>✂️ Tỉa cành / Lá</b> để cứu vãn tán lá.";
+  }
+  if (doAm < c.doAmLyTuong[0]) {
+    return "💧 <b>Cảnh báo khô hạn:</b> Độ ẩm đất hiện tại (" + Math.round(doAm) + "%) thấp hơn mức lý tưởng (" + c.doAmLyTuong[0] + "-" + c.doAmLyTuong[1] + "%). Giai đoạn <i>" + stageName + "</i> cây cần đủ nước để trao đổi chất, hãy dùng <b>💧 Tưới nước</b>.";
+  }
+  if (doAm > c.doAmLyTuong[1] + 10 && cropId !== "lua") {
+    return "⚠️ <b>Nguy cơ úng rễ:</b> Đất đang quá ẩm (" + Math.round(doAm) + "%). Cần ngưng tưới và khơi thông rãnh thoát nước để rễ thở, tránh thối rễ tơ.";
+  }
+  if (npk < c.npkLyTuong[0]) {
+    return "🧪 <b>Thiếu hụt dinh dưỡng:</b> Chỉ số N-P-K (" + Math.round(npk) + " ppm) đang thiếu. Dùng <b>🧪 Phân N-P-K</b> để thúc đẩy cây nuôi " + (stage >= 4 ? "trái/bông no đẫy hạt" : "tán lá sum sê") + ".";
+  }
+  return "✅ <b>Sinh thái cực tốt:</b> Cây " + c.ten + " đang phát triển sung mãn ở giai đoạn <i>" + stageName + "</i>. Độ ẩm và dinh dưỡng cân bằng, hướng tới năng suất kỷ lục <b>" + c.nangSuat + "</b>!";
 }
 
 function simInit(){
-  var cv=document.getElementById("simCv");if(!cv)return;
-  var W=360,H=200;
-  var off=document.createElement("canvas");off.width=W;off.height=H;
-  var octx=off.getContext("2d");
-  SIM={
-    W:W,H:H,cv:cv,ctx:cv.getContext("2d"),off:off,octx:octx,img:octx.createImageData(W,H),
-    t:new Uint8Array(W*H),m:new Uint8Array(W*H),n:new Uint8Array(W*H),a:new Uint8Array(W*H),
-    run:true,tick:0,ngay:1,ton:0,tool:WATER,paint:false,nuoi:0,loop:false,
-    health:100,weather:"sun"
-  };
-  simReset();veSimTools();veSimMtr();
-  cv.addEventListener("pointerdown",function(e){SIM.paint=true;cv.setPointerCapture(e.pointerId);simPaint(e)});
-  cv.addEventListener("pointermove",function(e){if(SIM.paint)simPaint(e)});
-  cv.addEventListener("pointerup",function(){SIM.paint=false});
-  cv.addEventListener("pointercancel",function(){SIM.paint=false});
+  var cv = document.getElementById("simCv");
+  if (!cv) return;
 
-  document.getElementById("simRun").addEventListener("click",function(){
-    SIM.run=!SIM.run;this.textContent=SIM.run?"⏸️ Dừng":"▶️ Tiếp tục";
+  var W = 1100, H = 560;
+  cv.width = W;
+  cv.height = H;
+  SIM.cv = cv;
+  SIM.ctx = cv.getContext("2d");
+  SIM.W = W;
+  SIM.H = H;
+  SIM.particles = [];
+  SIM.pests = [];
+  SIM.floatTexts = [];
+
+  veSimTools();
+  veSimMtr();
+
+  // Mouse & Touch interactions on canvas
+  cv.onpointerdown = function(e){
+    SIM.pointerDown = true;
+    cv.setPointerCapture(e.pointerId);
+    simApplyTool(e);
+  };
+  cv.onpointermove = function(e){
+    if(SIM.pointerDown) simApplyTool(e);
+  };
+  cv.onpointerup = function(e){
+    SIM.pointerDown = false;
+  };
+  cv.onpointercancel = function(e){
+    SIM.pointerDown = false;
+  };
+
+  // Crop Switching buttons
+  document.querySelectorAll("[data-simcrop]").forEach(function(btn){
+    btn.onclick = function(){
+      var cKey = this.getAttribute("data-simcrop");
+      if(SIM_CROPS[cKey]){
+        SIM.crop = cKey;
+        SIM.stage = 4; // default to fruiting / flowering
+        SIM.day = SIM_CROPS[cKey].stages[3].d;
+        SIM.doAm = (SIM_CROPS[cKey].doAmLyTuong[0] + SIM_CROPS[cKey].doAmLyTuong[1]) / 2;
+        SIM.npk = (SIM_CROPS[cKey].npkLyTuong[0] + SIM_CROPS[cKey].npkLyTuong[1]) / 2;
+        SIM.health = 100;
+        SIM.ton = 0;
+        SIM.particles = [];
+        SIM.pests = [];
+        addSimFloatText("🌾 Chuyển sang " + SIM_CROPS[cKey].ten, 550, 200, "#10b981");
+        ve();
+      }
+    };
   });
-  document.getElementById("simReset").addEventListener("click",function(){simReset();veSimMtr()});
-  document.getElementById("simMua").addEventListener("click",function(){
-    for(var x=0;x<SIM.W;x++)if(Math.random()<.65)for(var y=0;y<3;y++)simSet(x,y,WATER);
+
+  // Stage Stepper buttons
+  document.querySelectorAll("[data-simstage]").forEach(function(btn){
+    btn.onclick = function(){
+      var s = parseInt(this.getAttribute("data-simstage"), 10);
+      if(s >= 1 && s <= 5){
+        SIM.stage = s;
+        var c = SIM_CROPS[SIM.crop];
+        if(c && c.stages[s - 1]){
+          SIM.day = c.stages[s - 1].d;
+        }
+        addSimFloatText("🌱 Giai đoạn: " + c.stages[s-1].t, 550, 180, "#3b82f6");
+        ve();
+      }
+    };
   });
-  document.getElementById("simNgay").addEventListener("click",function(){
-    for(var i=0;i<120;i++)simStep();simNgay();veSimMtr();simDraw();
-  });
-  document.getElementById("simWeatherSun").addEventListener("click",function(){SIM.weather="sun"});
-  document.getElementById("simWeatherRain").addEventListener("click",function(){
-    SIM.weather="rain";for(var x=0;x<SIM.W;x++)if(Math.random()<.45)for(var y=0;y<2;y++)simSet(x,y,WATER);
-  });
-  document.getElementById("simWeatherStorm").addEventListener("click",function(){
-    SIM.weather="storm";for(var x=0;x<SIM.W;x++)for(var y=0;y<3;y++)if(Math.random()<.7)simSet(x,y,WATER);
-  });
-  var btnExp=document.getElementById("simToggleExpand");
+
+  // Weather controls
+  var bSun = document.getElementById("simWeatherSun");
+  var bRain = document.getElementById("simWeatherRain");
+  var bStorm = document.getElementById("simWeatherStorm");
+  if(bSun) bSun.onclick = function(){ SIM.weather = "sun"; ve(); };
+  if(bRain) bRain.onclick = function(){ SIM.weather = "rain"; ve(); };
+  if(bStorm) bStorm.onclick = function(){ SIM.weather = "storm"; ve(); };
+
+  // Expand canvas
+  var btnExp = document.getElementById("simToggleExpand");
   if(btnExp){
-    btnExp.addEventListener("click",function(){
+    btnExp.onclick = function(){
       cv.classList.toggle("sim-expanded");
-    });
+    };
   }
 
-  if(!SIM.loop){SIM.loop=true;requestAnimationFrame(simFrame)}
+  // Simulation step buttons
+  var btnRun = document.getElementById("simRun");
+  if(btnRun){
+    btnRun.onclick = function(){
+      SIM.run = !SIM.run;
+      this.textContent = SIM.run ? "⏸️ Tạm dừng" : "▶️ Tiếp tục";
+    };
+  }
+  var btnNgay = document.getElementById("simNgay");
+  if(btnNgay){
+    btnNgay.onclick = function(){
+      simAdvanceDays(1);
+    };
+  }
+  var btnWeek = document.getElementById("simWeek");
+  if(btnWeek){
+    btnWeek.onclick = function(){
+      simAdvanceDays(7);
+    };
+  }
+  var btnMua = document.getElementById("simMua");
+  if(btnMua){
+    btnMua.onclick = function(){
+      SIM.doAm = Math.min(100, SIM.doAm + 15);
+      for(var i=0; i<40; i++){
+        SIM.particles.push({
+          type: "water",
+          x: Math.random() * SIM.W,
+          y: Math.random() * 200,
+          vx: (Math.random() - 0.5) * 2,
+          vy: 8 + Math.random() * 4,
+          life: 60
+        });
+      }
+      addSimFloatText("🌧️ Mưa đều: +15% Độ ẩm", 550, 240, "#0284c7");
+      veSimMtr();
+    };
+  }
+  var btnReset = document.getElementById("simReset");
+  if(btnReset){
+    btnReset.onclick = function(){
+      var c = SIM_CROPS[SIM.crop];
+      SIM.stage = 1;
+      SIM.day = 1;
+      SIM.health = 100;
+      SIM.ton = 0;
+      SIM.doAm = c ? c.doAmLyTuong[0] : 60;
+      SIM.npk = c ? c.npkLyTuong[0] : 60;
+      SIM.particles = [];
+      SIM.pests = [];
+      addSimFloatText("🔄 Bắt đầu vụ mùa mới!", 550, 200, "#10b981");
+      ve();
+    };
+  }
+
+  if (!SIM.loop) {
+    SIM.loop = true;
+    requestAnimationFrame(simFrameLoop);
+  }
 }
 
-function simReset(){
-  var W=SIM.W,H=SIM.H,x,y;
-  SIM.t.fill(AIR);SIM.m.fill(0);SIM.n.fill(0);SIM.a.fill(0);
-  SIM.tick=0;SIM.ngay=1;SIM.ton=0;SIM.nuoi=0;SIM.health=100;
-  for(x=0;x<W;x++){
-    var mat=H-65+Math.round(Math.sin(x/30)*3);
-    for(y=mat;y<H;y++){
-      var i=y*W+x;SIM.t[i]=SOIL;SIM.m[i]=y>H-25?2:1;SIM.n[i]=y>H-35?2:1;
+function simAdvanceDays(days){
+  var c = SIM_CROPS[SIM.crop];
+  SIM.day += days;
+
+  // Environmental evaporation & nutrient consumption
+  if(SIM.weather === "sun"){
+    SIM.doAm = Math.max(10, SIM.doAm - 2.5 * days);
+  } else if(SIM.weather === "rain"){
+    SIM.doAm = Math.min(100, SIM.doAm + 4 * days);
+  } else if(SIM.weather === "storm"){
+    SIM.doAm = Math.min(100, SIM.doAm + 8 * days);
+  }
+  SIM.npk = Math.max(5, SIM.npk - 1.2 * days);
+  SIM.ton = Math.max(0, SIM.ton - 8 * days);
+
+  // If pests exist, tree health drops
+  if(SIM.pests.length > 0){
+    SIM.health = Math.max(15, SIM.health - SIM.pests.length * 3 * days);
+  } else if(SIM.health < 100 && SIM.doAm >= c.doAmLyTuong[0] && SIM.npk >= c.npkLyTuong[0]){
+    SIM.health = Math.min(100, SIM.health + 2 * days);
+  }
+
+  // Check auto advance stage
+  if(c && c.stages){
+    for(var s = c.stages.length - 1; s >= 0; s--){
+      if(SIM.day >= c.stages[s].d){
+        if(SIM.stage !== (s + 1)){
+          SIM.stage = s + 1;
+          addSimFloatText("🌟 Chuyển giai đoạn: " + c.stages[s].t, 550, 160, "#10b981");
+        }
+        break;
+      }
     }
   }
-  for(var k=0;k<6;k++){
-    var cx=30+k*58,top=H-65+Math.round(Math.sin(cx/30)*3);
-    for(var d=0;d<10;d++)SIM.t[(top+d)*W+cx]=ROOT;
-    for(var s=1;s<=14;s++){var yy=top-s;if(yy>0)SIM.t[yy*W+cx]=STEM}
-    for(var l=0;l<6;l++){
-      var ly=top-4-l*2,lx=cx+(l%2?3:-3);
-      if(ly>0&&lx>0&&lx<W-1){SIM.t[ly*W+lx]=LEAF;SIM.t[ly*W+lx+(l%2?1:-1)]=LEAF}
+
+  var dayTxt = document.getElementById("simDayTxt");
+  if(dayTxt) dayTxt.textContent = "Vụ mùa: Ngày thứ " + SIM.day;
+  var badge = document.getElementById("simDayTxtBadge");
+  if(badge) badge.textContent = SIM.day;
+
+  addSimFloatText("⚡ +" + days + " Ngày canh tác", 550, 220, "#eab308");
+  veSimMtr();
+}
+
+function simApplyTool(e){
+  var r = SIM.cv.getBoundingClientRect();
+  var scaleX = SIM.W / r.width;
+  var scaleY = SIM.H / r.height;
+  var x = (e.clientX - r.left) * scaleX;
+  var y = (e.clientY - r.top) * scaleY;
+
+  if (SIM.tool === "water") {
+    SIM.doAm = Math.min(100, SIM.doAm + 1.2);
+    for (var i = 0; i < 5; i++) {
+      SIM.particles.push({
+        type: "water",
+        x: x + (Math.random() - 0.5) * 30,
+        y: y + (Math.random() - 0.5) * 20,
+        vx: (Math.random() - 0.5) * 2,
+        vy: 6 + Math.random() * 4,
+        life: 40
+      });
     }
-  }
-  simDraw();
-}
-
-function simSet(x,y,ty){
-  if(x<0||y<0||x>=SIM.W||y>=SIM.H)return;
-  var i=y*SIM.W+x;
-  if(ty===ROOT){if(SIM.t[i]!==SOIL)return;SIM.t[i]=ROOT;return}
-  SIM.t[i]=ty;
-  if(ty===SOIL){SIM.m[i]=1;SIM.n[i]=0}
-  if(ty===AIR){SIM.m[i]=0;SIM.n[i]=0}
-}
-
-function simPaint(e){
-  var r=SIM.cv.getBoundingClientRect();
-  var x=Math.floor((e.clientX-r.left)/r.width*SIM.W),y=Math.floor((e.clientY-r.top)/r.height*SIM.H),R=SIM.tool===ROOT?1:3;
-  for(var dy=-R;dy<=R;dy++)for(var dx=-R;dx<=R;dx++){
-    if(dx*dx+dy*dy>R*R+1)continue;
-    if(SIM.tool===FERT&&Math.random()<.5)continue;
-    simSet(x+dx,y+dy,SIM.tool);
-  }
-  if(SIM.tool===SPRAY)SIM.ton=Math.min(100,SIM.ton+2.5);
-}
-
-function simStep(){
-  var W=SIM.W,H=SIM.H,t=SIM.t,m=SIM.m,n=SIM.n,a=SIM.a,DX=[1,-1,0,0],DY=[0,0,1,-1];
-  function ix(x,y){return y*W+x}
-  function sw(i,j){var q=t[i];t[i]=t[j];t[j]=q;q=a[i];a[i]=a[j];a[j]=q}
-
-  for(var y=H-1;y>=0;y--){
-    var l2r=(SIM.tick+y)%2===0;
-    for(var q=0;q<W;q++){
-      var x=l2r?q:W-1-q,i=ix(x,y),ty=t[i],d,j,s,b;
-      if(ty===AIR||ty===SOIL)continue;
-
-      if(ty===WATER){
-        b=y<H-1?ix(x,y+1):-1;
-        if(b<0){t[i]=AIR;continue}
-        if(t[b]===AIR){sw(i,b);continue}
-        if(t[b]===SOIL){
-          if(m[b]<4){m[b]++;t[i]=AIR}
-          else{s=x+(Math.random()<.5?-1:1);if(s>=0&&s<W&&t[ix(s,y)]===AIR)sw(i,ix(s,y))}
-          continue;
-        }
-        s=x+(Math.random()<.5?-1:1);
-        if(s>=0&&s<W&&y<H-1&&t[ix(s,y+1)]===AIR){sw(i,ix(s,y+1));continue}
-        if(s>=0&&s<W&&t[ix(s,y)]===AIR)sw(i,ix(s,y));
-        continue;
-      }
-
-      if(ty===SPRAY){
-        for(d=0;d<4;d++){
-          var nx2=x+DX[d],ny2=y+DY[d];
-          if(nx2<0||ny2<0||nx2>=W||ny2>=H)continue;
-          j=ix(nx2,ny2);if(t[j]===FUNG){t[j]=DEAD;a[j]=0;t[i]=AIR;break}
-        }
-        if(t[i]!==SPRAY)continue;
-        b=y<H-1?ix(x,y+1):-1;
-        if(b<0){t[i]=AIR;continue}
-        if(t[b]===AIR){sw(i,b);continue}
-        if(t[b]===LEAF||t[b]===STEM){if(SIM.ton>80&&Math.random()<.03)t[b]=DEAD;t[i]=AIR;continue}
-        if(t[b]===SOIL){t[i]=AIR;continue}
-        s=x+(Math.random()<.5?-1:1);
-        if(s>=0&&s<W&&t[ix(s,y)]===AIR)sw(i,ix(s,y));else t[i]=AIR;
-        continue;
-      }
-
-      if(ty===FERT){
-        b=y<H-1?ix(x,y+1):-1;
-        if(b<0){t[i]=AIR;continue}
-        if(t[b]===AIR||t[b]===WATER){sw(i,b);continue}
-        if(t[b]===SOIL){
-          if(m[b]>0){n[b]=Math.min(4,n[b]+2);m[b]--;t[i]=AIR}
-          else{s=x+(Math.random()<.5?-1:1);if(s>=0&&s<W&&y<H-1&&t[ix(s,y+1)]===AIR)sw(i,ix(s,y+1))}
-        }
-        continue;
-      }
-
-      if(ty===ROOT){
-        if(Math.random()<.06){
-          var P=[[0,1],[0,1],[-1,0],[1,0],[-1,1],[1,1]],p=P[(Math.random()*P.length)|0];
-          var rx=x+p[0],ry=y+p[1];
-          if(rx>=0&&rx<W&&ry<H){
-            j=ix(rx,ry);
-            if(t[j]===SOIL&&m[j]>0&&n[j]>0){t[j]=ROOT;m[j]--;n[j]--;SIM.nuoi++}
-          }
-        }
-        if(y>0&&t[ix(x,y-1)]===AIR&&SIM.nuoi>4&&Math.random()<.25){t[ix(x,y-1)]=STEM;SIM.nuoi-=4}
-        continue;
-      }
-
-      if(ty===STEM){
-        if(y>0&&t[ix(x,y-1)]===AIR&&SIM.nuoi>5&&Math.random()<.14){t[ix(x,y-1)]=STEM;SIM.nuoi-=5}
-        else if(Math.random()<.05&&SIM.nuoi>3){
-          var lx2=x+(Math.random()<.5?-1:1);
-          if(lx2>=0&&lx2<W&&t[ix(lx2,y)]===AIR){t[ix(lx2,y)]=LEAF;SIM.nuoi-=3}
-        }
-        continue;
-      }
-
-      if(ty===FUNG){
-        a[i]++;
-        if(a[i]>180){t[i]=DEAD;a[i]=0;continue}
-        var am=0;
-        for(d=0;d<4;d++){
-          var fx=x+DX[d],fy=y+DY[d];
-          if(fx<0||fy<0||fx>=W||fy>=H)continue;
-          j=ix(fx,fy);if(t[j]===WATER||(t[j]===SOIL&&m[j]>2))am++;
-        }
-        var pr2=.008+am*.014;
-        for(d=0;d<4;d++){
-          var gx=x+DX[d],gy=y+DY[d];
-          if(gx<0||gy<0||gx>=W||gy>=H)continue;
-          j=ix(gx,gy);
-          if((t[j]===LEAF||t[j]===STEM)&&Math.random()<pr2){t[j]=FUNG;a[j]=0}
-        }
-        continue;
-      }
-
-      if(ty===DEAD){a[i]++;if(a[i]>240){t[i]=AIR;a[i]=0}}
+    if (Math.random() < 0.15) addSimFloatText("+1.5% Độ ẩm", x, y - 20, "#0284c7");
+  } else if (SIM.tool === "fert") {
+    SIM.npk = Math.min(100, SIM.npk + 2);
+    for (var i = 0; i < 4; i++) {
+      SIM.particles.push({
+        type: "fert",
+        color: ["#eab308", "#10b981", "#3b82f6"][(Math.random() * 3) | 0],
+        x: x + (Math.random() - 0.5) * 30,
+        y: y + (Math.random() - 0.5) * 20,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: 4 + Math.random() * 3,
+        life: 50
+      });
     }
-  }
-  SIM.tick++;
-  if(SIM.tick%130===0)simNgay();
-}
-
-function simNgay(){
-  SIM.ngay++;SIM.ton=Math.max(0,SIM.ton-6);
-  var el=document.getElementById("simDayTxt");if(el)el.textContent="Ngày thứ: "+SIM.ngay;
-}
-
-function simDraw(){
-  var W=SIM.W,H=SIM.H,t=SIM.t,m=SIM.m,n=SIM.n,Da=SIM.img.data;
-  var colMap={
-    air:[238,242,239],sd:[154,130,95],sw:[84,68,47],wa:[59,130,246],fe:[234,179,8],
-    ro:[166,124,74],se:[22,163,74],le:[74,222,128],fu:[168,85,247],sp:[45,212,191],de:[148,163,184]
-  };
-
-  for(var i=0;i<W*H;i++){
-    var c,ty=t[i];
-    if(ty===SOIL){
-      var f=m[i]/4;
-      c=[colMap.sd[0]+(colMap.sw[0]-colMap.sd[0])*f,colMap.sd[1]+(colMap.sw[1]-colMap.sd[1])*f,colMap.sd[2]+(colMap.sw[2]-colMap.sd[2])*f];
-      if(n[i]>0){c[0]=c[0]*.75+colMap.fe[0]*.25;c[1]=c[1]*.75+colMap.fe[1]*.25;c[2]=c[2]*.75+colMap.fe[2]*.25}
+    if (Math.random() < 0.15) addSimFloatText("+2 N-P-K", x, y - 20, "#eab308");
+  } else if (SIM.tool === "spray") {
+    SIM.ton = Math.min(100, SIM.ton + 3);
+    for (var i = 0; i < 8; i++) {
+      SIM.particles.push({
+        type: "mist",
+        x: x + (Math.random() - 0.5) * 50,
+        y: y + (Math.random() - 0.5) * 30,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3,
+        life: 45
+      });
     }
-    else if(ty===AIR)c=colMap.air;
-    else if(ty===WATER)c=colMap.wa;
-    else if(ty===FERT)c=colMap.fe;
-    else if(ty===ROOT)c=colMap.ro;
-    else if(ty===STEM)c=colMap.se;
-    else if(ty===LEAF)c=colMap.le;
-    else if(ty===FUNG)c=colMap.fu;
-    else if(ty===SPRAY)c=colMap.sp;
-    else c=colMap.de;
-
-    var o=i*4;Da[o]=c[0];Da[o+1]=c[1];Da[o+2]=c[2];Da[o+3]=255;
+    if (SIM.pests.length > 0) {
+      SIM.pests = [];
+      SIM.health = Math.min(100, SIM.health + 10);
+      addSimFloatText("🛡️ Đã tiêu diệt sâu hại!", x, y - 30, "#10b981");
+    }
+  } else if (SIM.tool === "pest") {
+    if (SIM.pests.length < 12) {
+      SIM.pests.push({
+        x: x + (Math.random() - 0.5) * 20,
+        y: Math.min(270, Math.max(120, y)),
+        crawl: 0
+      });
+      SIM.health = Math.max(10, SIM.health - 5);
+      addSimFloatText("🐛 Sâu hại tấn công!", x, y - 20, "#a855f7");
+    }
+  } else if (SIM.tool === "prune") {
+    if (SIM.pests.length > 0) {
+      SIM.pests.pop();
+      SIM.health = Math.min(100, SIM.health + 5);
+      addSimFloatText("✂️ Tỉa sạch lá bệnh!", x, y - 20, "#f97316");
+    } else {
+      addSimFloatText("✂️ Tỉa tán thông thoáng", x, y - 20, "#f97316");
+    }
+  } else if (SIM.tool === "soil") {
+    SIM.npk = Math.min(100, SIM.npk + 3);
+    SIM.doAm = Math.min(100, SIM.doAm + 1);
+    for (var i = 0; i < 6; i++) {
+      SIM.particles.push({
+        type: "soil",
+        x: x + (Math.random() - 0.5) * 30,
+        y: y + (Math.random() - 0.5) * 15,
+        vx: (Math.random() - 0.5),
+        vy: 3 + Math.random() * 2,
+        life: 40
+      });
+    }
+    addSimFloatText("🪴 Bổ sung mùn vi sinh", x, y - 20, "#78350f");
   }
-  SIM.octx.putImageData(SIM.img,0,0);
-  SIM.ctx.imageSmoothingEnabled=false;
-  SIM.ctx.drawImage(SIM.off,0,0,SIM.cv.width,SIM.cv.height);
+
+  veSimMtr();
 }
 
-function simFrame(){
-  if(!SIM||!document.getElementById("simCv")){if(SIM)SIM.loop=false;return}
-  if(SIM.run){simStep();simStep();simDraw();if(SIM.tick%20===0)veSimMtr()}
-  requestAnimationFrame(simFrame);
+function addSimFloatText(txt, x, y, color){
+  if(SIM.floatTexts.length > 6) SIM.floatTexts.shift();
+  SIM.floatTexts.push({
+    txt: txt, x: x, y: y, color: color || "#10b981", life: 50, alpha: 1
+  });
 }
 
 function veSimTools(){
-  var el=document.getElementById("simToolsGrid");if(!el)return;
-  var h="";
-  for(var i=0;i<SIM_TOOLS.length;i++){
-    var t=SIM_TOOLS[i],on=SIM.tool===t.id;
-    h+='<button type="button" class="btn '+(on?'btn-p':'')+'" data-simtool="'+t.id+'" style="font-size:.75rem;padding:6px 8px;flex-direction:column;gap:2px">'
-      +'<span style="font-size:1.1rem">'+t.icon+'</span>'+t.ten+'</button>';
+  var el = document.getElementById("simToolsGrid");
+  if (!el) return;
+  var h = "";
+  for (var i = 0; i < SIM_TOOLS.length; i++) {
+    var t = SIM_TOOLS[i];
+    var act = SIM.tool === t.id ? " active" : "";
+    h += '<button type="button" class="sim-tool-btn' + act + '" data-simtool="' + t.id + '">'
+      + '<span style="font-size:1.4rem">' + t.icon + '</span>'
+      + '<span>' + esc(t.ten) + '</span>'
+      + '</button>';
   }
-  el.innerHTML=h;
+  el.innerHTML = h;
+
+  el.querySelectorAll("[data-simtool]").forEach(function(b){
+    b.onclick = function(){
+      SIM.tool = this.getAttribute("data-simtool");
+      veSimTools();
+    };
+  });
 }
 
 function veSimMtr(){
-  var el=document.getElementById("simMetersBox");if(!el||!SIM)return;
-  var W=SIM.W,H=SIM.H,t=SIM.t,m=SIM.m,n=SIM.n;
-  var am=0,phan=0,la=0,fung=0,soil=0;
-  for(var i=0;i<W*H;i++){
-    if(t[i]===SOIL){soil++;am+=m[i];phan+=n[i]}
-    if(t[i]===LEAF||t[i]===STEM)la++;
-    if(t[i]===FUNG)fung++;
-  }
-  var doAmPct=soil>0?Math.min(100,Math.round((am/(soil*4))*100)):0;
-  var npkPpm=soil>0?Math.min(100,Math.round((phan/(soil*4))*100)):0;
-  var health=la>0?Math.max(0,100-Math.round((fung*2.5/la)*100)):100;
-  SIM.health=health;
+  var el = document.getElementById("simMetersBox");
+  if (!el) return;
+  var c = SIM_CROPS[SIM.crop] || SIM_CROPS.caphe;
 
-  el.innerHTML='<div><div style="display:flex;justify-content:space-between;font-size:.78rem"><span>💧 Độ ẩm đất:</span><b class="mono">'+doAmPct+'%</b></div>'
-    +'<div class="match-bar-bg"><div style="height:100%;width:'+doAmPct+'%;background:#3b82f6"></div></div></div>'
-    +'<div><div style="display:flex;justify-content:space-between;font-size:.78rem"><span>🧪 Dinh dưỡng N-P-K:</span><b class="mono">'+npkPpm+'%</b></div>'
-    +'<div class="match-bar-bg"><div style="height:100%;width:'+npkPpm+'%;background:#eab308"></div></div></div>'
-    +'<div><div style="display:flex;justify-content:space-between;font-size:.78rem"><span>🌿 Sức khỏe cây trồng:</span><b class="mono">'+health+'%</b></div>'
-    +'<div class="match-bar-bg"><div style="height:100%;width:'+health+'%;background:'+(health>60?'#10b981':'#ef4444')+'"></div></div></div>'
-    +'<div><div style="display:flex;justify-content:space-between;font-size:.78rem"><span>🛡️ Tồn dư BVTV:</span><b class="mono">'+Math.round(SIM.ton)+' ppm</b></div>'
-    +'<div class="match-bar-bg"><div style="height:100%;width:'+Math.min(100,SIM.ton)+'%;background:'+(SIM.ton>50?'#ef4444':'#10b981')+'"></div></div></div>';
+  var amColor = (SIM.doAm >= c.doAmLyTuong[0] && SIM.doAm <= c.doAmLyTuong[1]) ? "#10b981" : (SIM.doAm < c.doAmLyTuong[0] ? "#eab308" : "#3b82f6");
+  var npkColor = (SIM.npk >= c.npkLyTuong[0]) ? "#10b981" : "#eab308";
+  var healthColor = SIM.health > 70 ? "#10b981" : (SIM.health > 40 ? "#eab308" : "#ef4444");
+  var tonColor = SIM.ton < 30 ? "#10b981" : (SIM.ton < 60 ? "#eab308" : "#ef4444");
+
+  var h = '<div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">'
+    + '<span>💧 Độ ẩm đất:</span>'
+    + '<b class="mono" style="color:' + amColor + '">' + Math.round(SIM.doAm) + '% <small style="color:var(--muted-fg);font-weight:400">(Lý tưởng: ' + c.doAmLyTuong[0] + '-' + c.doAmLyTuong[1] + '%)</small></b>'
+    + '</div>'
+    + '<div class="match-bar-bg"><div style="height:100%;width:' + Math.min(100, SIM.doAm) + '%;background:' + amColor + ';border-radius:4px;transition:width .2s ease"></div></div>'
+    + '</div>'
+
+    + '<div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">'
+    + '<span>🧪 Dinh dưỡng N-P-K:</span>'
+    + '<b class="mono" style="color:' + npkColor + '">' + Math.round(SIM.npk) + ' ppm <small style="color:var(--muted-fg);font-weight:400">(Tối ưu: ' + c.npkLyTuong[0] + '+)</small></b>'
+    + '</div>'
+    + '<div class="match-bar-bg"><div style="height:100%;width:' + Math.min(100, SIM.npk) + '%;background:' + npkColor + ';border-radius:4px;transition:width .2s ease"></div></div>'
+    + '</div>'
+
+    + '<div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">'
+    + '<span>🌿 Sức sống & Tán lá:</span>'
+    + '<b class="mono" style="color:' + healthColor + '">' + Math.round(SIM.health) + '% ' + (SIM.pests.length > 0 ? '⚠️ (' + SIM.pests.length + ' sâu bệnh)' : '✨ Sạch bệnh') + '</b>'
+    + '</div>'
+    + '<div class="match-bar-bg"><div style="height:100%;width:' + Math.min(100, SIM.health) + '%;background:' + healthColor + ';border-radius:4px;transition:width .2s ease"></div></div>'
+    + '</div>'
+
+    + '<div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px">'
+    + '<span>🛡️ Tồn dư BVTV:</span>'
+    + '<b class="mono" style="color:' + tonColor + '">' + Math.round(SIM.ton) + ' ppm ' + (SIM.ton < 10 ? '✅ An toàn' : '⏳ Đang cách ly') + '</b>'
+    + '</div>'
+    + '<div class="match-bar-bg"><div style="height:100%;width:' + Math.min(100, SIM.ton) + '%;background:' + tonColor + ';border-radius:4px;transition:width .2s ease"></div></div>'
+    + '</div>';
+
+  el.innerHTML = h;
+
+  var docBox = document.getElementById("simAiDoctorBox");
+  if(docBox){
+    docBox.innerHTML = getSimAITip(SIM.crop, SIM.stage, SIM.doAm, SIM.npk, SIM.health);
+  }
 }
 
+function simFrameLoop(){
+  if (!SIM || !document.getElementById("simCv")) {
+    if (SIM) SIM.loop = false;
+    return;
+  }
+  SIM.tick++;
+
+  // Atmospheric particle spawning
+  if (SIM.weather === "rain" && Math.random() < 0.6) {
+    SIM.particles.push({
+      type: "water",
+      x: Math.random() * SIM.W,
+      y: 0,
+      vx: 1 + Math.random() * 2,
+      vy: 10 + Math.random() * 5,
+      life: 60
+    });
+  } else if (SIM.weather === "storm") {
+    for (var r = 0; r < 2; r++) {
+      SIM.particles.push({
+        type: "water",
+        x: Math.random() * SIM.W,
+        y: 0,
+        vx: 4 + Math.random() * 4,
+        vy: 14 + Math.random() * 6,
+        life: 50
+      });
+    }
+  }
+
+  // Auto step every ~120 ticks if running
+  if (SIM.run && SIM.tick % 120 === 0) {
+    simAdvanceDays(1);
+  }
+
+  simDrawEngine();
+  requestAnimationFrame(simFrameLoop);
+}
+
+/* ======================= MASTER CANVAS RENDERING ENGINE ======================= */
+function simDrawEngine(){
+  var ctx = SIM.ctx;
+  if (!ctx) return;
+  var W = SIM.W, H = SIM.H;
+  var curCrop = SIM_CROPS[SIM.crop] || SIM_CROPS.caphe;
+  var groundY = 280;
+
+  // 1. SKY & ATMOSPHERE
+  var skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+  if (SIM.weather === "sun") {
+    skyGrad.addColorStop(0, "#38bdf8");
+    skyGrad.addColorStop(0.65, "#bae6fd");
+    skyGrad.addColorStop(1, "#fef08a");
+  } else if (SIM.weather === "rain") {
+    skyGrad.addColorStop(0, "#475569");
+    skyGrad.addColorStop(0.7, "#64748b");
+    skyGrad.addColorStop(1, "#94a3b8");
+  } else {
+    // Storm
+    skyGrad.addColorStop(0, "#0f172a");
+    skyGrad.addColorStop(0.6, "#1e293b");
+    skyGrad.addColorStop(1, "#334155");
+  }
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, W, groundY);
+
+  // Sun or Lightning
+  if (SIM.weather === "sun") {
+    // Sun glow
+    var sunX = 940, sunY = 70;
+    var sunG = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 90);
+    sunG.addColorStop(0, "rgba(254, 240, 138, 0.9)");
+    sunG.addColorStop(0.3, "rgba(253, 224, 71, 0.5)");
+    sunG.addColorStop(1, "rgba(253, 224, 71, 0)");
+    ctx.fillStyle = sunG;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, 90, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Soft clouds
+    var cloudShift = (SIM.tick * 0.25) % (W + 200);
+    drawFluffyCloud(ctx, (cloudShift - 100), 55, 0.85);
+    drawFluffyCloud(ctx, ((cloudShift + 450) % (W + 200)) - 100, 90, 0.65);
+  } else if (SIM.weather === "storm" && Math.random() < 0.015) {
+    // Lightning flash
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.fillRect(0, 0, W, groundY);
+  }
+
+  // Distant Mountain / Forest Silhouette
+  ctx.fillStyle = SIM.weather === "storm" ? "rgba(30, 41, 59, 0.5)" : "rgba(34, 197, 94, 0.18)";
+  ctx.beginPath();
+  ctx.moveTo(0, groundY);
+  for (var bx = 0; bx <= W; bx += 50) {
+    var by = groundY - 45 - Math.sin(bx * 0.008) * 30 - Math.cos(bx * 0.02) * 15;
+    ctx.lineTo(bx, by);
+  }
+  ctx.lineTo(W, groundY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 2. SOIL CROSS-SECTION STRATA
+  drawSoilLayers(ctx, W, H, groundY, curCrop);
+
+  // 3. BOTANICAL ROOTS
+  drawPlantRoots(ctx, W, H, groundY, curCrop, SIM.stage, SIM.doAm, SIM.npk);
+
+  // 4. WATER ON PADDY SURFACE (If rice)
+  if (curCrop.id === "lua") {
+    ctx.fillStyle = "rgba(56, 189, 248, 0.35)";
+    ctx.fillRect(0, groundY - 12, W, 14);
+    // Water reflection highlight
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    for (var rw = 0; rw < 8; rw++) {
+      var rx = ((SIM.tick * 1.5 + rw * 140) % W);
+      ctx.fillRect(rx, groundY - 8 + (rw % 3), 45, 1.5);
+    }
+  }
+
+  // 5. BOTANICAL CANOPY & CROPS
+  var wind = (SIM.weather === "storm" ? 14 : 5) * Math.sin(SIM.tick * 0.04);
+  drawPlantBotany(ctx, W, H, groundY, curCrop, SIM.stage, wind, SIM.health, SIM.pests);
+
+  // 6. PESTS ON LEAVES
+  drawPests(ctx, SIM.pests);
+
+  // 7. PARTICLES (Rain, Fertilizer, Mist, Droplets)
+  drawParticles(ctx);
+
+  // 8. FLOATING TEXT FEEDBACK
+  drawFloatTexts(ctx);
+}
+
+function drawFluffyCloud(ctx, cx, cy, scale){
+  ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, 24 * scale, 0, Math.PI * 2);
+  ctx.arc(cx + 25 * scale, cy - 8 * scale, 30 * scale, 0, Math.PI * 2);
+  ctx.arc(cx + 55 * scale, cy, 26 * scale, 0, Math.PI * 2);
+  ctx.arc(cx + 28 * scale, cy + 10 * scale, 22 * scale, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawSoilLayers(ctx, W, H, groundY, crop){
+  var topColor = "#451a03", subColor = "#291002", surfaceColor = "#78350f";
+
+  if (crop.id === "lua") {
+    // Alluvial Paddy Silt
+    topColor = "#3d2817";
+    subColor = "#1f140b";
+    surfaceColor = "#4a3320";
+  } else if (crop.id === "caphe") {
+    // Famous Red Basalt Soil of Central Highlands
+    topColor = "#881337";
+    subColor = "#4c0519";
+    surfaceColor = "#9f1239";
+  } else if (crop.id === "cam" || crop.id === "saurieng") {
+    // Raised Orchard Mound
+    topColor = "#451a03";
+    subColor = "#260e02";
+    surfaceColor = "#78350f";
+  } else if (crop.id === "bap") {
+    // Ridge Alluvial Soil
+    topColor = "#543719";
+    subColor = "#2c1c0c";
+    surfaceColor = "#7c5225";
+  }
+
+  // Draw mound shape if cam / saurieng
+  ctx.beginPath();
+  if (crop.id === "cam" || crop.id === "saurieng") {
+    var moundHeight = crop.id === "saurieng" ? 50 : 38;
+    ctx.moveTo(0, groundY);
+    ctx.quadraticCurveTo(W * 0.25, groundY - 10, W * 0.5, groundY - moundHeight);
+    ctx.quadraticCurveTo(W * 0.75, groundY - 10, W, groundY);
+  } else if (crop.id === "bap") {
+    ctx.moveTo(0, groundY);
+    for (var rx = 0; rx <= W; rx += 140) {
+      ctx.quadraticCurveTo(rx + 35, groundY - 20, rx + 70, groundY - 20);
+      ctx.quadraticCurveTo(rx + 105, groundY, rx + 140, groundY);
+    }
+  } else {
+    // Flat or paddy
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(W, groundY);
+  }
+  ctx.lineTo(W, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+
+  // Soil gradient
+  var soilGrad = ctx.createLinearGradient(0, groundY - 30, 0, H);
+  soilGrad.addColorStop(0, surfaceColor);
+  soilGrad.addColorStop(0.35, topColor);
+  soilGrad.addColorStop(1, subColor);
+  ctx.fillStyle = soilGrad;
+  ctx.fill();
+
+  // Moisture darkening overlay based on SIM.doAm
+  var moistAlpha = Math.min(0.5, (SIM.doAm / 100) * 0.45);
+  ctx.fillStyle = "rgba(15, 23, 42, " + moistAlpha + ")";
+  ctx.fill();
+
+  // Organic soil aggregates & speckles
+  ctx.fillStyle = "rgba(0,0,0,0.12)";
+  for (var i = 0; i < 40; i++) {
+    var sx = (i * 97) % W;
+    var sy = groundY + 20 + ((i * 43) % (H - groundY - 40));
+    ctx.beginPath();
+    ctx.arc(sx, sy, 2.5 + (i % 3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Ground Strata Line Labels
+  ctx.fillStyle = "rgba(255,255,255,0.45)";
+  ctx.font = "10px Inter, sans-serif";
+  ctx.fillText("TẦNG ĐẤT CANH TÁC HỮU CƠ (0 - 30cm)", 18, groundY + 45);
+  ctx.fillText("TẦNG ĐẤT CÁI & MẠCH NƯỚC NGẦM (30 - 150cm)", 18, groundY + 160);
+
+  // Divider dashed line
+  ctx.strokeStyle = "rgba(255,255,255,0.15)";
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath();
+  ctx.moveTo(15, groundY + 110);
+  ctx.lineTo(W - 15, groundY + 110);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawPlantRoots(ctx, W, H, groundY, crop, stage, doAm, npk){
+  var growth = stage / 5;
+  var rootDepth = 70 + growth * 130;
+
+  if (crop.id === "lua") {
+    // Dense fibrous roots (Rễ chùm) for paddy rice
+    var clumps = [W * 0.22, W * 0.42, W * 0.62, W * 0.82];
+    for (var c = 0; c < clumps.length; c++) {
+      var cx = clumps[c];
+      for (var r = 0; r < 18; r++) {
+        var ang = (Math.PI * 0.25) + (r / 18) * (Math.PI * 0.5);
+        var len = (35 + (r % 5) * 12) * growth;
+        var ex = cx + Math.cos(ang) * len * 1.4;
+        var ey = groundY + Math.sin(ang) * len;
+
+        ctx.strokeStyle = "rgba(254, 243, 199, 0.75)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(cx, groundY + 2);
+        ctx.quadraticCurveTo(cx + (ex - cx) * 0.4, groundY + len * 0.5, ex, ey);
+        ctx.stroke();
+      }
+    }
+  } else if (crop.id === "caphe") {
+    // Powerful central Taproot (Rễ cọc) + Lateral roots for Robusta
+    var cx = W * 0.5;
+    ctx.strokeStyle = "rgba(217, 119, 6, 0.85)";
+    ctx.lineWidth = 6 * growth;
+    ctx.beginPath();
+    ctx.moveTo(cx, groundY);
+    ctx.lineTo(cx + 4, groundY + rootDepth);
+    ctx.stroke();
+
+    // Lateral spreading roots
+    for (var b = 0; b < 10; b++) {
+      var by = groundY + 15 + b * (rootDepth / 10);
+      var side = b % 2 === 0 ? -1 : 1;
+      var span = (120 - b * 7) * growth;
+
+      ctx.lineWidth = Math.max(1, 3 - b * 0.25);
+      ctx.beginPath();
+      ctx.moveTo(cx, by);
+      ctx.quadraticCurveTo(cx + side * span * 0.5, by + 12, cx + side * span, by + 28);
+      ctx.stroke();
+    }
+  } else if (crop.id === "cam") {
+    // Citrus mound root fan
+    var cx = W * 0.5, moundY = groundY - 38;
+    for (var r = 0; r < 20; r++) {
+      var side = r % 2 === 0 ? -1 : 1;
+      var span = (30 + r * 9) * growth;
+      var dep = (20 + (r % 6) * 14) * growth;
+
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.75)";
+      ctx.lineWidth = Math.max(1, 2.8 - r * 0.1);
+      ctx.beginPath();
+      ctx.moveTo(cx, moundY + 8);
+      ctx.quadraticCurveTo(cx + side * span * 0.5, moundY + dep * 0.6, cx + side * span, moundY + dep);
+      ctx.stroke();
+    }
+  } else if (crop.id === "saurieng") {
+    // Heavy timber taproot & surface buttress roots
+    var cx = W * 0.5, moundY = groundY - 50;
+    ctx.strokeStyle = "rgba(180, 83, 9, 0.9)";
+    ctx.lineWidth = 8 * growth;
+    ctx.beginPath();
+    ctx.moveTo(cx, moundY);
+    ctx.lineTo(cx, groundY + rootDepth + 30);
+    ctx.stroke();
+
+    for (var r = 0; r < 14; r++) {
+      var side = r % 2 === 0 ? -1 : 1;
+      var span = (50 + r * 14) * growth;
+      var dep = (30 + r * 8) * growth;
+
+      ctx.lineWidth = Math.max(1.5, 4.5 - r * 0.25);
+      ctx.beginPath();
+      ctx.moveTo(cx, moundY + 15);
+      ctx.quadraticCurveTo(cx + side * span * 0.4, moundY + dep * 0.4, cx + side * span, moundY + dep);
+      ctx.stroke();
+    }
+  } else if (crop.id === "bap") {
+    // Corn roots + Stilt brace roots (Rễ chân kiềng)
+    var stalks = [W * 0.32, W * 0.5, W * 0.68];
+    for (var s = 0; s < stalks.length; s++) {
+      var cx = stalks[s];
+      // Underground root ball
+      for (var r = 0; r < 14; r++) {
+        var side = r % 2 === 0 ? -1 : 1;
+        var span = (25 + r * 6) * growth;
+        var dep = (20 + r * 7) * growth;
+        ctx.strokeStyle = "rgba(254, 240, 138, 0.75)";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(cx, groundY - 18);
+        ctx.quadraticCurveTo(cx + side * span * 0.5, groundY + dep * 0.5, cx + side * span, groundY + dep);
+        ctx.stroke();
+      }
+
+      // Aerial brace roots (Rễ chân kiềng)
+      if (stage >= 2) {
+        ctx.strokeStyle = "rgba(244, 114, 182, 0.9)";
+        ctx.lineWidth = 2.4;
+        for (var br = 0; br < 4; br++) {
+          var bside = br % 2 === 0 ? -1 : 1;
+          var bdist = 18 + br * 6;
+          ctx.beginPath();
+          ctx.moveTo(cx, groundY - 32 + (br * 3));
+          ctx.quadraticCurveTo(cx + bside * bdist * 0.6, groundY - 22, cx + bside * bdist, groundY - 18);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  // Glowing nutrient flow dots when NPK is rich
+  if (npk > 40 && SIM.tick % 4 === 0) {
+    SIM.particles.push({
+      type: "nutrient_flow",
+      x: (W * 0.5) + (Math.random() - 0.5) * 80 * growth,
+      y: groundY + 20 + Math.random() * rootDepth * 0.8,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: -1.2,
+      life: 30
+    });
+  }
+}
+
+function drawPlantBotany(ctx, W, H, groundY, crop, stage, wind, health, pests){
+  var scale = 0.4 + (stage / 5) * 0.6;
+  var healthColorMod = health < 60 ? "#854d0e" : "#16a34a";
+
+  if (crop.id === "lua") {
+    // 🌾 PADDY RICE BOTANY
+    var clumps = [W * 0.22, W * 0.42, W * 0.62, W * 0.82];
+    for (var c = 0; c < clumps.length; c++) {
+      var cx = clumps[c];
+      var leafCount = 8 + stage * 3;
+      var clumpHeight = (60 + stage * 22) * scale;
+
+      for (var l = 0; l < leafCount; l++) {
+        var ang = -Math.PI * 0.5 + ((l - leafCount / 2) / leafCount) * 1.1 + (wind * 0.015);
+        var len = clumpHeight * (0.75 + (l % 4) * 0.1);
+        var tx = cx + Math.cos(ang) * len;
+        var ty = groundY - Math.abs(Math.sin(ang) * len);
+
+        ctx.strokeStyle = health < 60 ? "#a16207" : (l % 2 === 0 ? "#15803d" : "#22c55e");
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(cx, groundY - 5);
+        ctx.quadraticCurveTo(cx + (tx - cx) * 0.5, ty + 15, tx, ty);
+        ctx.stroke();
+
+        // Rice Grain Panicle (Bông lúa uốn cong) in stages 3, 4, 5
+        if (stage >= 3 && l % 3 === 0) {
+          var panicleColor = stage === 5 ? "#eab308" : (stage === 4 ? "#84cc16" : "#4ade80");
+          var px = tx + (wind * 1.2), py = ty + 12;
+
+          ctx.strokeStyle = panicleColor;
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.quadraticCurveTo(tx + 12, ty + 5, px, py);
+          ctx.stroke();
+
+          // Rice grains dots
+          ctx.fillStyle = stage === 5 ? "#facc15" : "#a3e635";
+          for (var g = 0; g < 5; g++) {
+            ctx.beginPath();
+            ctx.ellipse(tx + g * 2.5, ty + g * 2.2, 2.5, 1.4, Math.PI * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+    }
+  } else if (crop.id === "caphe") {
+    // ☕ ROBUSTA COFFEE BOTANY
+    var cx = W * 0.5;
+    var trunkH = (90 + stage * 28) * scale;
+    var topY = groundY - trunkH;
+
+    // Woody Trunk
+    ctx.strokeStyle = "#5c2b0c";
+    ctx.lineWidth = 14 * scale;
+    ctx.beginPath();
+    ctx.moveTo(cx, groundY);
+    ctx.lineTo(cx, topY);
+    ctx.stroke();
+
+    // Bark highlight
+    ctx.strokeStyle = "#78350f";
+    ctx.lineWidth = 4 * scale;
+    ctx.beginPath();
+    ctx.moveTo(cx - 2, groundY);
+    ctx.lineTo(cx - 2, topY);
+    ctx.stroke();
+
+    // Horizontal Tier Branches (Cành cấp 1)
+    var branchTiers = 2 + stage;
+    for (var b = 0; b < branchTiers; b++) {
+      var by = groundY - 30 - b * (trunkH / (branchTiers + 1));
+      var span = (65 + (branchTiers - b) * 16) * scale;
+
+      for (var side = -1; side <= 1; side += 2) {
+        var endX = cx + side * span + wind;
+        var endY = by - 8 + (side * wind * 0.3);
+
+        ctx.strokeStyle = "#451a03";
+        ctx.lineWidth = Math.max(2, 6 - b * 0.8);
+        ctx.beginPath();
+        ctx.moveTo(cx, by);
+        ctx.quadraticCurveTo(cx + side * span * 0.5, by - 6, endX, endY);
+        ctx.stroke();
+
+        // Glossy wavy leaves on branch
+        for (var lf = 1; lf <= 4; lf++) {
+          var lx = cx + side * span * (lf / 4);
+          var ly = by - 4;
+          drawCoffeeLeaf(ctx, lx, ly, side, health);
+
+          // Cherries / Flowers
+          if (stage === 3) {
+            // White Star Flowers
+            drawCoffeeFlower(ctx, lx, ly - 4);
+          } else if (stage === 4) {
+            // Young Green Cherries
+            drawCoffeeCherries(ctx, lx, ly, "#84cc16");
+          } else if (stage === 5) {
+            // Ripe Ruby Red Cherries
+            drawCoffeeCherries(ctx, lx, ly, "#dc2626");
+          }
+        }
+      }
+    }
+  } else if (crop.id === "cam") {
+    // 🍊 CITRUS / ORANGE BOTANY
+    var cx = W * 0.5;
+    var moundY = groundY - 38;
+    var trunkH = (75 + stage * 22) * scale;
+    var crownY = moundY - trunkH;
+
+    // Sturdy low trunk
+    ctx.strokeStyle = "#5c3d2e";
+    ctx.lineWidth = 16 * scale;
+    ctx.beginPath();
+    ctx.moveTo(cx, moundY);
+    ctx.lineTo(cx, crownY + 20);
+    ctx.stroke();
+
+    // Dense rounded umbrella canopy
+    var crownR = (75 + stage * 24) * scale;
+    var canopyGrad = ctx.createRadialGradient(cx - 20, crownY - 15, 10, cx, crownY, crownR);
+    canopyGrad.addColorStop(0, health < 60 ? "#854d0e" : "#22c55e");
+    canopyGrad.addColorStop(0.75, health < 60 ? "#713f12" : "#15803d");
+    canopyGrad.addColorStop(1, health < 60 ? "#451a03" : "#14532d");
+
+    ctx.fillStyle = canopyGrad;
+    ctx.beginPath();
+    ctx.arc(cx + wind * 0.5, crownY, crownR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Leaf cluster texture
+    ctx.fillStyle = "rgba(74, 222, 128, 0.35)";
+    for (var cl = 0; cl < 12; cl++) {
+      var ang = (cl / 12) * Math.PI * 2;
+      var dist = crownR * 0.65;
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(ang) * dist + wind * 0.5, crownY + Math.sin(ang) * dist, 24 * scale, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Flowers or Oranges
+    if (stage === 3) {
+      for (var f = 0; f < 10; f++) {
+        var fa = (f / 10) * Math.PI * 2;
+        var fr = crownR * 0.7;
+        drawCitrusBlossom(ctx, cx + Math.cos(fa) * fr, crownY + Math.sin(fa) * fr);
+      }
+    } else if (stage >= 4) {
+      // Big Round Oranges
+      var fruitCount = stage === 5 ? 14 : 9;
+      var fruitColor = stage === 5 ? "#f59e0b" : "#65a30d";
+      for (var o = 0; o < fruitCount; o++) {
+        var oa = (o / fruitCount) * Math.PI * 2 + 0.3;
+        var odist = crownR * (0.45 + (o % 3) * 0.2);
+        var ox = cx + Math.cos(oa) * odist + wind * 0.4;
+        var oy = crownY + Math.sin(oa) * odist;
+
+        // Orange sphere
+        var orangeG = ctx.createRadialGradient(ox - 3, oy - 3, 2, ox, oy, 14 * scale);
+        orangeG.addColorStop(0, stage === 5 ? "#fde047" : "#a3e635");
+        orangeG.addColorStop(0.6, fruitColor);
+        orangeG.addColorStop(1, stage === 5 ? "#d97706" : "#15803d");
+
+        ctx.fillStyle = orangeG;
+        ctx.beginPath();
+        ctx.arc(ox, oy, 12 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stippled skin pores
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.beginPath();
+        ctx.arc(ox, oy - 1, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  } else if (crop.id === "saurieng") {
+    // 🍈 DURIAN BOTANY
+    var cx = W * 0.5;
+    var moundY = groundY - 50;
+    var trunkH = (110 + stage * 30) * scale;
+    var crownY = moundY - trunkH;
+
+    // Giant Timber Trunk
+    ctx.strokeStyle = "#451a03";
+    ctx.lineWidth = 22 * scale;
+    ctx.beginPath();
+    ctx.moveTo(cx, moundY);
+    ctx.lineTo(cx, crownY + 20);
+    ctx.stroke();
+
+    // Heavy horizontal scaffold limbs
+    var limbs = [
+      {y: crownY + 70, span: 140 * scale, dir: -1},
+      {y: crownY + 50, span: 160 * scale, dir: 1},
+      {y: crownY + 20, span: 120 * scale, dir: -1},
+      {y: crownY, span: 110 * scale, dir: 1}
+    ];
+
+    for (var i = 0; i < limbs.length; i++) {
+      var l = limbs[i];
+      var lx = cx + l.dir * l.span;
+
+      ctx.strokeStyle = "#3e1c07";
+      ctx.lineWidth = 10 * scale;
+      ctx.beginPath();
+      ctx.moveTo(cx, l.y);
+      ctx.lineTo(lx, l.y - 10);
+      ctx.stroke();
+
+      // Durian foliage clusters (Upper dark green, underside golden-bronze)
+      ctx.fillStyle = health < 60 ? "#78350f" : "#14532d";
+      ctx.beginPath();
+      ctx.ellipse(lx, l.y - 18, 45 * scale, 26 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hanging Durians with Sharp Spines
+      if (stage >= 4) {
+        var fruitCount = stage === 5 ? 2 : 1;
+        for (var d = 0; d < fruitCount; d++) {
+          var fx = cx + l.dir * (l.span * (0.45 + d * 0.35));
+          var fy = l.y + 24;
+
+          // Pedicel (Cuống trái)
+          ctx.strokeStyle = "#271202";
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(fx, l.y);
+          ctx.lineTo(fx, fy - 16);
+          ctx.stroke();
+
+          // Spiky Oval Durian
+          drawSpikyDurian(ctx, fx, fy, stage === 5, scale);
+        }
+      }
+    }
+  } else if (crop.id === "bap") {
+    // 🌽 CORN / MAIZE BOTANY
+    var stalks = [W * 0.32, W * 0.5, W * 0.68];
+    for (var s = 0; s < stalks.length; s++) {
+      var cx = stalks[s];
+      var stalkH = (100 + stage * 32) * scale;
+      var topY = groundY - 20 - stalkH;
+
+      // Jointed Stalk
+      ctx.strokeStyle = health < 60 ? "#854d0e" : "#65a30d";
+      ctx.lineWidth = 10 * scale;
+      ctx.beginPath();
+      ctx.moveTo(cx, groundY - 20);
+      ctx.lineTo(cx, topY);
+      ctx.stroke();
+
+      // Visible nodes
+      ctx.strokeStyle = "#4d7c0f";
+      ctx.lineWidth = 2;
+      for (var nd = 1; nd <= 6; nd++) {
+        var ny = groundY - 20 - nd * (stalkH / 7);
+        ctx.beginPath();
+        ctx.moveTo(cx - 7 * scale, ny);
+        ctx.lineTo(cx + 7 * scale, ny);
+        ctx.stroke();
+
+        // Broad Arching Corn Leaves
+        var ldir = nd % 2 === 0 ? -1 : 1;
+        var lspan = (60 + (6 - nd) * 12) * scale;
+        ctx.strokeStyle = health < 60 ? "#a16207" : "#4ade80";
+        ctx.lineWidth = 4 * scale;
+        ctx.beginPath();
+        ctx.moveTo(cx, ny);
+        ctx.quadraticCurveTo(cx + ldir * lspan * 0.6, ny - 15, cx + ldir * lspan, ny + 20);
+        ctx.stroke();
+      }
+
+      // Top Tassel (Cờ bắp)
+      if (stage >= 3) {
+        ctx.strokeStyle = "#eab308";
+        ctx.lineWidth = 1.8;
+        for (var ts = -2; ts <= 2; ts++) {
+          ctx.beginPath();
+          ctx.moveTo(cx, topY);
+          ctx.quadraticCurveTo(cx + ts * 14 + wind, topY - 18, cx + ts * 26 + wind * 1.5, topY - 32);
+          ctx.stroke();
+        }
+      }
+
+      // Ears of Corn with Silk (Bắp ngô có râu)
+      if (stage >= 4) {
+        var earY = groundY - 20 - stalkH * 0.55;
+        drawCornCob(ctx, cx + 12 * scale, earY, stage === 5, scale);
+      }
+    }
+  }
+}
+
+function drawCoffeeLeaf(ctx, x, y, side, health){
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(side * 0.3);
+  ctx.fillStyle = health < 60 ? "#854d0e" : "#14532d";
+  ctx.beginPath();
+  ctx.ellipse(side * 18, 0, 18, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // White gloss reflection
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.beginPath();
+  ctx.ellipse(side * 18, -2, 12, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawCoffeeFlower(ctx, x, y){
+  ctx.fillStyle = "#ffffff";
+  for (var p = 0; p < 5; p++) {
+    var a = (p / 5) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(x + Math.cos(a) * 4, y + Math.sin(a) * 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#facc15";
+  ctx.beginPath();
+  ctx.arc(x, y, 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawCoffeeCherries(ctx, x, y, color){
+  for (var i = 0; i < 4; i++) {
+    var cx = x + (i % 2 === 0 ? -4 : 4);
+    var cy = y + (i < 2 ? -4 : 3);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cherry gloss
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.beginPath();
+    ctx.arc(cx - 1, cy - 1, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawCitrusBlossom(ctx, x, y){
+  ctx.fillStyle = "#ffffff";
+  for (var p = 0; p < 5; p++) {
+    var a = (p / 5) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.ellipse(x + Math.cos(a) * 6, y + Math.sin(a) * 6, 5, 2.5, a, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#eab308";
+  ctx.beginPath();
+  ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawSpikyDurian(ctx, x, y, isRipe, scale){
+  var w = 18 * scale, h = 24 * scale;
+  var dGrad = ctx.createRadialGradient(x - 4, y - 4, 3, x, y, h);
+  dGrad.addColorStop(0, isRipe ? "#fef08a" : "#bef264");
+  dGrad.addColorStop(0.6, isRipe ? "#ca8a04" : "#65a30d");
+  dGrad.addColorStop(1, isRipe ? "#713f12" : "#365314");
+
+  ctx.fillStyle = dGrad;
+  ctx.beginPath();
+  ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Spikes (Gai sầu riêng)
+  ctx.strokeStyle = isRipe ? "#a16207" : "#4d7c0f";
+  ctx.lineWidth = 1.6;
+  for (var sp = 0; sp < 18; sp++) {
+    var sa = (sp / 18) * Math.PI * 2;
+    var sx = x + Math.cos(sa) * w;
+    var sy = y + Math.sin(sa) * h;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + Math.cos(sa) * 5, sy + Math.sin(sa) * 5);
+    ctx.stroke();
+  }
+}
+
+function drawCornCob(ctx, x, y, isRipe, scale){
+  // Husk
+  ctx.fillStyle = isRipe ? "#a3e635" : "#65a30d";
+  ctx.beginPath();
+  ctx.ellipse(x, y, 10 * scale, 22 * scale, Math.PI * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Yellow corn kernels showing
+  ctx.fillStyle = isRipe ? "#eab308" : "#fef08a";
+  ctx.beginPath();
+  ctx.ellipse(x + 2, y - 6, 6 * scale, 12 * scale, Math.PI * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Corn Silk (Râu bắp)
+  ctx.strokeStyle = isRipe ? "#78350f" : "#ca8a04";
+  ctx.lineWidth = 1.2;
+  for (var sk = -2; sk <= 2; sk++) {
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y - 16);
+    ctx.quadraticCurveTo(x + 8 + sk * 4, y - 4, x + 6 + sk * 6, y + 16);
+    ctx.stroke();
+  }
+}
+
+function drawPests(ctx, pests){
+  for (var i = 0; i < pests.length; i++) {
+    var p = pests[i];
+    p.crawl += 0.05;
+    var px = p.x + Math.sin(p.crawl) * 3;
+    var py = p.y;
+
+    // Caterpillar body segments
+    for (var seg = 0; seg < 4; seg++) {
+      ctx.fillStyle = seg === 0 ? "#7e22ce" : "#a855f7";
+      ctx.beginPath();
+      ctx.arc(px + seg * 4, py, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Tiny eyes
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(px - 1, py - 2, 1.5, 1.5);
+  }
+}
+
+function drawParticles(ctx){
+  for (var i = SIM.particles.length - 1; i >= 0; i--) {
+    var p = SIM.particles[i];
+    p.life--;
+    if (p.life <= 0) {
+      SIM.particles.splice(i, 1);
+      continue;
+    }
+
+    if (p.type === "water") {
+      p.x += p.vx;
+      p.y += p.vy;
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.75)";
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - p.vx * 1.5, p.y - p.vy * 1.5);
+      ctx.stroke();
+    } else if (p.type === "fert") {
+      p.x += p.vx;
+      p.y += p.vy;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.type === "mist") {
+      p.x += p.vx;
+      p.y += p.vy;
+      var alpha = p.life / 45;
+      ctx.fillStyle = "rgba(16, 185, 129, " + (alpha * 0.45) + ")";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 14 * (1 - alpha * 0.5), 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.type === "soil") {
+      p.x += p.vx;
+      p.y += p.vy;
+      ctx.fillStyle = "#78350f";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.type === "nutrient_flow") {
+      p.x += p.vx;
+      p.y += p.vy;
+      var alpha = p.life / 30;
+      ctx.fillStyle = "rgba(253, 224, 71, " + alpha + ")";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function drawFloatTexts(ctx){
+  for (var i = SIM.floatTexts.length - 1; i >= 0; i--) {
+    var ft = SIM.floatTexts[i];
+    ft.life--;
+    ft.y -= 0.8;
+    ft.alpha = ft.life / 50;
+
+    if (ft.life <= 0) {
+      SIM.floatTexts.splice(i, 1);
+      continue;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = ft.alpha;
+    ctx.font = "bold 13px Inter, sans-serif";
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillText(ft.txt, ft.x + 1, ft.y + 1);
+    ctx.fillStyle = ft.color;
+    ctx.fillText(ft.txt, ft.x, ft.y);
+    ctx.restore();
+  }
+}
 /* ======================= GLOBAL LIGHTBOX PHOTO MODAL ======================= */
 function veModalPhotoViewGlobal(){
   return '<div id="modalPhotoView" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongXemAnh()">'
