@@ -622,6 +622,9 @@ function di(id){
     document.getElementById("pgTitle").textContent=p.ten;
     document.getElementById("pgSub").textContent=p.sub;
   }
+  if(id==="benh"){
+    if(!benhState.mode || benhState.mode==="camera") benhState.mode="upload";
+  }
   dongSidebarMobile();
   veNav();ve();window.scrollTo(0,0);
 }
@@ -2175,6 +2178,49 @@ var BO_PHAN=[
   {id:"qua", ten:"Quả / Trái", icon:"🍏", desc:"Thán thư đốm quả, nứt trái, ghẻ loét sẹo"}
 ];
 
+var DANH_MUC_CAY_BENH = [
+  { nhom: "🌾 Cây lương thực", cays: [
+    { id: "lúa", ten: "Lúa nước", icon: "🌾" },
+    { id: "bắp", ten: "Bắp / Ngô", icon: "🌽" },
+    { id: "khoai lang", ten: "Khoai lang", icon: "🍠" },
+    { id: "khoai mì", ten: "Khoai mì (Sắn)", icon: "🥔" }
+  ]},
+  { nhom: "☕ Cây công nghiệp", cays: [
+    { id: "cà phê", ten: "Cà phê", icon: "☕" },
+    { id: "tiêu", ten: "Hồ tiêu", icon: "🌿" },
+    { id: "cao su", ten: "Cao su", icon: "🪵" },
+    { id: "điều", ten: "Hạt điều", icon: "🌰" },
+    { id: "chè", ten: "Chè / Trà", icon: "🍵" },
+    { id: "mía", ten: "Mía đường", icon: "🎋" }
+  ]},
+  { nhom: "🍈 Cây ăn trái cao cấp", cays: [
+    { id: "sầu riêng", ten: "Sầu riêng", icon: "🍈" },
+    { id: "cam", ten: "Cam", icon: "🍊" },
+    { id: "bưởi", ten: "Bưởi", icon: "🍈" },
+    { id: "quýt", ten: "Quýt", icon: "🍊" },
+    { id: "chanh", ten: "Chanh", icon: "🍋" },
+    { id: "xoài", ten: "Xoài", icon: "🥭" },
+    { id: "thanh long", ten: "Thanh long", icon: "🐉" },
+    { id: "bơ", ten: "Bơ sáp & 034", icon: "🥑" },
+    { id: "mít", ten: "Mít Thái", icon: "🍈" },
+    { id: "chuối", ten: "Chuối", icon: "🍌" },
+    { id: "nhãn", ten: "Nhãn", icon: "🍇" },
+    { id: "vải", ten: "Vải thiều", icon: "🍓" },
+    { id: "ổi", ten: "Ổi", icon: "🍐" },
+    { id: "dưa hấu", ten: "Dưa hấu", icon: "🍉" }
+  ]},
+  { nhom: "🍅 Rau màu & Gia vị", cays: [
+    { id: "cà chua", ten: "Cà chua", icon: "🍅" },
+    { id: "ớt", ten: "Ớt cay", icon: "🌶️" },
+    { id: "dưa leo", ten: "Dưa leo", icon: "🥒" },
+    { id: "hành tỏi", ten: "Hành / Tỏi", icon: "🧅" },
+    { id: "bầu bí", ten: "Bầu / Bí / Mướp", icon: "🫑" },
+    { id: "khổ qua", ten: "Khổ qua (Mướp đắng)", icon: "🥒" },
+    { id: "rau cải", ten: "Rau cải các loại", icon: "🥬" },
+    { id: "đậu đỗ", ten: "Đậu đỗ", icon: "🫘" }
+  ]}
+];
+
 var BENH_MAU=[
   // Lúa
   {id:"lua_dao_on", ten:"Bệnh Đạo ôn lá (Cháy lá)", sci:"Pyricularia oryzae Cavara", cay:"lúa", boPhan:"la",
@@ -2236,11 +2282,63 @@ var BENH_MAU=[
    dh:"chết nhanh", mucDo:"Gây chết trắng cả vườn tiêu", phacDo:"Đào rãnh thoát nước sâu giữa các hàng tiêu, xử lý vôi bột và thuốc gốc đồng.",
    anhReal:"assets/benh/tieu_chet_nhanh.jpg", mauBg:"#f5f5f4", mauSpot:"#1c1917", mauCenter:"#44403c", shape:"re"},
 
-  // Cam Quýt
+  // Cam Quýt Bưởi
   {id:"cam_loet", ten:"Bệnh Loét cam / Ghẻ sẹo", sci:"Xanthomonas citri", cay:"cam", boPhan:"la",
    trieuChung:"Vết bệnh sần sùi nhô lên như miệng núi lửa màu nâu xám, có quầng vàng sáng bao quanh. Xuất hiện trên cả lá, cành và quả non.",
    dh:"loét", mucDo:"Làm xấu mã quả, rụng lá non", phacDo:"Diệt sâu vẽ bùa bảo vệ đọt non. Phun phòng thuốc gốc đồng Boóc-đô.",
-   anhReal:"assets/benh/cam_loet.jpg", mauBg:"#fefce8", mauSpot:"#713f12", mauCenter:"#ca8a04", shape:"loet"}
+   anhReal:"assets/benh/cam_loet.jpg", mauBg:"#fefce8", mauSpot:"#713f12", mauCenter:"#ca8a04", shape:"loet"},
+
+  // Cao su
+  {id:"caosu_phan_trang", ten:"Bệnh Phấn trắng lá cao su", sci:"Oidium heveae Steinmann", cay:"cao su", boPhan:"la",
+   trieuChung:"Lớp phấn màu trắng xám bao phủ hai mặt lá non, phiến lá bị biến dạng quăn queo, khô cháy rồi rụng hàng loạt vào mùa thay lá.",
+   dh:"phấn trắng", mucDo:"Làm rụng lá non, suy giảm sản lượng mủ", phacDo:"Phun thuốc bột lưu huỳnh hoặc Hexaconazole (Anvil) lúc sáng sớm khi lá non bắt đầu nhú.",
+   anhReal:"assets/benh/caosu_phan_trang.jpg", mauBg:"#f8fafc", mauSpot:"#64748b", mauCenter:"#f1f5f9", shape:"phantrang"},
+  {id:"caosu_loet_soc", ten:"Bệnh Loét sọc mặt cạo mủ cao su", sci:"Phytophthora botryosa", cay:"cao su", boPhan:"than",
+   trieuChung:"Trên mặt cạo xuất hiện các sọc nâu đen thẳng đứng ăn sâu vào lớp tượng tầng vỏ, mủ ứa ra có mùi chua, vỏ bị thối nhũn không thể cạo mủ tiếp.",
+   dh:"loét sọc mặt cạo", mucDo:"Nguy hiểm, làm hỏng mặt cạo khai thác", phacDo:"Vệ sinh miệng cạo, bôi thuốc đặc trị Metalaxyl (Ridomil Gold) hoặc Mancozeb sau mỗi nhịp cạo.",
+   anhReal:"assets/benh/caosu_loet_soc.jpg", mauBg:"#fef2f2", mauSpot:"#334155", mauCenter:"#94a3b8", shape:"loetsoc"},
+
+  // Bắp / Ngô
+  {id:"bap_dom_la_lon", ten:"Bệnh Đốm lá lớn bắp ngô", sci:"Exserohilum turcicum", cay:"bắp", boPhan:"la",
+   trieuChung:"Vết bệnh hình thoi dài màu xám nâu chạy dọc theo gân lá bắp, viền nâu sẫm, dài 3-10cm. Lá bắp bị khô cháy rụi từ lá gốc lên cờ.",
+   dh:"đốm lá lớn", mucDo:"Làm giảm quang hợp nuôi bắp", phacDo:"Phun thuốc gốc Azoxystrobin + Difenoconazole (Amistar Top), tiêu hủy tàn dư sau thu hoạch.",
+   anhReal:"assets/benh/bap_dom_la_lon.jpg", mauBg:"#fefce8", mauSpot:"#854d0e", mauCenter:"#a16207", shape:"thoilong"},
+
+  // Cà chua
+  {id:"cachua_suong_mai", ten:"Bệnh Mốc sương / Sương mai cà chua", sci:"Phytophthora infestans", cay:"cà chua", boPhan:"la",
+   trieuChung:"Vết bệnh úng nước màu xanh tái đến nâu sẫm ở chóp và mép lá, sáng sớm ẩm ướt có lớp tơ mốc trắng mỏng. Quả xanh bị đốm nâu cứng sần sùi.",
+   dh:"mốc sương", mucDo:"Lây lan cực nhanh trong thời tiết ẩm lạnh", phacDo:"Phun phòng Ridomil Gold, Aliette hoặc Mancozeb khi độ ẩm không khí cao.",
+   anhReal:"assets/benh/cachua_suong_mai.jpg", mauBg:"#f0fdf4", mauSpot:"#3f3f46", mauCenter:"#71717a", shape:"suongmai"},
+
+  // Ớt
+  {id:"ot_than_thu", ten:"Bệnh Thán thư ớt (Ớt nổ trái / Đốm vòng)", sci:"Colletotrichum capsici", cay:"ớt", boPhan:"qua",
+   trieuChung:"Vết bệnh tròn hoặc bầu dục lõm sâu vào thịt quả ớt, có nhiều vòng tròn đồng tâm màu đen, quả ớt khô tóp hoặc thối rụng hàng loạt.",
+   dh:"thán thư ớt", mucDo:"Hư hại nặng giai đoạn thu hoạch", phacDo:"Phun Score 250EC, Antracol hoặc Amistar Top khi cây trổ hoa đậu quả non.",
+   anhReal:"assets/benh/ot_than_thu.jpg", mauBg:"#fef2f2", mauSpot:"#b91c1c", mauCenter:"#f87171", shape:"domvong"},
+
+  // Xoài
+  {id:"xoai_than_thu", ten:"Bệnh Thán thư hoa & quả xoài", sci:"Colletotrichum gloeosporioides", cay:"xoài", boPhan:"hoa",
+   trieuChung:"Chùm hoa bị đốm đen khô cháy rụng không đậu trái; quả non xuất hiện chấm kim đen rồi loang rộng thối thâm đen vỏ quả.",
+   dh:"thán thư xoài", mucDo:"Làm rụng hoa trái non hàng loạt", phacDo:"Phun thuốc phòng ngừa từ lúc nhú cựa gà hoa đến khi bao quả bằng Score hoặc Antracol.",
+   anhReal:"assets/benh/xoai_than_thu.jpg", mauBg:"#fef2f2", mauSpot:"#7f1d1d", mauCenter:"#991b1b", shape:"lomqua"},
+
+  // Thanh long
+  {id:"thanhlong_dom_nau", ten:"Bệnh Đốm nâu / Mắt cua thanh long", sci:"Neoscytalidium dimidiatum", cay:"thanh long", boPhan:"than",
+   trieuChung:"Vết bệnh tròn màu vàng sau chuyển sang màu xám có tâm màu nâu như mắt cua, cành và quả bị sần sùi rỉ mủ, quả chín nổ gai.",
+   dh:"đốm nâu", mucDo:"Làm xấu mã quả, giảm giá trị xuất khẩu", phacDo:"Cắt tỉa cành bệnh tiêu hủy, phun luân phiên thuốc gốc đồng và Difenoconazole.",
+   anhReal:"assets/benh/thanhlong_dom_nau.jpg", mauBg:"#fefce8", mauSpot:"#713f12", mauCenter:"#ca8a04", shape:"daho"},
+
+  // Dưa hấu / Dưa leo
+  {id:"duahau_nut_than", ten:"Bệnh Nứt thân chảy nhựa dưa hấu / dưa leo", sci:"Mycosphaerella melonis", cay:"dưa hấu", boPhan:"than",
+   trieuChung:"Gốc thân bị ủng nước, teo thắt lại và ứa ra chất dịch màu nâu đỏ như giọt gôm, sau đó thân nứt toác và toàn bộ dây dưa héo rũ.",
+   dh:"nứt thân chảy nhựa", mucDo:"Làm chết dây dưa hàng loạt", phacDo:"Tưới thuốc Score 250EC hoặc Ridomil Gold quanh gốc, tránh tưới ướt thân vào chiều tối.",
+   anhReal:"assets/benh/duahau_nut_than.jpg", mauBg:"#fef2f2", mauSpot:"#831843", mauCenter:"#9d174d", shape:"ximu"},
+
+  // Bơ
+  {id:"bo_thoi_re", ten:"Bệnh Thối rễ xì mủ cây bơ", sci:"Phytophthora cinnamomi", cay:"bơ", boPhan:"re",
+   trieuChung:"Rễ tơ bị thối đen nhũn nước, vỏ rễ dễ tuột khỏi lõi gỗ. Tán lá ngả vàng xỉn màu, lá rủ xuống như thiếu nước và rụng dần từ đọt ngọn.",
+   dh:"thối rễ bơ", mucDo:"Làm chết cây bơ kinh doanh", phacDo:"Tưới gốc thuốc đặc trị nấm rễ Tervigo hoặc Ridomil Gold, bón nấm đối kháng Trichoderma.",
+   anhReal:"assets/benh/bo_thoi_re.jpg", mauBg:"#f5f5f4", mauSpot:"#292524", mauCenter:"#57534e", shape:"re"}
 ];
 
 var benhState={
@@ -2254,7 +2352,8 @@ var benhState={
   ketQuaAI:null,
   loaiTru:{},
   benhChon:null,
-  thuocChon:null
+  thuocChon:null,
+  searchQuery:""
 };
 
 function moXemAnh(src, ten, desc){
@@ -2322,134 +2421,246 @@ function veAnhMauBenh(b,w,h){
 }
 
 function chayChuanDoanAI(forceBenhId){
-  var ds=[],cLower=(benhState.cay||'lúa').toLowerCase().trim();
-  for(var i=0;i<BENH_MAU.length;i++){
-    var b=BENH_MAU[i];
-    if(benhState.loaiTru[b.id])continue;
-    var matchCay=(cLower.indexOf(b.cay)>=0||b.cay.indexOf(cLower)>=0);
-    var matchBoPhan=(!benhState.boPhan||b.boPhan===benhState.boPhan);
-    var score=50;
+  var ds = [];
+  var cLower = (benhState.cay || 'lúa').toLowerCase().trim();
+  var qRaw = (benhState.searchQuery || '').toLowerCase().trim();
 
-    if(forceBenhId && b.id===forceBenhId){
-      score = 98;
-    } else if(matchCay&&matchBoPhan){
-      score=94-ds.length*8+Math.floor(Math.random()*3);
-    } else if(matchCay){
-      score=74-ds.length*8;
-    } else if(matchBoPhan){
-      score=58-ds.length*6;
-    } else {
-      score=40;
-    }
-    if(score>=45)ds.push({benh:b,score:Math.min(score,98)});
+  function boDau(str){
+    return (str || '').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+      .trim();
   }
-  ds.sort(function(a,b){return b.score-a.score});
-  benhState.ketQuaAI=ds;
+  var qClean = boDau(qRaw);
+
+  for(var i = 0; i < BENH_MAU.length; i++){
+    var b = BENH_MAU[i];
+    if(benhState.loaiTru && benhState.loaiTru[b.id]) continue;
+
+    var bCayClean = boDau(b.cay);
+    var cLowerClean = boDau(cLower);
+    var matchCay = (bCayClean.indexOf(cLowerClean) >= 0 || cLowerClean.indexOf(bCayClean) >= 0);
+    // Nhóm cây tương đồng sinh học
+    if(!matchCay){
+      if((cLowerClean.indexOf("cam")>=0 || cLowerClean.indexOf("buoi")>=0 || cLowerClean.indexOf("chanh")>=0 || cLowerClean.indexOf("quyt")>=0) && (bCayClean.indexOf("cam")>=0 || bCayClean.indexOf("buoi")>=0)) matchCay = true;
+      if((cLowerClean.indexOf("ca chua")>=0 || cLowerClean.indexOf("ot")>=0) && (bCayClean.indexOf("ca chua")>=0 || bCayClean.indexOf("ot")>=0)) matchCay = true;
+      if((cLowerClean.indexOf("dua hau")>=0 || cLowerClean.indexOf("dua leo")>=0 || cLowerClean.indexOf("bau bi")>=0) && (bCayClean.indexOf("dua hau")>=0 || bCayClean.indexOf("dua leo")>=0)) matchCay = true;
+    }
+    var matchBoPhan = (!benhState.boPhan || b.boPhan === benhState.boPhan);
+    var score = 50;
+
+    if(forceBenhId && b.id === forceBenhId){
+      score = 98;
+    } else if(qClean){
+      // Chế độ tìm kiếm triệu chứng hoặc tên bệnh
+      var bAllText = boDau(b.ten + ' ' + b.sci + ' ' + b.trieuChung + ' ' + b.dh + ' ' + b.mucDo + ' ' + b.phacDo + ' ' + b.cay);
+      var words = qClean.split(/\s+/).filter(Boolean);
+      var matchedWords = 0;
+      for(var w = 0; w < words.length; w++){
+        if(bAllText.indexOf(words[w]) >= 0) matchedWords++;
+      }
+
+      if(matchedWords === 0) continue; // Bỏ qua nếu không trùng khớp từ nào
+
+      var matchRatio = matchedWords / Math.max(words.length, 1);
+      score = Math.round(55 + matchRatio * 32);
+
+      // Ưu tiên cao nếu khớp trực tiếp tên bệnh hoặc tên sâu hại
+      if(boDau(b.ten).indexOf(qClean) >= 0 || boDau(b.dh).indexOf(qClean) >= 0){
+        score = Math.max(score, 95);
+      }
+      // Khớp triệu chứng cụ thể
+      if(boDau(b.trieuChung).indexOf(qClean) >= 0){
+        score = Math.max(score, 88);
+      }
+      // Cộng điểm nếu khớp cả cây trồng đang chọn
+      if(matchCay) score += 6;
+      if(matchBoPhan) score += 3;
+    } else if(matchCay && matchBoPhan){
+      score = 94 - ds.length * 8 + Math.floor(Math.random() * 3);
+    } else if(matchCay){
+      score = 76 - ds.length * 8;
+    } else if(matchBoPhan){
+      score = 58 - ds.length * 6;
+    } else {
+      score = 42;
+    }
+
+    if(score >= 45){
+      ds.push({ benh: b, score: Math.min(score, 98) });
+    }
+  }
+
+  ds.sort(function(a, b){ return b.score - a.score; });
+  benhState.ketQuaAI = ds;
 }
 
 function pBenh(){
-  var h='';
+  var h = '';
 
-  /* BƯỚC 1: CHỌN CÂY TRỒNG */
-  h+='<div class="card" style="padding:18px;margin-bottom:16px">';
-  h+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:8px">Bước 1: Chọn cây trồng</div>';
-  var CAYS=["lúa","cà phê","sầu riêng","tiêu","cam","quýt","bưởi","xoài","cà chua","dưa hấu"];
-  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
-  for(var c=0;c<CAYS.length;c++){
-    var onC=benhState.cay===CAYS[c];
-    h+='<button type="button" class="plant-chip'+(onC?' on':'')+'" data-setcay="'+CAYS[c]+'">'
-      +(CAYS[c]==="lúa"?"🌾":CAYS[c]==="cà phê"?"☕":CAYS[c]==="sầu riêng"?"🍈":"🌱")+' '+esc(CAYS[c])+'</button>';
+  /* BƯỚC 1: CHỌN CÂY TRỒNG (ĐA DẠNG 30+ CÂY TRỒNG VIỆT NAM) */
+  h += '<div class="card" style="padding:18px;margin-bottom:16px">';
+  h += '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">';
+  h += '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">Bước 1: Chọn cây trồng (Đa dạng 30+ loại nông sản Việt Nam)</div>';
+  h += '<div style="font-size:.78rem;color:var(--muted-fg)">Đang chọn: <b style="color:var(--primary);font-size:.86rem;background:var(--accent);padding:3px 10px;border-radius:8px;border:1px solid var(--border)">' + esc(benhState.cay) + '</b></div>';
+  h += '</div>';
+
+  // Dropdown chọn cây trồng theo nhóm đầy đủ
+  h += '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px;background:var(--bg);padding:10px 14px;border-radius:12px;border:1px solid var(--border)">';
+  h += '<span style="font-size:.82rem;font-weight:700;color:var(--muted-fg);display:inline-flex;align-items:center;gap:6px">📂 Chọn nhanh theo danh mục cây trồng:</span>';
+  h += '<select id="selCayBenhFull" style="flex:1;min-width:240px;padding:8px 12px;border-radius:9px;font-weight:700;border:1px solid var(--border);background:var(--card)">';
+  for(var g = 0; g < DANH_MUC_CAY_BENH.length; g++){
+    var grp = DANH_MUC_CAY_BENH[g];
+    h += '<optgroup label="' + esc(grp.nhom) + '">';
+    for(var ci = 0; ci < grp.cays.length; ci++){
+      var cy = grp.cays[ci];
+      var isSel = (benhState.cay || '').toLowerCase() === cy.id.toLowerCase();
+      h += '<option value="' + cy.id + '" ' + (isSel ? 'selected' : '') + '>' + cy.icon + ' ' + esc(cy.ten) + '</option>';
+    }
+    h += '</optgroup>';
   }
-  h+='<span style="font-size:.78rem;color:var(--muted-fg);margin-left:auto">Đang chọn: <b style="color:var(--fg)">'+esc(benhState.cay)+'</b></span>';
-  h+='</div></div>';
+  h += '</select>';
+  h += '</div>';
+
+  // Hàng nút chọn nhanh cây trồng chủ lực (Quick Pills)
+  var QUICK_CAYS = [
+    { id: "lúa", icon: "🌾", ten: "Lúa nước" },
+    { id: "cà phê", icon: "☕", ten: "Cà phê" },
+    { id: "sầu riêng", icon: "🍈", ten: "Sầu riêng" },
+    { id: "cao su", icon: "🪵", ten: "Cao su" },
+    { id: "tiêu", icon: "🌿", ten: "Hồ tiêu" },
+    { id: "cam", icon: "🍊", ten: "Cam sành" },
+    { id: "bưởi", icon: "🍈", ten: "Bưởi" },
+    { id: "xoài", icon: "🥭", ten: "Xoài" },
+    { id: "bơ", icon: "🥑", ten: "Bơ sáp" },
+    { id: "bắp", icon: "🌽", ten: "Bắp / Ngô" },
+    { id: "cà chua", icon: "🍅", ten: "Cà chua" },
+    { id: "dưa hấu", icon: "🍉", ten: "Dưa hấu" },
+    { id: "ớt", icon: "🌶️", ten: "Ớt cay" },
+    { id: "dưa leo", icon: "🥒", ten: "Dưa leo" }
+  ];
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
+  for(var c = 0; c < QUICK_CAYS.length; c++){
+    var qk = QUICK_CAYS[c];
+    var onC = (benhState.cay || '').toLowerCase() === qk.id.toLowerCase();
+    h += '<button type="button" class="plant-chip' + (onC ? ' on' : '') + '" data-setcay="' + qk.id + '">'
+      + qk.icon + ' ' + esc(qk.ten) + '</button>';
+  }
+  h += '</div></div>';
 
   /* BƯỚC 2: CHỌN BỘ PHẬN BỊ SÂU BỆNH */
-  h+='<div class="card" style="padding:18px;margin-bottom:16px">';
-  h+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:8px">Bước 2: Chọn bộ phận cây xuất hiện triệu chứng</div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">';
-  for(var bp=0;bp<BO_PHAN.length;bp++){
-    var p=BO_PHAN[bp],onP=benhState.boPhan===p.id;
-    h+='<button type="button" class="part-card'+(onP?' on':'')+'" data-setbophan="'+p.id+'">'
-      +'<div style="display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:700">'+p.icon+' '+p.ten+'</div>'
-      +'<div style="font-size:.72rem;color:var(--muted-fg);margin-top:4px;line-height:1.4">'+p.desc+'</div></button>';
+  h += '<div class="card" style="padding:18px;margin-bottom:16px">';
+  h += '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:8px">Bước 2: Chọn bộ phận cây xuất hiện triệu chứng</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">';
+  for(var bp = 0; bp < BO_PHAN.length; bp++){
+    var p = BO_PHAN[bp], onP = benhState.boPhan === p.id;
+    h += '<button type="button" class="part-card' + (onP ? ' on' : '') + '" data-setbophan="' + p.id + '">'
+      + '<div style="display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:700">' + p.icon + ' ' + p.ten + '</div>'
+      + '<div style="font-size:.72rem;color:var(--muted-fg);margin-top:4px;line-height:1.4">' + p.desc + '</div></button>';
   }
-  h+='</div></div>';
+  h += '</div></div>';
 
-  /* BƯỚC 3: PHƯƠNG THỨC TRA CỨU: CAMERA / TẢI ẢNH / DANH MỤC */
-  h+='<div class="card" style="padding:18px;margin-bottom:16px">';
-  h+='<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px">';
-  h+='<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">Bước 3: Chọn phương thức tra cứu</div>';
-  h+='<div style="display:flex;gap:6px">';
-  h+='<button type="button" class="btn '+(benhState.mode==="camera"?'btn-p':'')+'" data-setmode="camera">📷 Bật Camera quét AI</button>';
-  h+='<button type="button" class="btn '+(benhState.mode==="upload"?'btn-p':'')+'" data-setmode="upload">📁 Tải ảnh lên</button>';
-  h+='<button type="button" class="btn '+(benhState.mode==="thuong"?'btn-p':'')+'" data-setmode="thuong">🔍 Tra danh mục thường</button>';
-  h+='</div></div>';
+  /* BƯỚC 3: PHƯƠNG THỨC TRA CỨU: TẢI ẢNH (MẶC ĐỊNH) / CAMERA / DANH MỤC */
+  h += '<div class="card" style="padding:18px;margin-bottom:16px">';
+  h += '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px">';
+  h += '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">Bước 3: Chọn phương thức tra cứu</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  h += '<button type="button" class="btn ' + (benhState.mode === "upload" ? 'btn-p' : '') + '" data-setmode="upload">📁 Tải ảnh lên</button>';
+  h += '<button type="button" class="btn ' + (benhState.mode === "camera" ? 'btn-p' : '') + '" data-setmode="camera">📷 Bật Camera quét AI</button>';
+  h += '<button type="button" class="btn ' + (benhState.mode === "thuong" ? 'btn-p' : '') + '" data-setmode="thuong">🔍 Tra danh mục thường</button>';
+  h += '</div></div>';
 
-  if(benhState.mode==="camera"){
-    h+='<div style="text-align:center;padding:12px 0">'
-      +'<div class="cam-wrapper">'
-      +'<video id="camVideo" class="cam-video" autoplay playsinline muted></video>'
-      +'<div class="cam-reticle"></div>'
-      +'<div class="cam-laser"></div>'
-      +'<div style="position:absolute;bottom:14px;left:0;right:0;text-align:center">'
-      +'<span style="background:rgba(0,0,0,.65);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem">Hướng camera vào vết sâu bệnh</span>'
-      +'</div></div>'
-      +'<div style="margin-top:14px;display:flex;justify-content:center;gap:10px">'
-      +'<button type="button" id="btnSnapCam" class="btn btn-p" style="padding:10px 24px;font-size:.9rem;font-weight:700">📸 Chụp ảnh & Chẩn đoán AI</button>'
-      +'<button type="button" id="btnRestartCam" class="btn">Khởi động lại Cam</button>'
-      +'</div></div>';
-  }else if(benhState.mode==="upload"){
+  if(benhState.mode === "camera"){
+    h += '<div style="text-align:center;padding:12px 0">'
+      + '<div class="cam-wrapper">'
+      + '<video id="camVideo" class="cam-video" autoplay playsinline muted></video>'
+      + '<div class="cam-reticle"></div>'
+      + '<div class="cam-laser"></div>'
+      + '<div style="position:absolute;bottom:14px;left:0;right:0;text-align:center">'
+      + '<span style="background:rgba(0,0,0,.65);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem">Hướng camera vào vết sâu bệnh</span>'
+      + '</div></div>'
+      + '<div style="margin-top:14px;display:flex;justify-content:center;gap:10px">'
+      + '<button type="button" id="btnSnapCam" class="btn btn-p" style="padding:10px 24px;font-size:.9rem;font-weight:700">📸 Chụp ảnh & Chẩn đoán AI</button>'
+      + '<button type="button" id="btnRestartCam" class="btn">Khởi động lại Cam</button>'
+      + '</div></div>';
+  } else if(benhState.mode === "upload"){
     if(benhState.capturedImg){
-      h+='<div class="card" id="dropZoneBenh" style="border:2px solid var(--primary);border-radius:14px;padding:24px 20px;text-align:center;background:var(--bg)">'
-        +'<div style="max-width:540px;margin:0 auto">'
-        +'<div style="position:relative;display:inline-block;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.15);border:2px solid var(--border);background:#000">'
-        +'<img id="imgUploadedPreview" src="'+benhState.capturedImg+'" style="max-height:240px;max-width:100%;display:block;cursor:pointer" title="Nhấn để xem ảnh phóng to" onclick="moXemAnh(\''+benhState.capturedImg+'\',\'Ảnh vết bệnh do bạn tải lên\',\'Ảnh chụp từ điện thoại / máy tính của bạn\')">'
-        +(benhState.isScanning
-          ? '<div class="ai-laser-scanner"></div><div style="position:absolute;inset:0;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.85);color:#6ee7b7;padding:8px 18px;border-radius:20px;font-size:.85rem;font-weight:800;border:1px solid #10b981;box-shadow:0 4px 16px rgba(0,0,0,.4)">⚡ '+(benhState.scanStepText||'Đang quét hình thái đốm bệnh...')+'</span></div>'
+      h += '<div class="card" id="dropZoneBenh" style="border:2px solid var(--primary);border-radius:14px;padding:24px 20px;text-align:center;background:var(--bg)">'
+        + '<div style="max-width:540px;margin:0 auto">'
+        + '<div style="position:relative;display:inline-block;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.15);border:2px solid var(--border);background:#000">'
+        + '<img id="imgUploadedPreview" src="' + benhState.capturedImg + '" style="max-height:240px;max-width:100%;display:block;cursor:pointer" title="Nhấn để xem ảnh phóng to" onclick="moXemAnh(\'' + benhState.capturedImg + '\',\'Ảnh vết bệnh do bạn tải lên\',\'Ảnh chụp từ điện thoại / máy tính của bạn\')">'
+        + (benhState.isScanning
+          ? '<div class="ai-laser-scanner"></div><div style="position:absolute;inset:0;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.85);color:#6ee7b7;padding:8px 18px;border-radius:20px;font-size:.85rem;font-weight:800;border:1px solid #10b981;box-shadow:0 4px 16px rgba(0,0,0,.4)">⚡ ' + (benhState.scanStepText || 'Đang quét hình thái đốm bệnh...') + '</span></div>'
           : '<div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:3px 8px;border-radius:4px;backdrop-filter:blur(4px)">🔍 Nhấn ảnh để phóng to</div>'
         )
-        +'</div>'
-        +'<div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px">'
-        +'<span style="font-size:.8rem;color:var(--muted-fg)">Ảnh đã nạp: <b style="color:var(--fg)">'+esc(benhState.capturedName||'Ảnh bệnh từ thiết bị')+'</b></span>'
-        +'<button type="button" class="btn" id="btnXoaAnhUpload" style="font-size:.75rem;padding:3px 8px;color:var(--bad)">❌ Huỷ ảnh</button>'
-        +'<button type="button" class="btn" style="font-size:.75rem;padding:3px 8px" onclick="document.getElementById(\'fileUploadBenh\').click()">🔄 Thay ảnh khác</button>'
-        +'</div>'
-        +'<div style="margin-top:14px;padding:14px;background:var(--card);border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;gap:10px;align-items:center">'
-        +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;font-size:.85rem">'
-        +'<span style="font-weight:600;color:var(--muted-fg)">Cây trồng:</span>'
-        +'<select id="selCayKhiUpload" style="padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid var(--border);background:var(--bg)">'
-        +'<option value="tudong">🤖 Tự động nhận diện (AI Vision)</option>'
-        +'<option value="cà phê" '+(benhState.cay==="cà phê"?'selected':'')+'>☕ Cây Cà phê</option>'
-        +'<option value="lúa" '+(benhState.cay==="lúa"?'selected':'')+'>🌾 Cây Lúa</option>'
-        +'<option value="sầu riêng" '+(benhState.cay==="sầu riêng"?'selected':'')+'>🍈 Cây Sầu riêng</option>'
-        +'<option value="tiêu" '+(benhState.cay==="tiêu"?'selected':'')+'>🪴 Cây Tiêu</option>'
-        +'<option value="cam" '+(benhState.cay==="cam"?'selected':'')+'>🍊 Cây Cam / Quýt</option>'
-        +'</select>'
-        +'</div>'
-        +'<button type="button" id="btnChuanDoanNgay" class="btn btn-p" style="font-size:1.02rem;font-weight:800;padding:12px 32px;border-radius:10px;box-shadow:0 4px 18px rgba(16,185,129,.35);display:inline-flex;align-items:center;gap:10px;cursor:pointer">'
-        +(benhState.isScanning ? '⏳ ĐANG PHÂN TÍCH AI...' : '🔍 PHÂN TÍCH AI & TRA CỨU LOẠI BỆNH NGAY')
-        +'</button>'
-        +'<div style="font-size:.76rem;color:var(--muted-fg)">Bấm nút trên để AI phân tích hình thái đốm bệnh và đối chiếu ảnh mẫu BVTV</div>'
-        +'</div>'
-        +'</div>'
-        +'<input type="file" id="fileUploadBenh" accept="image/*" style="display:none">'
-        +'</div>';
-    }else{
-      h+='<div class="card" id="dropZoneBenh" style="border:2px dashed var(--border);border-radius:14px;padding:32px 20px;text-align:center;background:var(--bg);cursor:pointer" onclick="document.getElementById(\'fileUploadBenh\').click()">'
-        +'<div style="font-size:2.8rem;margin-bottom:8px">🖼️</div>'
-        +'<div style="font-size:1rem;font-weight:700;margin-bottom:4px">Kéo thả ảnh chụp hoặc chọn từ máy / điện thoại</div>'
-        +'<p style="font-size:.78rem;color:var(--muted-fg);margin:0 0 14px">Hỗ trợ định dạng JPG, PNG, WEBP (chụp rõ vết sâu bệnh trên '+esc(benhState.boPhan)+')</p>'
-        +'<input type="file" id="fileUploadBenh" accept="image/*" style="display:none">'
-        +'<button type="button" class="btn btn-p" style="pointer-events:none">Chọn ảnh từ thiết bị</button>'
-        +'<p style="font-size:.72rem;color:var(--muted-fg);margin:8px 0 0">Hoặc kéo thả file ảnh trực tiếp vào ô này</p>'
-        +'</div>';
+        + '</div>'
+        + '<div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px">'
+        + '<span style="font-size:.8rem;color:var(--muted-fg)">Ảnh đã nạp: <b style="color:var(--fg)">' + esc(benhState.capturedName || 'Ảnh bệnh từ thiết bị') + '</b></span>'
+        + '<button type="button" class="btn" id="btnXoaAnhUpload" style="font-size:.75rem;padding:3px 8px;color:var(--bad)">❌ Huỷ ảnh</button>'
+        + '<button type="button" class="btn" style="font-size:.75rem;padding:3px 8px" onclick="document.getElementById(\'fileUploadBenh\').click()">🔄 Thay ảnh khác</button>'
+        + '</div>'
+        + '<div style="margin-top:14px;padding:14px;background:var(--card);border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;gap:10px;align-items:center">'
+        + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;font-size:.85rem">'
+        + '<span style="font-weight:600;color:var(--muted-fg)">Cây trồng:</span>'
+        + '<select id="selCayKhiUpload" style="padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid var(--border);background:var(--bg)">'
+        + '<option value="tudong">🤖 Tự động nhận diện (AI Vision)</option>';
+      for(var g = 0; g < DANH_MUC_CAY_BENH.length; g++){
+        var grp = DANH_MUC_CAY_BENH[g];
+        h += '<optgroup label="' + esc(grp.nhom) + '">';
+        for(var ci = 0; ci < grp.cays.length; ci++){
+          var cy = grp.cays[ci];
+          var isSel = (benhState.cay || '').toLowerCase() === cy.id.toLowerCase();
+          h += '<option value="' + cy.id + '" ' + (isSel ? 'selected' : '') + '>' + cy.icon + ' Cây ' + esc(cy.ten) + '</option>';
+        }
+        h += '</optgroup>';
+      }
+      h += '</select>'
+        + '</div>'
+        + '<button type="button" id="btnChuanDoanNgay" class="btn btn-p" style="font-size:1.02rem;font-weight:800;padding:12px 32px;border-radius:10px;box-shadow:0 4px 18px rgba(16,185,129,.35);display:inline-flex;align-items:center;gap:10px;cursor:pointer">'
+        + (benhState.isScanning ? '⏳ ĐANG PHÂN TÍCH AI...' : '🔍 PHÂN TÍCH AI & TRA CỨU LOẠI BỆNH NGAY')
+        + '</button>'
+        + '<div style="font-size:.76rem;color:var(--muted-fg)">Bấm nút trên để AI phân tích hình thái đốm bệnh và đối chiếu ảnh mẫu BVTV</div>'
+        + '</div>'
+        + '</div>'
+        + '<input type="file" id="fileUploadBenh" accept="image/*" style="display:none">'
+        + '</div>';
+    } else {
+      h += '<div class="card" id="dropZoneBenh" style="border:2px dashed var(--border);border-radius:14px;padding:32px 20px;text-align:center;background:var(--bg);cursor:pointer" onclick="document.getElementById(\'fileUploadBenh\').click()">'
+        + '<div style="font-size:2.8rem;margin-bottom:8px">🖼️</div>'
+        + '<div style="font-size:1rem;font-weight:700;margin-bottom:4px">Kéo thả ảnh chụp hoặc chọn từ máy / điện thoại</div>'
+        + '<p style="font-size:.78rem;color:var(--muted-fg);margin:0 0 14px">Hỗ trợ định dạng JPG, PNG, WEBP (chụp rõ vết sâu bệnh trên ' + esc(benhState.boPhan) + ')</p>'
+        + '<input type="file" id="fileUploadBenh" accept="image/*" style="display:none">'
+        + '<button type="button" class="btn btn-p" style="pointer-events:none">Chọn ảnh từ thiết bị</button>'
+        + '<p style="font-size:.72rem;color:var(--muted-fg);margin:8px 0 0">Hoặc kéo thả file ảnh trực tiếp vào ô này</p>'
+        + '</div>';
     }
-  }else{
-    h+='<div style="display:flex;gap:10px;margin-bottom:12px">'
-      +'<input type="search" id="timBenhThuong" placeholder="Gõ tên bệnh, triệu chứng (vd: đạo ôn, đốm mắt én, rỉ sắt, xì mủ…)" style="flex:1">'
-      +'<button type="button" id="btnTimBenhThuong" class="btn btn-p">Tìm kiếm</button></div>';
+  } else {
+    // Mode "thuong": Tra danh mục & triệu chứng với thanh tìm kiếm và nút tìm kiếm hoạt động
+    h += '<div style="margin-bottom:14px">'
+      + '<div style="display:flex;gap:10px;align-items:stretch">'
+      + '<div style="position:relative;flex:1">'
+      + '<input type="search" id="timBenhThuong" value="' + esc(benhState.searchQuery || '') + '" placeholder="Gõ tên bệnh, tác nhân hoặc triệu chứng (vd: lá màu vàng, đốm mắt én, rỉ sắt, xì mủ, thán thư…)" style="width:100%;padding:10px 14px 10px 38px;border-radius:10px;font-size:.9rem;border:1px solid var(--border);background:var(--bg)">'
+      + '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted-fg);font-size:1.05rem;pointer-events:none">🔍</span>'
+      + (benhState.searchQuery ? '<button type="button" id="btnClearTimBenh" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--muted-fg);cursor:pointer;font-size:1.1rem;padding:4px" title="Xóa tìm kiếm">✕</button>' : '')
+      + '</div>'
+      + '<button type="button" id="btnTimBenhThuong" class="btn btn-p" style="padding:10px 22px;font-size:.92rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer;border-radius:10px">'
+      + '<svg viewBox="0 0 24 24" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+      + '<span>Tìm kiếm</span>'
+      + '</button>'
+      + '</div>'
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px">'
+      + '<span style="font-size:.74rem;color:var(--muted-fg);font-weight:600">Gợi ý tìm nhanh:</span>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="lá màu vàng">🍂 Lá màu vàng</button>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="rỉ sắt">☕ Rỉ sắt</button>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="đạo ôn">🌾 Đạo ôn lá</button>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="xì mủ">🍈 Nứt thân xì mủ</button>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="thán thư">🍅 Thán thư</button>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="tuyến trùng">🌱 Tuyến trùng rễ</button>'
+      + '<button type="button" class="btn" style="padding:3px 9px;font-size:.74rem;border-radius:6px" data-goyitim="loét sẹo">🍊 Loét sẹo</button>'
+      + '</div>'
+      + '</div>';
   }
-  h+='</div>';
+  h += '</div>';
 
   /* BƯỚC 4: KẾT QUẢ CHẨN ĐOÁN AI & ĐỐI CHIẾU ẢNH MẪU */
   if(!benhState.ketQuaAI)chayChuanDoanAI();
@@ -6673,6 +6884,36 @@ document.addEventListener("click",function(ev){
     return;
   }
 
+  // Tra cứu sâu bệnh thường & Triệu chứng
+  if(el.id==="btnTimBenhThuong" || el.closest("#btnTimBenhThuong")){
+    var inp=document.getElementById("timBenhThuong");
+    benhState.searchQuery=inp ? inp.value.trim() : "";
+    chayChuanDoanAI();
+    ve();
+    setTimeout(function(){
+      var s4=document.getElementById("ketQuaStep4");
+      if(s4) s4.scrollIntoView({behavior:"smooth",block:"start"});
+    },60);
+    return;
+  }
+  if(el.id==="btnClearTimBenh"){
+    benhState.searchQuery="";
+    chayChuanDoanAI();
+    ve();
+    return;
+  }
+  var goy=el.getAttribute("data-goyitim");
+  if(goy){
+    benhState.searchQuery=goy;
+    chayChuanDoanAI();
+    ve();
+    setTimeout(function(){
+      var s4=document.getElementById("ketQuaStep4");
+      if(s4) s4.scrollIntoView({behavior:"smooth",block:"start"});
+    },60);
+    return;
+  }
+
   // Xuất hồ sơ
   if(el.id==="btnHoSo"){
     var out=document.getElementById("hoSoOut");
@@ -6691,6 +6932,16 @@ document.addEventListener("click",function(ev){
 /* Input listeners for search */
 document.addEventListener("input",function(ev){
   var id=ev.target&&ev.target.id;
+  if(id==="timBenhThuong"){
+    benhState.searchQuery=ev.target.value;
+    clearTimeout(window._timBenhTimer);
+    window._timBenhTimer=setTimeout(function(){
+      chayChuanDoanAI();
+      ve();
+      var inEl=document.getElementById("timBenhThuong");
+      if(inEl){inEl.focus();inEl.setSelectionRange(inEl.value.length,inEl.value.length)}
+    },350);
+  }
   if(id==="timGiaNongSan"){
     timKiemGiaQuery=ev.target.value;
     clearTimeout(window._giaTimer);
@@ -6727,6 +6978,12 @@ document.addEventListener("input",function(ev){
 /* Change listeners */
 document.addEventListener("change",function(ev){
   var id=ev.target&&ev.target.id;
+  if(id==="selCayBenhFull"){
+    benhState.cay=ev.target.value;
+    benhState.loaiTru={};
+    chayChuanDoanAI();
+    ve();
+  }
   if(id==="fileUploadBenh"){
     var f=ev.target.files&&ev.target.files[0];
     if(f) napFileAnhBenh(f);
@@ -6739,6 +6996,20 @@ document.addEventListener("change",function(ev){
   }
   if(id==="selCayPha"){phaCayChon=ev.target.value;ve()}
   if(id==="selDatPha"){phaDatChon=ev.target.value;ve()}
+});
+
+/* Keydown listener for Enter on search */
+document.addEventListener("keydown",function(e){
+  if(e.key==="Enter" && e.target && e.target.id==="timBenhThuong"){
+    e.preventDefault();
+    benhState.searchQuery=e.target.value.trim();
+    chayChuanDoanAI();
+    ve();
+    setTimeout(function(){
+      var s4=document.getElementById("ketQuaStep4");
+      if(s4) s4.scrollIntoView({behavior:"smooth",block:"start"});
+    },60);
+  }
 });
 
 /* Drag & Drop cho Tra bệnh AI */
