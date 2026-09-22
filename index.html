@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 // Mặc định NỀN TỐI. Chuyển sáng khi người dùng bấm nút.
@@ -242,6 +244,34 @@ input::placeholder{color:var(--muted-fg)}
 .mbtn{display:grid;width:36px;height:36px;flex-shrink:0;place-items:center;
   border-radius:9px;border:1px solid var(--border);background:var(--card);cursor:pointer}
 @media(min-width:768px){.mbtn{display:none}}
+
+/* ===== MAP LAYOUT ===== */
+.map-layout{display:grid;gap:0;border-radius:14px;overflow:hidden;border:1px solid var(--border);min-height:420px}
+@media(min-width:768px){.map-layout{grid-template-columns:280px 1fr}}
+.map-sidebar{display:flex;flex-direction:column;gap:6px;padding:12px;background:var(--card);
+  max-height:420px;overflow-y:auto}
+.map-main{position:relative;min-height:300px;background:var(--muted)}
+@media(max-width:767px){.map-main{min-height:240px}}
+.leaflet-box{width:100%;height:100%;min-height:300px}
+@media(max-width:767px){.leaflet-box{min-height:240px}}
+.dark .leaflet-tile{filter:brightness(.85) contrast(1.1)}
+.leaflet-popup-content-wrapper{border-radius:10px!important;font-family:inherit!important}
+.dark .leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--fg)!important}
+.dark .leaflet-popup-tip{border-top-color:var(--card)!important}
+
+/* ===== FIELD CARD ===== */
+.field-card{display:block;border-radius:12px;border:1px solid var(--border);background:var(--card);
+  padding:12px 14px;transition:all .15s ease;font-family:inherit;color:var(--fg)}
+.field-card:hover{border-color:var(--primary);background:var(--accent)}
+.field-sel{border-color:var(--primary)!important;background:var(--accent)!important;box-shadow:0 0 0 2px rgba(52,211,153,.15)}
+.field-emoji{width:40px;height:40px;flex-shrink:0;border-radius:10px;background:var(--muted);
+  display:grid;place-items:center;font-size:1.3rem}
+
+/* ===== DETAIL CELLS ===== */
+.detail-cell{border-radius:10px;background:var(--muted);padding:10px 12px}
+.detail-lbl{display:block;font-size:.62rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.13em;color:var(--muted-fg);margin-bottom:3px}
+.detail-val{display:block;font-size:.92rem;font-weight:600}
 </style>
 </head>
 
@@ -762,17 +792,22 @@ function pTong(){
  return h;
 }
 
-function cThua(t){
- var s=tt(t.id),w=s.con>0,n=0;
- for(var i=0;i<so.length;i++)if(so[i].thua===t.id)n++;
- var inner='<div style="padding:16px"><div style="display:flex;align-items:flex-start;gap:12px">'
-  +'<div style="min-width:0"><div style="font-size:1rem;font-weight:700;letter-spacing:-.01em">'+esc(t.ten)+"</div>"
-  +'<div style="font-size:.78rem;color:var(--muted-fg)">'+t.dt+" sào · "+esc(t.giong)+" · "+esc(t.gd)+"</div></div>"
-  +'<span style="margin-left:auto;flex-shrink:0">'+tag(w?"chờ "+s.con+" ngày":"gặt được",w?"wait":"ok")+"</span></div>"
-  +'<div style="margin-top:14px;display:flex;border-top:1px solid var(--border);padding-top:12px">'
-  +st2(t.ngaycay,"ngày sau cấy",1)+st2(n,"việc đã ghi")+st2(w?dm(s.het):"—","gặt sớm nhất")
-  +"</div></div>";
- return card(inner)}
+function cThua2(t,idx){
+ var s=tt(t.id),w=s.con>0,n=0,i;
+ for(i=0;i<so.length;i++)if(so[i].thua===t.id)n++;
+ var CROP_EMOJI={"lúa":"🌾","cà phê":"☕","hồ tiêu":"🌿","sầu riêng":"🍈","ngô":"🌽","mía":"🎋","cao su":"🌳","chè":"🍵","điều":"🥜"};
+ var emoji=CROP_EMOJI[t.cay]||"🌱";
+ var sel=thuaCur===t.id;
+ return '<button type="button" data-sthua="'+t.id+'" class="field-card'+(sel?' field-sel':'')+'" style="text-align:left;width:100%;cursor:pointer">'
+  +'<div style="display:flex;align-items:center;gap:14px">'
+  +'<div class="field-emoji">'+emoji+'</div>'
+  +'<div style="min-width:0;flex:1">'
+  +'<div style="font-size:1rem;font-weight:700;line-height:1.3">'+esc(t.ten)+'</div>'
+  +'<div style="font-size:.78rem;color:var(--muted-fg)">'+esc(t.cay)+' · '+t.dt+' sào'+(t.dat&&t.dat!=="—"?' · '+esc(t.dat):'')+'</div>'
+  +'</div>'
+  +tag(w?"chờ "+s.con+"d":"✓ gặt được",w?"wait":"ok")
+  +'</div></button>';
+}
 function st2(v,l,first){
  return '<div style="flex:1;'+(first?"":"border-left:1px solid var(--border);padding-left:12px")+'">'
   +'<b class="mono" style="display:block;font-size:.92rem;font-weight:600;line-height:1.2">'+v+"</b>"
@@ -783,17 +818,125 @@ function fg(v,l,first){
   +'<div style="font-size:1.4rem;font-weight:700;letter-spacing:-.02em">'+v+"</div>"
   +'<div style="margin-top:3px;font-size:.78rem;color:var(--muted-fg)">'+l+"</div></div>"}
 
+var thuaCur=THUA.length?THUA[0].id:null;
+var mapInst=null;
+
 function pThua(){
- var pl="",i;for(i=0;i<THUA.length;i++)pl+=cThua(THUA[i]);
- var h=sec("Thửa trong vụ",'<div class="g2">'+pl+"</div>");
- var r="";
- for(i=0;i<so.length;i++){var e=so[i],t=byId(THUA,e.thua),d=new Date(e.ngay),s,cl;
-  if(e.phi){var het=addD(d,e.phi),c=dif(NAY,het);cl=e.phi+" ngày";
-   s=c>0?tag("còn "+c+" ngày","wait"):tag("đã qua","ok")}
-  else{cl="—";s=tag("không cách ly","mut")}
-  r+=tr2([esc(t?t.ten:"—"),dmy(d),esc(e.viec),esc(e.thuoc||e.lieu),{n:cl},s])}
- h+=sec("Việc theo từng thửa",tbl2(["Thửa","Ngày","Việc","Vật tư",{n:"Cách ly"},"Trạng thái"],r));
- return h}
+ if(!THUA.length){
+  return sec("Thửa ruộng",'<div class="card" style="padding:40px;text-align:center">'
+   +'<div style="font-size:3rem;margin-bottom:12px">🗺️</div>'
+   +'<div style="font-size:1.1rem;font-weight:700">Chưa có thửa nào</div>'
+   +'<p style="margin:8px auto 20px;max-width:38ch;font-size:.88rem;color:var(--muted-fg)">Quay lại Tổng quan để tạo thửa đầu tiên.</p>'
+   +'<button type="button" data-go="tongquan" class="btn btn-p">Tạo thửa</button></div>');
+ }
+ if(!thuaCur||!byId(THUA,thuaCur))thuaCur=THUA[0].id;
+ var i,dt=0,ok=0,cho=0;
+ for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++;else ok++}
+
+ /* Summary */
+ var h=sec("Tổng quan vụ",card('<div style="display:flex;flex-wrap:wrap">'
+  +fg(THUA.length,'thửa đang quản lý',1)+fg(dt+' <span style="font-size:.78rem;font-weight:400">sào</span>','tổng diện tích')
+  +fg(tag(cho?cho+' chờ':'Tất cả đạt',cho?'wait':'ok'),'trạng thái cách ly')
+  +fg(so.length,'việc đã ghi')+'</div>'));
+
+ /* Map + field list layout */
+ var list='';
+ for(i=0;i<THUA.length;i++)list+=cThua2(THUA[i],i);
+ list+='<button type="button" data-go="tongquan" class="btn" style="width:100%;margin-top:8px;font-size:.82rem">+ Thêm thửa mới</button>';
+
+ h+='<section class="sec fade-up"><div class="sec-h"><h2 class="sec-t">Bản đồ & Thửa</h2><span class="sec-l"></span>'
+  +'<span style="font-size:.72rem;color:var(--muted-fg)">Ảnh vệ tinh Esri · bấm thửa để xem chi tiết</span></div>'
+  +'<div class="map-layout">'
+  +'<div class="map-sidebar scr">'+list+'</div>'
+  +'<div class="map-main"><div id="leafMap" class="leaflet-box"></div></div>'
+  +'</div></section>';
+
+ /* Detail panel for selected field */
+ var th=byId(THUA,thuaCur);
+ if(th){
+  var s=tt(th.id),w=s.con>0,nv=0;
+  for(i=0;i<so.length;i++)if(so[i].thua===th.id)nv++;
+  h+=sec('Chi tiết — '+esc(th.ten),
+   '<div class="g2">'
+   +card('<div style="padding:20px">'
+    +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">'
+    +ring(w?s.con:0,w?Math.max(s.con,14):14,34,4.5)
+    +'<div style="min-width:0"><div style="font-size:1.1rem;font-weight:700">'+esc(th.ten)+'</div>'
+    +'<div style="font-size:.78rem;color:var(--muted-fg)">'+tag(w?"Chờ cách ly":"Gặt được",w?"wait":"ok")+'</div></div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div class="detail-cell"><span class="detail-lbl">Cây trồng</span><span class="detail-val">'+esc(th.cay)+'</span></div>'
+    +'<div class="detail-cell"><span class="detail-lbl">Giống</span><span class="detail-val">'+esc(th.giong)+'</span></div>'
+    +'<div class="detail-cell"><span class="detail-lbl">Diện tích</span><span class="detail-val">'+th.dt+' sào</span></div>'
+    +'<div class="detail-cell"><span class="detail-lbl">Loại đất</span><span class="detail-val">'+esc(th.dat||"—")+'</span></div>'
+    +'<div class="detail-cell"><span class="detail-lbl">Giai đoạn</span><span class="detail-val">'+esc(th.gd)+'</span></div>'
+    +'<div class="detail-cell"><span class="detail-lbl">Ngày sau trồng</span><span class="detail-val mono">'+th.ngaycay+'</span></div>'
+    +(w?'<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">Gặt sớm nhất</span><span class="detail-val c-wait" style="font-weight:700">'+dmy(s.het)+'  (còn '+s.con+' ngày)</span></div>':'')
+    +'</div></div>')
+   +card('<div style="padding:20px"><div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg);margin-bottom:12px">Nhật ký thửa này</div>'
+    +(function(){
+     var rows='',k=0;
+     for(var j=0;j<so.length;j++){var e=so[j];if(e.thua!==thuaCur)continue;k++;
+      var d2=new Date(e.ngay),gt2;
+      if(e.phi){var het2=addD(d2,e.phi),c2=dif(NAY,het2);gt2=c2>0?tag(dmy(het2)+' · còn '+c2,'wait'):tag('đã qua','ok')}
+      else gt2=tag('—','mut');
+      rows+='<div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--border)">'
+       +'<div class="mono" style="flex-shrink:0;font-size:.78rem;color:var(--muted-fg)">'+dmy(d2)+'</div>'
+       +'<div style="min-width:0;flex:1"><div style="font-size:.88rem;font-weight:600">'+esc(e.viec)+'</div>'
+       +'<div style="font-size:.78rem;color:var(--muted-fg)">'+esc(e.thuoc?e.thuoc+' · '+e.lieu:e.lieu)+'</div></div>'
+       +gt2+'</div>';}
+     if(!k)rows='<div style="padding:16px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Chưa ghi việc nào cho thửa này.</div>';
+     return rows;
+    })()
+    +'</div>')
+   +'</div>',
+   '<button type="button" data-go="benh" class="btn btn-p" style="font-size:.82rem">Ghi việc mới</button>'
+   +'<button type="button" data-xoathua="'+th.id+'" class="btn" style="font-size:.82rem;color:var(--bad);border-color:var(--bad-bd)">Xoá thửa</button>');
+ }
+ return h;
+}
+
+function initMap(){
+ var el=document.getElementById('leafMap');if(!el)return;
+ if(mapInst){mapInst.remove();mapInst=null}
+
+ /* Default: somewhere in VN Mekong Delta */
+ var defLat=10.45,defLng=106.65,defZoom=15;
+ /* If geolocation available, use it */
+
+ mapInst=L.map(el,{zoomControl:false,attributionControl:false}).setView([defLat,defLng],defZoom);
+ L.control.zoom({position:'topright'}).addTo(mapInst);
+ L.control.attribution({prefix:false,position:'bottomright'}).addTo(mapInst);
+
+ /* Satellite tile from Esri — free, no API key */
+ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+  attribution:'Tiles © Esri',maxZoom:19}).addTo(mapInst);
+ /* Labels overlay */
+ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
+  maxZoom:19,opacity:.7}).addTo(mapInst);
+
+ /* Add field markers */
+ var COLORS=['#34d399','#fbbf24','#60a5fa','#f87171','#a78bfa','#fb923c'];
+ for(var i=0;i<THUA.length;i++){
+  var th=THUA[i];
+  var angle=i*(2*Math.PI/Math.max(THUA.length,1));
+  var r=0.002+Math.random()*0.002;
+  var lat=defLat+r*Math.cos(angle),lng=defLng+r*Math.sin(angle);
+  var col=COLORS[i%COLORS.length];
+  var ic=L.divIcon({className:'',html:'<div style="width:32px;height:32px;border-radius:50%;background:'+col+';border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff">'+(i+1)+'</div>',iconSize:[32,32],iconAnchor:[16,16]});
+  var mk=L.marker([lat,lng],{icon:ic}).addTo(mapInst);
+  mk.bindPopup('<b>'+esc(th.ten)+'</b><br>'+esc(th.cay)+' · '+th.dt+' sào');
+  (function(id){mk.on('click',function(){thuaCur=id;ve()})})(th.id);
+ }
+
+ /* Try geolocation */
+ if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(function(pos){
+   if(mapInst)mapInst.setView([pos.coords.latitude,pos.coords.longitude],defZoom);
+  },function(){},{ timeout:5000, maximumAge:300000 });
+ }
+
+ setTimeout(function(){if(mapInst)mapInst.invalidateSize()},200);
+}
 
 function tbl2(cols,rows){
  var th="",i;
@@ -1248,6 +1391,7 @@ function ve(){
  else if(cur==="gia")h=pGia();else if(cur==="mophong")h=pSim();
  document.getElementById("page").innerHTML=h;
  if(cur==="mophong")simInit();
+ if(cur==="thua"&&THUA.length)setTimeout(initMap,50);
  if((cur==="tongquan")&&(!THUA.length||themThua.dang))ganFormThua();
  ganTip()}
 
@@ -1331,7 +1475,7 @@ document.addEventListener("click",function(ev){
  if(ev.target&&ev.target.id==="btnTao"){taoThua();return}
  if(ev.target&&ev.target.id==="btnHuy"){themThua.dang=false;ve();return}
  if(ev.target&&ev.target.id==="btnThemThua"){themThua.dang=true;ve();return}
- var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool],[data-fcay],[data-dat],[data-fgd],[data-xoathua]";
+ var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool],[data-fcay],[data-dat],[data-fgd],[data-xoathua],[data-sthua]";
  var el=ev.target.closest?ev.target.closest(S):null;if(!el)return;
  var v;
  if((v=el.getAttribute("data-nav"))){di(v);return}
@@ -1352,6 +1496,7 @@ document.addEventListener("click",function(ev){
  if((v=el.getAttribute("data-diem"))){diemCur=diemCur===+v?null:+v;ve();return}
  if((v=el.getAttribute("data-gia"))){giaCur=v;ve();return}
  if((v=el.getAttribute("data-tool"))&&SIM){SIM.tool=+v;veTools();return}
+ if((v=el.getAttribute("data-sthua"))){thuaCur=v;ve();return}
  if((v=el.getAttribute("data-fcay"))){fCay=v;var cc=document.getElementById("fCayChon");
   if(cc)cc.innerHTML='<span class="tag tag-ok">'+esc(v)+'</span>';
   var kq=document.getElementById("fKqCay");if(kq)kq.innerHTML="";veGd(v);return}
