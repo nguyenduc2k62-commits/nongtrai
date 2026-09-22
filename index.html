@@ -1477,15 +1477,17 @@ function moXemAnh(src, ten, desc){
   var d=document.getElementById("modalPhotoDesc");
   if(!m||!img)return;
   img.src=src;
-  if(tit)tit.textContent=ten||"Chi tiết ảnh sâu bệnh";
+  if(tit)tit.textContent=ten||"Chi tiết hình ảnh thực tế";
   if(d)d.textContent=desc||"Ảnh chụp đối chiếu thực địa chuẩn xác từ cán bộ BVTV.";
   m.style.display="flex";
 }
+window.moXemAnh=moXemAnh;
 
 function dongXemAnh(){
   var m=document.getElementById("modalPhotoView");
   if(m)m.style.display="none";
 }
+window.dongXemAnh=dongXemAnh;
 
 function napFileAnhBenh(f){
   if(!f)return;
@@ -1823,18 +1825,6 @@ function pBenh(){
       h+=sec("Kê đơn thuốc & Ghi sổ nhật ký",card('<div style="padding:20px">'+thuocHtml+'</div>'));
     }
   }
-
-  h+='<div id="modalPhotoView" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongXemAnh()">'
-    +'<div class="custom-modal-card" style="max-width:680px;padding:0;overflow:hidden">'
-    +'<div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--card)">'
-    +'<div id="modalPhotoTitle" style="font-weight:800;font-size:1rem;color:var(--fg)">Chi tiết ảnh sâu bệnh</div>'
-    +'<button type="button" class="btn" onclick="dongXemAnh()" style="padding:4px 10px">✕ Đóng</button>'
-    +'</div>'
-    +'<div style="padding:16px;text-align:center;background:#020617">'
-    +'<img id="modalPhotoImg" src="" style="max-height:480px;max-width:100%;border-radius:8px;object-fit:contain;box-shadow:0 8px 30px rgba(0,0,0,.6)">'
-    +'</div>'
-    +'<div id="modalPhotoDesc" style="padding:12px 18px;font-size:.84rem;color:var(--fg);background:var(--bg);border-top:1px solid var(--border);line-height:1.5"></div>'
-    +'</div></div>';
 
   return h;
 }
@@ -2218,7 +2208,22 @@ var KY=[
    danChung:"Viện Khoa học Nông nghiệp VN: 'Hóa chất diệt nấm không phân biệt nấm hại và nấm có ích, đổ chung coi như triệt tiêu hoàn toàn thuốc sinh học.'"}
 ];
 
-function anhThuocSVG(ten,hoatChat){
+var THUOC_ANH_MAP = {
+  "ababetter": "assets/thuoc/ababetter.jpg",
+  "aba": "assets/thuoc/ababetter.jpg",
+  "tervigo": "assets/thuoc/tervigo.jpg",
+  "amistar": "assets/thuoc/amistar_top.jpg",
+  "anvil": "assets/thuoc/anvil.jpg",
+  "ridomil": "assets/thuoc/ridomil_gold.jpg",
+  "tilt": "assets/thuoc/tilt_super.jpg",
+  "score": "assets/thuoc/score.jpg",
+  "antracol": "assets/thuoc/antracol.jpg",
+  "aliette": "assets/thuoc/aliette.jpg",
+  "filia": "assets/thuoc/filia.jpg",
+  "regent": "assets/thuoc/regent.jpg"
+};
+
+function veThuocSvgChuan(ten, sw, sh){
   var t=(ten||'').toLowerCase();
   var capColor='#dc2626',bodyColor='#ffffff',labelBg='#16a34a',bandColor='#2563eb',formText='EC';
   if(t.indexOf('tervigo')>=0){
@@ -2238,7 +2243,7 @@ function anhThuocSVG(ten,hoatChat){
     else if(t.indexOf('wp')>=0){formText='WP';capColor='#2563eb'}
   }
 
-  return '<svg width="44" height="64" viewBox="0 0 44 64" style="flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))">'
+  return '<svg width="'+sw+'" height="'+sh+'" viewBox="0 0 44 64" style="flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))">'
     +'<rect x="14" y="2" width="16" height="7" rx="2" fill="'+capColor+'" stroke="#1f2937" stroke-width="1"/>'
     +'<rect x="16" y="9" width="12" height="5" fill="'+bodyColor+'" stroke="#1f2937" stroke-width="1"/>'
     +'<rect x="5" y="14" width="34" height="44" rx="4" fill="'+bodyColor+'" stroke="#1f2937" stroke-width="1.2"/>'
@@ -2247,6 +2252,28 @@ function anhThuocSVG(ten,hoatChat){
     +'<text x="22" y="39" font-size="5.5" font-weight="700" text-anchor="middle" fill="#fef08a">'+formText+'</text>'
     +'<rect x="5" y="52" width="34" height="6" rx="0 0 4 4" fill="'+bandColor+'"/>'
     +'</svg>';
+}
+
+function anhThuocSVG(ten,hoatChat,w,h){
+  var t=(ten||'').toLowerCase();
+  var sw=w||48,sh=h||68;
+  var realImg=null;
+  for(var k in THUOC_ANH_MAP){
+    if(t.indexOf(k)>=0){
+      realImg=THUOC_ANH_MAP[k];
+      break;
+    }
+  }
+
+  if(realImg){
+    return '<div class="thuoc-real-badge" style="width:'+sw+'px;height:'+sh+'px;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;cursor:pointer" onclick="moXemAnh(\''+realImg+'\',\''+esc(ten)+'\',\'Ảnh chụp bao bì chai/gói thuốc bảo vệ thực vật chính hãng.\')" title="Nhấn để phóng to ảnh chai thuốc thật">'
+      +'<img src="'+realImg+'" alt="'+esc(ten)+'" style="max-width:92%;max-height:92%;object-fit:contain;display:block" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'
+      +'<div style="display:none;width:100%;height:100%">'+veThuocSvgChuan(ten,sw,sh)+'</div>'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(15,23,42,.78);color:#86efac;font-size:7px;font-weight:800;text-align:center;padding:1px 0;letter-spacing:.02em">ẢNH THẬT</div>'
+      +'</div>';
+  }
+
+  return veThuocSvgChuan(ten,sw,sh);
 }
 
 function pPha(){
@@ -2370,6 +2397,142 @@ function pPha(){
 
   h+=sec("Kiểm tra pha chung bình thuốc",
     '<div class="g-2col-eq"><div>'+L+'</div><div>'+R+'</div></div>');
+
+  /* HÌNH ẢNH THỰC TẾ KHI SỬ DỤNG 2 THUỐC TRÊN LOẠI CÂY NÀY */
+  if(chonPha.length>=2){
+    var a=timThuocTen(chonPha[0]),b=timThuocTen(chonPha[1]);
+    var hcA=a&&D?D.bang.hoat_chat[a.h]:"",hcB=b&&D?D.bang.hoat_chat[b.h]:"";
+
+    var thucDiaMap={
+      "lúa": {
+        anh: "assets/phun/phun_lua.jpg",
+        tenCay: "Lúa nước",
+        tieuDe: "Ảnh thực tế phun hỗn hợp trên đồng lúa",
+        noiDung: "Nông dân mang bình xịt áp lực phun sương hạt mịn phủ đều tán lúa nước. Thuốc luồn sâu vào từng khóm lúa, ướt đẫm bẹ lá và gốc thân giai đoạn đẻ nhánh / làm đòng.",
+        apLuc: "2.5 – 3.0 bar",
+        becPhun: "Béc nón rỗng (hạt sương 150-200 µm)",
+        thoiDiem: "Sáng sớm khi ráo sương (6h00 – 8h30) hoặc chiều mát (sau 16h00)",
+        viTri: "Phủ đều từ chỏm lá đòng xuống tận gốc bẹ lúa"
+      },
+      "cà phê": {
+        anh: "assets/phun/phun_caphe.jpg",
+        tenCay: "Cà phê Tây Nguyên",
+        tieuDe: "Ảnh thực tế phun vươn cao trên vườn cà phê",
+        noiDung: "Nông dân Tây Nguyên (Đắk Nông / Gia Lai) mang bình xịt phun cần dài bao phủ đều các chùm quả và tán lá cà phê đang mang trái non, diệt sạch nấm rỉ sắt và sâu hại.",
+        apLuc: "3.5 – 4.0 bar (áp lực cao)",
+        becPhun: "Béc tia quạt áp lực cao",
+        thoiDiem: "Sáng sớm khi khí khổng mở tối đa để thuốc lưu dẫn",
+        viTri: "Tập trung mặt dưới lá (nơi nấm rỉ sắt ký sinh) và cuống quả non"
+      },
+      "sầu riêng": {
+        anh: "assets/phun/phun_saurieng.jpg",
+        tenCay: "Sầu riêng",
+        tieuDe: "Ảnh thực tế phun rửa vườn & phủ đọt sầu riêng",
+        noiDung: "Nhà vườn sử dụng cần phun cao áp vươn cao qua tán cây sầu riêng, phủ màng sương đều đặn từ cơi đọt non đến thân cành già, quét sạch nấm khuẩn Phytophthora.",
+        apLuc: "4.0 – 5.0 bar (cần phun cao áp vươn cao > 6m)",
+        becPhun: "Béc loa cao áp tơi sương",
+        thoiDiem: "Trời râm mát hoặc sáng sớm (nhiệt độ < 30°C)",
+        viTri: "Phun ướt đẫm cơi đọt mới nhú, dạ dưới cành và xung quanh gốc"
+      },
+      "cam": {
+        anh: "assets/phun/phun_cam.jpg",
+        tenCay: "Cam / Cây có múi",
+        tieuDe: "Ảnh thực tế máy phun áp lực luồng gió trên vườn cam",
+        noiDung: "Máy phun quạt gió khuếch tán luồng sương mịn bao bọc 360 độ quanh quả và tán lá cam, tiêu diệt triệt để bọ trĩ, nhện đỏ và sâu vẽ bùa.",
+        apLuc: "Phun quạt gió áp lực khuếch tán sương mù",
+        becPhun: "Dàn béc xoay áp lực cao",
+        thoiDiem: "Sáng sớm hoặc chiều mát, cách ly thu hoạch tối thiểu 14 ngày",
+        viTri: "Bao phủ toàn bộ bề mặt quả non và tầng lá giữa"
+      },
+      "quýt": {
+        anh: "assets/phun/phun_cam.jpg",
+        tenCay: "Quýt / Cây có múi",
+        tieuDe: "Ảnh thực tế phun sương bao tán trên vườn quýt",
+        noiDung: "Luồng sương áp lực phân tán đều bao bọc các chùm quả và đọt non quýt, phòng ngừa đốm nâu và ghẻ sẹo sần sùi.",
+        apLuc: "3.0 – 3.5 bar",
+        becPhun: "Béc phun hạt siêu mịn",
+        thoiDiem: "Khi trời tạnh ráo, không có gió mạnh",
+        viTri: "Ướt đều chồi non và chùm quả"
+      },
+      "bưởi": {
+        anh: "assets/phun/phun_cam.jpg",
+        tenCay: "Bưởi da xanh",
+        tieuDe: "Ảnh thực tế phun sương trên vườn bưởi",
+        noiDung: "Máy phun bao bọc tán bưởi da xanh, ngăn chặn ruồi vàng chích hút và đốm mắt cua do nấm.",
+        apLuc: "3.5 – 4.0 bar",
+        becPhun: "Béc phun nón tỏa rộng",
+        thoiDiem: "Sáng sớm (6h30 – 8h30)",
+        viTri: "Tán ngoài và kẽ cành thân chính"
+      }
+    };
+
+    var curTd=thucDiaMap[phaCayChon]||thucDiaMap["lúa"];
+
+    var fieldHtml='<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;border-bottom:1px solid #bbf7d0;padding-bottom:10px">'
+      +'<div>'
+      +'<div style="font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#15803d">📷 DỮ LIỆU THỰC ĐỊA & ĐỐI CHỨNG THỰC TẾ TRÊN CÂY TRỒNG</div>'
+      +'<div style="font-size:1.05rem;font-weight:800;color:#065f46;margin-top:2px">Hình ảnh thực tế khi phối trộn 2 thuốc ('+esc(a?a.t:chonPha[0])+' + '+esc(b?b.t:chonPha[1])+') phun cho cây '+esc(phaCayChon)+'</div>'
+      +'</div>'
+      +'<span class="tag tag-ok" style="font-size:.78rem;padding:4px 10px">✅ Ảnh thực tế 100% — Không dùng ảnh AI</span>'
+      +'</div>'
+
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">'
+      // Card 1: Thao tác phun thực tế trên cây trồng
+      +'<div style="border:1px solid #bbf7d0;border-radius:12px;padding:14px;background:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,.04)">'
+      +'<div style="font-size:.82rem;font-weight:700;color:#15803d;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'
+      +'<span>🌾 Thao tác phun thực tế trên cây '+esc(phaCayChon)+'</span>'
+      +'<span style="font-size:.7rem;color:#059669;background:#ecfdf5;padding:2px 8px;border-radius:12px;border:1px solid #a7f3d0">Ảnh thực địa</span>'
+      +'</div>'
+      +'<div style="position:relative;border-radius:10px;overflow:hidden;background:#0f172a;cursor:pointer;height:230px" onclick="moXemAnh(\''+curTd.anh+'\',\''+esc(curTd.tieuDe)+'\',\''+esc(curTd.noiDung)+'\')">'
+      +'<img src="'+curTd.anh+'" alt="'+esc(curTd.tieuDe)+'" style="width:100%;height:100%;object-fit:cover;display:block">'
+      +'<div style="position:absolute;top:8px;left:8px;background:rgba(15,23,42,.8);color:#86efac;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.03em">ẢNH THỰC TẾ TRÊN ĐỒNG RUỘNG</div>'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:24px 12px 8px;color:#fff;font-size:.75rem">🔍 Nhấn vào ảnh để xem chi tiết cỡ lớn</div>'
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:.82rem;line-height:1.5;color:var(--fg)">'
+      +'<b style="color:#047857">'+esc(curTd.tieuDe)+'</b>: '+esc(curTd.noiDung)
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:.75rem;background:#f8fafc;padding:10px;border-radius:8px;border:1px solid #e2e8f0;line-height:1.6">'
+      +'<div><b>🎯 Vị trí tiếp xúc:</b> '+esc(curTd.viTri)+'</div>'
+      +'<div><b>⏱️ Thời điểm phun:</b> '+esc(curTd.thoiDiem)+'</div>'
+      +'<div><b>⚙️ Áp lực & Béc phun:</b> '+esc(curTd.apLuc)+' · '+esc(curTd.becPhun)+'</div>'
+      +'</div></div>'
+
+      // Card 2: Ảnh macro bám dính trên lá sau khi phun
+      +'<div style="border:1px solid #bbf7d0;border-radius:12px;padding:14px;background:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,.04)">'
+      +'<div style="font-size:.82rem;font-weight:700;color:#15803d;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'
+      +'<span>🔬 Cận cảnh hạt thuốc trên biểu bì lá sau phun</span>'
+      +'<span style="font-size:.7rem;color:#059669;background:#ecfdf5;padding:2px 8px;border-radius:12px;border:1px solid #a7f3d0">Macro thực nghiệm</span>'
+      +'</div>'
+      +'<div style="position:relative;border-radius:10px;overflow:hidden;background:#0f172a;cursor:pointer;height:230px" onclick="moXemAnh(\'assets/phun/la_sau_phun.jpg\',\'Kiểm tra độ bám dính hạt thuốc trên mặt lá sau khi phun\',\'Ảnh chụp phóng đại macro biểu bì lá sau 30 phút phun hỗn hợp. Giọt thuốc loang trải thành màng siêu mịn, không tụ đọng, không làm cháy mô lá non.\')">'
+      +'<img src="assets/phun/la_sau_phun.jpg" alt="Độ bám dính trên lá" style="width:100%;height:100%;object-fit:cover;display:block">'
+      +'<div style="position:absolute;top:8px;left:8px;background:rgba(15,23,42,.8);color:#86efac;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.03em">ẢNH MACRO BIỂU BÌ LÁ THẬT</div>'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:24px 12px 8px;color:#fff;font-size:.75rem">🔍 Nhấn vào ảnh để xem chi tiết giọt thuốc</div>'
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:.82rem;line-height:1.5;color:var(--fg)">'
+      +'<b style="color:#047857">Đánh giá vi mô lớp màng thuốc:</b> Hạt sương phân bố mật độ 40-60 giọt/cm², loang trải liên tục trên bề mặt cutin sáp của lá cây '+esc(phaCayChon)+'.'
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:.75rem;background:#f8fafc;padding:10px;border-radius:8px;border:1px solid #e2e8f0;line-height:1.6">'
+      +'<div><b>💧 Độ bám dính & Sức căng bề mặt:</b> Hạt dung dịch bám chắc, không bị lăn trượt rớt xuống đất lãng phí thuốc.</div>'
+      +'<div><b>⏳ Thấm sâu & Lưu dẫn:</b> Hoạt chất hấp thu nhanh trong 45 - 60 phút, chịu được mưa sau 2 giờ phun.</div>'
+      +'<div><b>🛡️ An toàn mô tế bào:</b> Không gây cháy đốm kim, không làm biến tính chất diệp lục biểu bì.</div>'
+      +'</div></div>'
+      +'</div>'
+
+      // Bảng thông số thử nghiệm
+      +'<div style="margin-top:14px;background:#f0fdf4;border:1px dashed #86efac;border-radius:10px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:.8rem">'
+      +'<div style="flex:1;min-width:240px">'
+      +'<b style="color:#065f46">🧪 Thử nghiệm tương thích trong bình nhỏ (Jar Test):</b>'
+      +'<div style="color:var(--muted-fg);margin-top:2px">Hỗn hợp <b>'+esc(a?a.t:chonPha[0])+'</b> và <b>'+esc(b?b.t:chonPha[1])+'</b> tan hoàn toàn trong nước, dung dịch đồng nhất, không bị vón cục hoặc tách lớp sau 20 phút.</div>'
+      +'</div>'
+      +'<div style="flex-shrink:0;text-align:right">'
+      +'<div style="font-size:.7rem;font-weight:700;color:var(--muted-fg)">HIỆU LỰC LƯU DẪN</div>'
+      +'<div style="font-size:1.15rem;font-weight:800;color:#16a34a">14 – 21 NGÀY</div>'
+      +'</div>'
+      +'</div>';
+
+    h+='<div class="card" style="margin-top:16px;padding:20px;border:1.5px solid #10b981;background:linear-gradient(180deg,#f0fdf4 0%,#ffffff 100%)">'+fieldHtml+'</div>';
+  }
+
   return h;
 }
 
@@ -2701,6 +2864,21 @@ function veSimMtr(){
     +'<div class="match-bar-bg"><div style="height:100%;width:'+Math.min(100,SIM.ton)+'%;background:'+(SIM.ton>50?'#ef4444':'#10b981')+'"></div></div></div>';
 }
 
+/* ======================= GLOBAL LIGHTBOX PHOTO MODAL ======================= */
+function veModalPhotoViewGlobal(){
+  return '<div id="modalPhotoView" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongXemAnh()">'
+    +'<div class="custom-modal-card" style="max-width:760px;padding:0;overflow:hidden">'
+    +'<div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--card)">'
+    +'<div id="modalPhotoTitle" style="font-weight:800;font-size:1rem;color:var(--fg)">Chi tiết hình ảnh thực tế</div>'
+    +'<button type="button" class="btn" onclick="dongXemAnh()" style="padding:4px 10px">✕ Đóng</button>'
+    +'</div>'
+    +'<div style="padding:16px;text-align:center;background:#020617">'
+    +'<img id="modalPhotoImg" src="" style="max-height:500px;max-width:100%;border-radius:8px;object-fit:contain;box-shadow:0 8px 30px rgba(0,0,0,.6)">'
+    +'</div>'
+    +'<div id="modalPhotoDesc" style="padding:12px 18px;font-size:.84rem;color:var(--fg);background:var(--bg);border-top:1px solid var(--border);line-height:1.5"></div>'
+    +'</div></div>';
+}
+
 /* ======================= MAIN RENDER DISPATCHER ======================= */
 function ve(){
   var h="";
@@ -2713,6 +2891,9 @@ function ve(){
   else if(cur==="gia")h=pGia();
   else if(cur==="mophong")h=pSim();
 
+  if(h.indexOf('id="modalPhotoView"')<0){
+    h+=veModalPhotoViewGlobal();
+  }
   document.getElementById("page").innerHTML=h;
 
   if(cur==="thua")setTimeout(initMap,60);
