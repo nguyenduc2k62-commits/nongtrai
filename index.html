@@ -358,7 +358,9 @@ var THUA_KEY="so-ruong-thua";
 var THUA=(function(){try{var r=localStorage.getItem(THUA_KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v)&&v.length)return v}}catch(e){}
   return [
     {id:"thua1", ten:"Lô 1 — Vùng Lúa Nước", cay:"lúa", giong:"OM 18", dt:5, dat:"Phù sa", gd:"Đẻ nhánh", ngaycay:28},
-    {id:"thua2", ten:"Lô 2 — Vườn Cà Phê", cay:"cà phê", giong:"Robusta TR4", dt:8, dat:"Đất đỏ bazan", gd:"Nuôi quả", ngaycay:140}
+    {id:"thua2", ten:"Lô 2 — Vườn Cà Phê", cay:"cà phê", giong:"Robusta TR4", dt:8, dat:"Đất đỏ bazan", gd:"Nuôi quả", ngaycay:140},
+    {id:"thua3", ten:"Lô 3 — Vườn Cao Su Lấy Mủ", cay:"cao su", giong:"RRIV 106", dt:12, dat:"Đất đỏ bazan", gd:"Khai thác mủ (D3)", ngaycay:450},
+    {id:"thua4", ten:"Lô 4 — Vườn Sầu Riêng Ri6", cay:"sầu riêng", giong:"Ri6 cơm vàng", dt:6, dat:"Đất đắp mô", gd:"Nuôi trái non", ngaycay:210}
   ];
 })();
 function luuThua(){try{localStorage.setItem(THUA_KEY,JSON.stringify(THUA))}catch(e){}}
@@ -369,6 +371,7 @@ var GIAI_DOAN={
   "cà phê":["Kiến thiết","Ra hoa","Nuôi quả non","Quả chín","Sau thu hoạch"],
   "sầu riêng":["Kéo đọt","Mắt cua ra hoa","Xả nhị đậu trái","Nuôi trái non","Trái già chín"],
   "hồ tiêu":["Nuôi dây","Ra hoa thụ phấn","Nuôi chùm quả","Thu hoạch"],
+  "cao su":["Kiến thiết cơ bản","Mở miệng cạo","Khai thác mủ chính vụ (D3)","Xả cạo nghỉ lá sinh lý","Phục hồi mặt cạo"],
   "_":["Cây con","Sinh trưởng mạnh","Ra hoa","Nuôi quả/củ","Thu hoạch"]
 };
 
@@ -478,7 +481,7 @@ function rowBtn(inner,attr,on){
 
 /* ======================= NAVIGATION ======================= */
 var PAGES=[
-  {id:"tongquan", ten:"Tổng quan", sub:"Vụ mùa 2026 · Quản lý thời gian cách ly & cảnh báo", g:1},
+  {id:"tongquan", ten:"Tổng quan", sub:"Trung tâm điều hành nông trại · Vận hành đa cây trồng theo niên vụ & chu kỳ sinh học", g:1},
   {id:"thua", ten:"Lô đất", sub:"Bản đồ vệ tinh · Định vị GPS · Vẽ phân khu canh tác", g:1},
   {id:"benh", ten:"Tra bệnh AI", sub:"AI Vision Scanner · Đối chiếu ảnh mẫu · Kê đơn Thông tư 75", g:1},
   {id:"so", ten:"Nhật ký canh tác", sub:"Toàn bộ việc đã làm · Lịch cách ly · Xuất mã QR hồ sơ", g:1},
@@ -540,78 +543,307 @@ function di(id){
 }
 
 /* ======================= 1. TỔNG QUAN ======================= */
+function phanLoaiCayTrong(tenCay){
+  var c = (tenCay || "").toLowerCase().trim();
+  if (c.indexOf("cao su") >= 0) return "caosu";
+  if (c.indexOf("cà phê") >= 0 || c.indexOf("ca phe") >= 0 || c.indexOf("tiêu") >= 0 || c.indexOf("điều") >= 0 || c.indexOf("chè") >= 0 || c.indexOf("trà") >= 0) return "congnghiep";
+  if (c.indexOf("sầu riêng") >= 0 || c.indexOf("cam") >= 0 || c.indexOf("bưởi") >= 0 || c.indexOf("chanh") >= 0 || c.indexOf("xoài") >= 0 || c.indexOf("thanh long") >= 0 || c.indexOf("bơ") >= 0 || c.indexOf("mít") >= 0 || c.indexOf("nhãn") >= 0 || c.indexOf("vải") >= 0 || c.indexOf("chuối") >= 0) return "antrai";
+  return "luongthuc"; // lúa, bắp, khoai, rau màu
+}
+
 function pTong(){
-  var dt=0,cho=0,ok=0,i;
-  for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++;else ok++}
-
-  var h=card('<div style="display:flex;flex-wrap:wrap">'
-    +fg(THUA.length,'lô đất canh tác',1)
-    +fg(dt+' <span style="font-size:.78rem;font-weight:400">sào</span>','tổng diện tích')
-    +fg(tag(cho?cho+' lô chờ':'Tất cả đạt',cho?'wait':'ok'),'trạng thái cách ly')
-    +fg(so.length,'việc đã ghi trong vụ')
-    +'</div>');
-
-  /* Countdown & Status Cards */
-  var cards='';
-  for(i=0;i<THUA.length;i++){
-    var th=THUA[i],s=tt(th.id),w=s.con>0;
-    cards+='<div class="card" style="padding:20px;cursor:pointer" data-chothua="'+th.id+'">'
-      +'<div style="display:flex;align-items:center;gap:14px">'
-      +ring(w?s.con:0,w?Math.max(s.con,14):14,28,4)
-      +'<div style="min-width:0;flex:1">'
-      +'<div style="font-size:1.05rem;font-weight:700">'+esc(th.ten)+'</div>'
-      +'<div style="font-size:.78rem;color:var(--muted-fg)">'+esc(th.cay)+' · '+th.dt+' sào · '+esc(th.dat||"Đất phù sa")+'</div>'
-      +'</div>'
-      +tag(w?'Cách ly '+s.con+' ngày':'Gặt được',w?'wait':'ok')
-      +'</div>'
-      +(w?'<div style="margin-top:12px;font-size:.78rem;color:var(--wait);border-top:1px dashed var(--border);padding-top:8px">Thu hoạch sớm nhất từ: <b>'+dmy(s.het)+'</b> (Xịt '+esc(s.ng?s.ng.thuoc:"")+')</div>':'')
-      +'</div>';
+  var dt = 0, cho = 0, ok = 0, i;
+  var cropTypesCount = {};
+  for(i = 0; i < THUA.length; i++){
+    dt += THUA[i].dt;
+    var cType = phanLoaiCayTrong(THUA[i].cay);
+    cropTypesCount[cType] = (cropTypesCount[cType] || 0) + 1;
+    if(cType === "luongthuc"){
+      if(tt(THUA[i].id).con > 0) cho++; else ok++;
+    }
   }
-  h+=sec("Tình trạng các lô đất",'<div class="g2">'+cards+'</div>');
 
-  /* Biểu đồ lịch cách ly */
-  h+=sec("Lịch cách ly theo ngày",card('<div style="padding:20px">'+chLich()+'</div>'));
+  // 1. KPI Cards Header
+  var cropSummaryPills = [];
+  if(cropTypesCount.luongthuc) cropSummaryPills.push('🌾 ' + cropTypesCount.luongthuc + ' lô Lương thực/Rau');
+  if(cropTypesCount.congnghiep) cropSummaryPills.push('☕ ' + cropTypesCount.congnghiep + ' lô Cây công nghiệp');
+  if(cropTypesCount.caosu) cropSummaryPills.push('🌳 ' + cropTypesCount.caosu + ' lô Cao su lấy mủ');
+  if(cropTypesCount.antrai) cropSummaryPills.push('🍈 ' + cropTypesCount.antrai + ' lô Cây ăn trái');
+
+  var h = card('<div style="display:flex;flex-wrap:wrap">'
+    + fg(THUA.length, 'lô đất canh tác', 1)
+    + fg(dt + ' <span style="font-size:.78rem;font-weight:400">sào (' + (dt*360/10000).toFixed(2) + ' ha)</span>', 'tổng diện tích')
+    + fg('<span style="font-size:1rem;color:#047857;font-weight:700">' + (cropSummaryPills.join(' · ') || 'Đa cây trồng') + '</span>', 'cơ cấu cây trồng')
+    + fg(so.length, 'lượt nhật ký đã ghi')
+    + '</div>');
+
+  // 2. Crop-Adaptive Plot Cards
+  var cards = '';
+  for(i = 0; i < THUA.length; i++){
+    var th = THUA[i];
+    var cType = phanLoaiCayTrong(th.cay);
+    var s = tt(th.id);
+    var w = s.con > 0;
+
+    cards += '<div class="card" style="padding:20px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease" data-chothua="' + th.id + '">';
+
+    if(cType === "caosu"){
+      // 🌳 CAO SU: Khai thác mủ, Nhịp cạo D3, Độ mủ DRC, Nghỉ cạo dưỡng cây
+      var isTapDay = (i % 2 === 0); // Alternate tapping day
+      cards += '<div>'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        + ringGauge("DRC", "34%", 40, "#10b981")
+        + '<div>'
+        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
+        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">🌳 Cao su lấy mủ · ' + th.dt + ' sào (' + Math.round(th.dt*360) + ' m²) · ' + esc(th.dat||"Đất đỏ Bazan") + '</div>'
+        + '</div>'
+        + '</div>'
+        + (isTapDay ? tag('🩸 Nhịp cạo D3 (3:30 Sáng)', 'ok') : tag('💤 Nghỉ cạo dưỡng vỏ', 'mut'))
+        + '</div>'
+
+        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
+        + '<div style="display:flex;justify-content:space-between"><span>🩸 <b>Độ mủ cao su (DRC):</b></span><b style="color:#059669">33.8% – 34.5% (Chuẩn A)</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Sản lượng ước tính:</b></span><b>42 - 46 kg mủ nước / ngày</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🧪 <b>Chế độ kích mủ Ethrel:</b></span><span style="color:var(--muted-fg)">Nồng độ 2.5% (Cách 14 ngày/lần)</span></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Tình trạng mặt cạo:</b></span><span style="color:#10b981">Khỏe mạnh, phòng loét sọc cạo tốt</span></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
+        + '<span style="color:#059669;font-weight:700">✓ Đang khai thác mủ chính vụ (Tháng 5 - 12)</span>'
+        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết vườn →</span>'
+        + '</div>';
+
+    } else if(cType === "congnghiep"){
+      // ☕ CÀ PHÊ / TIÊU: Niên vụ, Chu kỳ tưới mùa khô, Nuôi nhân, Tỷ lệ chín
+      var isTieu = th.cay.toLowerCase().indexOf("tiêu") >= 0;
+      cards += '<div>'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        + ringGauge(isTieu ? "TIÊU" : "TR4", "85%", 40, "#3b82f6")
+        + '<div>'
+        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
+        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">' + (isTieu ? "🌶️ Hồ tiêu" : "☕ Cà phê Robusta") + ' · ' + th.dt + ' sào · ' + esc(th.dat||"Đất đỏ Bazan") + '</div>'
+        + '</div>'
+        + '</div>'
+        + tag('☕ Niên vụ 2026', 'ok')
+        + '</div>'
+
+        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
+        + '<div style="display:flex;justify-content:space-between"><span>🌱 <b>Giai đoạn niên vụ:</b></span><b style="color:#047857">Nuôi nhân chắc hạt & Phân cành</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>💧 <b>Chu kỳ tưới mùa khô:</b></span><span>Đã tưới đợt 2 (Độ ẩm 62%)</span></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🍒 <b>Dự kiến thu hoạch rộ:</b></span><b>Tháng 11/2026 (Hái chọn chín >90%)</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Dư lượng & An toàn:</b></span><span style="color:#10b981">Đã qua thời kỳ phân giải an toàn</span></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
+        + '<span style="color:#2563eb;font-weight:700">Năng suất mục tiêu: 3.8 - 4.2 Tấn nhân/ha</span>'
+        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết vườn →</span>'
+        + '</div>';
+
+    } else if(cType === "antrai"){
+      // 🍈 CÂY ĂN TRÁI: Cơi đọt, Làm bông, Nuôi trái, Độ ngọt Brix, Chuẩn xuất khẩu
+      var isSauRieng = th.cay.toLowerCase().indexOf("sầu riêng") >= 0;
+      cards += '<div>'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        + ringGauge("Brix", "12.5°", 40, "#f59e0b")
+        + '<div>'
+        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
+        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">' + (isSauRieng ? "🍈 Sầu riêng Ri6" : "🍊 Cây ăn trái đắp mô") + ' · ' + th.dt + ' sào · ' + esc(th.dat||"Đất đắp mô") + '</div>'
+        + '</div>'
+        + '</div>'
+        + tag('🌟 Đạt chuẩn MSVT', 'ok')
+        + '</div>'
+
+        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
+        + '<div style="display:flex;justify-content:space-between"><span>🍈 <b>Giai đoạn trái:</b></span><b style="color:#b45309">Nuôi trái non 65 ngày (Trái chạy gai)</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🌿 <b>Tình trạng cơi đọt:</b></span><span>Cơi đọt 3 đã già lá lụa chống rụng trái</span></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Trọng lượng bình quân:</b></span><b>2.8 - 3.2 kg / trái (Dáng tròn đều)</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Kiểm soát dư lượng (MRL):</b></span><span style="color:#10b981">Dư lượng 0 ppm (Đủ chuẩn xuất khẩu)</span></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
+        + '<span style="color:#d97706;font-weight:700">Dự kiến thu hoạch cắt trái: Sau 40 - 45 ngày</span>'
+        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết vườn →</span>'
+        + '</div>';
+
+    } else {
+      // 🌾 LÚA NƯỚC & RAU MÀU: Đếm ngược ngày cách ly (PHI) trước khi gặt
+      cards += '<div>'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        + ring(w ? s.con : 0, w ? Math.max(s.con, 14) : 14, 28, 4)
+        + '<div>'
+        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
+        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">🌾 Lúa nước Đồng Bằng · ' + th.dt + ' sào · ' + esc(th.dat||"Đất phù sa") + '</div>'
+        + '</div>'
+        + '</div>'
+        + tag(w ? '⏳ Cách ly ' + s.con + ' ngày' : '🌾 An toàn gặt lúa', w ? 'wait' : 'ok')
+        + '</div>'
+
+        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
+        + '<div style="display:flex;justify-content:space-between"><span>🌾 <b>Giai đoạn sinh trưởng:</b></span><b>' + esc(th.gd || "Làm đòng trổ bông") + '</b></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>💧 <b>Mực nước mặt ruộng:</b></span><span>Duy trì 3-5cm nước phù sa</span></div>'
+        + (w ? '<div style="display:flex;justify-content:space-between;color:var(--wait)"><span>⏱️ <b>Thời điểm gặt an toàn:</b></span><b>Từ ngày ' + dmy(s.het) + '</b></div>'
+             : '<div style="display:flex;justify-content:space-between;color:#10b981"><span>✅ <b>Dư lượng BVTV:</b></span><b>0 ppm (Đã qua thời gian cách ly)</b></div>')
+        + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Năng suất ước tính:</b></span><span>6.5 - 7.0 Tấn lúa tươi / ha</span></div>'
+        + '</div>'
+        + '</div>'
+
+        + '<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
+        + '<span style="color:' + (w ? 'var(--wait)' : '#10b981') + ';font-weight:700">' + (w ? '⚠️ Đang trong thời gian phân giải thuốc an toàn' : '✓ Sẵn sàng thu hoạch xuất xưởng') + '</span>'
+        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết ruộng →</span>'
+        + '</div>';
+    }
+
+    cards += '</div>';
+  }
+  h += sec("Tình trạng vận hành các lô đất (Theo chu kỳ sinh thái cây trồng)", '<div class="g2">' + cards + '</div>');
+
+  // 3. Operational Timeline / Gantt Chart (Lịch trình đa cây trồng)
+  h += sec("Lịch trình vận hành canh tác & Kế hoạch nông trại (Đa cây trồng)", card('<div style="padding:20px">' + chLichDaCay() + '</div>'));
+
+  // 4. Daily Operational Tasks & Agronomic AI Doctor Advice
+  h += sec("Kế hoạch nông vụ hôm nay & Cố vấn mùa vụ AI",
+    '<div class="card" style="padding:18px;background:linear-gradient(135deg,#ecfdf5 0%,#f0fdf4 100%);border:1.5px solid #a7f3d0">'
+    + '<div style="font-size:.88rem;font-weight:800;color:#047857;margin-bottom:12px;display:flex;align-items:center;gap:8px">'
+    + '<span>📋 Nhiệm vụ khuyến nông đề xuất cho hôm nay:</span>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">'
+    + '<div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #bbf7d0">'
+    + '<div style="font-weight:700;color:#065f46;font-size:.82rem;margin-bottom:4px">🌾 Lô lúa nước:</div>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg);line-height:1.5">Giữ mực nước nông 3-5cm, chuẩn bị rút nước ráo ruộng trước ngày gặt 10 ngày để cây lúa đanh cứng chống ngã đổ.</div>'
+    + '</div>'
+    + '<div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #bbf7d0">'
+    + '<div style="font-weight:700;color:#065f46;font-size:.82rem;margin-bottom:4px">☕ Lô cà phê / Hồ tiêu:</div>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg);line-height:1.5">Kiểm tra độ ẩm tầng đất đỏ Bazan sau các ngày nắng ráo; bổ sung phân bón lá Kali - Bo vi lượng nuôi nhân chắc hạt.</div>'
+    + '</div>'
+    + '<div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #bbf7d0">'
+    + '<div style="font-weight:700;color:#065f46;font-size:.82rem;margin-bottom:4px">🌳 Lô cao su (nếu có):</div>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg);line-height:1.5">Thực hiện vệ sinh chén hứng mủ và máng dẫn trước giờ cạo sáng sớm (3:30 AM), kiểm tra phòng nấm loét sọc cạo.</div>'
+    + '</div>'
+    + '<div style="background:#fff;padding:12px 14px;border-radius:10px;border:1px solid #bbf7d0">'
+    + '<div style="font-weight:700;color:#065f46;font-size:.82rem;margin-bottom:4px">🍈 Lô cây ăn trái (Sầu riêng/Cam):</div>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg);line-height:1.5">Buộc néo cành chịu lực cho các chùm quả nặng, tỉa bỏ quả méo dị hình, tuyệt đối không để ứ nước chân mô đất.</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>');
+
   return h;
 }
 
-function ring(days,max,r,sw){
-  var circ=2*Math.PI*r, pct=max>0?Math.min(days/max,1):0, off=circ*(1-pct);
-  var col=days>0?"#d97706":"#16a34a";
-  return '<svg width="'+(2*r+sw+4)+'" height="'+(2*r+sw+4)+'" viewBox="0 0 '+(2*r+sw+4)+' '+(2*r+sw+4)+'">'
-   +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" fill="none" stroke="var(--muted)" stroke-width="'+sw+'"/>'
-   +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'"'
-   +' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" stroke-linecap="round"/>'
-   +'<text x="'+(r+sw/2+2)+'" y="'+(r+sw/2+6)+'" text-anchor="middle" font-size="12" font-weight="700" fill="'+col+'">'+days+'</text>'
-   +'</svg>';
+function ring(days, max, r, sw){
+  var circ = 2 * Math.PI * r, pct = max > 0 ? Math.min(days / max, 1) : 0, off = circ * (1 - pct);
+  var col = days > 0 ? "#d97706" : "#16a34a";
+  return '<svg width="' + (2*r+sw+4) + '" height="' + (2*r+sw+4) + '" viewBox="0 0 ' + (2*r+sw+4) + ' ' + (2*r+sw+4) + '">'
+    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="var(--muted)" stroke-width="' + sw + '"/>'
+    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" stroke-linecap="round"/>'
+    + '<text x="' + (r+sw/2+2) + '" y="' + (r+sw/2+6) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + col + '">' + days + '</text>'
+    + '</svg>';
+}
+window.ring = ring;
+
+function ringGauge(topLabel, centerVal, r, color){
+  var sw = 4;
+  return '<svg width="' + (2*r+sw+4) + '" height="' + (2*r+sw+4) + '" viewBox="0 0 ' + (2*r+sw+4) + ' ' + (2*r+sw+4) + '">'
+    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="var(--muted)" stroke-width="' + sw + '"/>'
+    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + sw + '" stroke-dasharray="' + (2*Math.PI*r).toFixed(1) + '" stroke-dashoffset="' + (2*Math.PI*r * 0.25).toFixed(1) + '" stroke-linecap="round"/>'
+    + '<text x="' + (r+sw/2+2) + '" y="' + (r+sw/2-3) + '" text-anchor="middle" font-size="8" font-weight="700" fill="var(--muted-fg)">' + topLabel + '</text>'
+    + '<text x="' + (r+sw/2+2) + '" y="' + (r+sw/2+11) + '" text-anchor="middle" font-size="11" font-weight="800" fill="' + color + '">' + centerVal + '</text>'
+    + '</svg>';
 }
 
-function chLich(){
-  var moc=[],i;
-  for(i=0;i<so.length;i++){var e=so[i];if(!e.phi)continue;
-    moc.push({thua:e.thua,bd:sod(new Date(e.ngay)),kt:addD(new Date(e.ngay),e.phi),thuoc:e.thuoc,phi:e.phi})}
-  if(!moc.length)return '<p style="text-align:center;font-size:.88rem;color:var(--muted-fg);padding:24px">Chưa có lần dùng thuốc nào cần cách ly.</p>';
-  var t0=addD(NAY,-14),t1=addD(NAY,21),tg=dif(t0,t1);
-  var W=820,pL=90,pR=60,pT=20,rh=38,H=pT+THUA.length*rh+30,pw=W-pL-pR;
-  function X(d){return pL+dif(t0,d)/tg*pw}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
-  for(var d=0;d<=tg;d+=7){var x=pL+d/tg*pw;
-    s+='<line x1="'+x.toFixed(1)+'" y1="'+pT+'" x2="'+x.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="var(--border)" stroke-width="1"/>';
-    s+='<text x="'+x.toFixed(1)+'" y="'+(pT+THUA.length*rh+16)+'" text-anchor="middle" font-size="10" fill="var(--muted-fg)">'+dm(addD(t0,d))+"</text>"}
-  for(var r=0;r<THUA.length;r++){var th=THUA[r],cy=pT+r*rh+rh/2;
-    s+='<text x="'+(pL-12)+'" y="'+(cy+4)+'" text-anchor="end" font-size="11.5" font-weight="600" fill="var(--fg)">'+esc(th.ten)+"</text>";
-    s+='<line x1="'+pL+'" y1="'+cy+'" x2="'+(W-pR)+'" y2="'+cy+'" stroke="var(--border)" stroke-width="1"/>';
-    for(var m=0;m<moc.length;m++){var o=moc[m];if(o.thua!==th.id)continue;
-      var x1=X(o.bd),x2=X(o.kt),con=dif(NAY,o.kt),c=con>0?"#d97706":"#16a34a";
-      s+='<rect x="'+x1.toFixed(1)+'" y="'+(cy-6)+'" width="'+Math.max(6,x2-x1).toFixed(1)+'" height="12" rx="4" fill="'+c+'"'
-        +(con>0?"":" opacity=\".45\"")+'/>';
-      if(con>0)s+='<text x="'+(x2+6).toFixed(1)+'" y="'+(cy+4)+'" font-size="10.5" font-weight="600" fill="#d97706">còn '+con+'n ('+dm(o.kt)+')</text>'}}
-  var xh=X(NAY);
-  s+='<line x1="'+xh.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xh.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="var(--primary)" stroke-width="1.8" stroke-dasharray="3 3"/>';
-  s+='<text x="'+xh.toFixed(1)+'" y="'+(pT-8)+'" text-anchor="middle" font-size="10" font-weight="800" fill="var(--primary)">HÔM NAY</text>';
-  s+="</svg>";
+function chLichDaCay(){
+  var t0 = addD(NAY, -14), t1 = addD(NAY, 21), tg = dif(t0, t1);
+  var W = 840, pL = 120, pR = 60, pT = 20, rh = 44, H = pT + THUA.length * rh + 45, pw = W - pL - pR;
+  function X(d){ return pL + dif(t0, d) / tg * pw; }
+
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto">';
+
+  // 7-day grid lines
+  for(var d = 0; d <= tg; d += 7){
+    var x = pL + d / tg * pw;
+    s += '<line x1="' + x.toFixed(1) + '" y1="' + pT + '" x2="' + x.toFixed(1) + '" y2="' + (pT + THUA.length * rh) + '" stroke="var(--border)" stroke-width="1"/>';
+    s += '<text x="' + x.toFixed(1) + '" y="' + (pT + THUA.length * rh + 18) + '" text-anchor="middle" font-size="10" fill="var(--muted-fg)">' + dm(addD(t0, d)) + '</text>';
+  }
+
+  // Plot rows with crop-specific operational timelines
+  for(var r = 0; r < THUA.length; r++){
+    var th = THUA[r], cy = pT + r * rh + rh / 2;
+    var cType = phanLoaiCayTrong(th.cay);
+
+    // Plot Title
+    s += '<text x="' + (pL - 12) + '" y="' + (cy + 4) + '" text-anchor="end" font-size="11.5" font-weight="700" fill="var(--fg)">' + esc(th.ten) + '</text>';
+    s += '<line x1="' + pL + '" y1="' + cy + '" x2="' + (W - pR) + '" y2="' + cy + '" stroke="var(--border)" stroke-width="1"/>';
+
+    if(cType === "caosu"){
+      // Rubber timeline: Tapping cycles (Cạo mủ xen kẽ D3)
+      for(var td = -12; td <= 18; td += 3){
+        var tapDate = addD(NAY, td);
+        var tx = X(tapDate);
+        s += '<circle cx="' + tx.toFixed(1) + '" cy="' + cy + '" r="5.5" fill="#10b981"/>';
+        s += '<text x="' + tx.toFixed(1) + '" y="' + (cy - 9) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#047857">D3</text>';
+      }
+      s += '<text x="' + (X(addD(NAY, 19))) + '" y="' + (cy + 4) + '" font-size="9.5" font-weight="700" fill="#059669">🩸 Chu kỳ cạo mủ D3</text>';
+
+    } else if(cType === "congnghiep"){
+      // Coffee timeline: Irrigation & Harvest
+      var irriDate1 = addD(NAY, -8), irriDate2 = addD(NAY, 12);
+      var ix1 = X(irriDate1), ix2 = X(irriDate2);
+      s += '<rect x="' + (ix1 - 12).toFixed(1) + '" y="' + (cy - 7) + '" width="24" height="14" rx="4" fill="#3b82f6"/>';
+      s += '<text x="' + ix1.toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">Tưới 2</text>';
+
+      s += '<rect x="' + (ix2 - 12).toFixed(1) + '" y="' + (cy - 7) + '" width="24" height="14" rx="4" fill="#60a5fa" stroke="#2563eb" stroke-dasharray="2 2"/>';
+      s += '<text x="' + ix2.toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="8" font-weight="800" fill="#1e3a8a">Tưới 3</text>';
+      s += '<text x="' + (ix2 + 20).toFixed(1) + '" y="' + (cy + 4) + '" font-size="9.5" font-weight="700" fill="#2563eb">☕ Dự kiến tưới đợt 3</text>';
+
+    } else if(cType === "antrai"){
+      // Fruit tree timeline: Fruit filling & harvest
+      var fx1 = X(addD(NAY, -10)), fx2 = X(addD(NAY, 15));
+      s += '<rect x="' + fx1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + (fx2 - fx1).toFixed(1) + '" height="14" rx="4" fill="#f59e0b" opacity=".85"/>';
+      s += '<text x="' + ((fx1 + fx2)/2).toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Nuôi trái non 65 ngày · Sửa tướng trái</text>';
+
+    } else {
+      // Rice / Veggies: Quarantine countdown if sprayed
+      var st = tt(th.id);
+      if(st.ng && st.ng.phi){
+        var x1 = X(sod(new Date(st.ng.ngay))), x2 = X(st.het);
+        var con = st.con, c = con > 0 ? "#d97706" : "#16a34a";
+        s += '<rect x="' + x1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + Math.max(6, x2 - x1).toFixed(1) + '" height="14" rx="4" fill="' + c + '"' + (con > 0 ? '' : ' opacity=".45"') + '/>';
+        if(con > 0){
+          s += '<text x="' + (x2 + 8).toFixed(1) + '" y="' + (cy + 4) + '" font-size="10" font-weight="700" fill="#d97706">còn ' + con + ' ngày cách ly (' + dm(st.het) + ')</text>';
+        } else {
+          s += '<text x="' + (x2 + 8).toFixed(1) + '" y="' + (cy + 4) + '" font-size="10" font-weight="700" fill="#16a34a">🌾 Đã an toàn gặt lúa (' + dm(st.het) + ')</text>';
+        }
+      } else {
+        var rx1 = X(addD(NAY, -7)), rx2 = X(addD(NAY, 14));
+        s += '<rect x="' + rx1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + (rx2 - rx1).toFixed(1) + '" height="14" rx="4" fill="#10b981" opacity=".7"/>';
+        s += '<text x="' + ((rx1 + rx2)/2).toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">🌾 Đang làm đòng trổ bông · An toàn dư lượng</text>';
+      }
+    }
+  }
+
+  // TODAY indicator line
+  var xh = X(NAY);
+  s += '<line x1="' + xh.toFixed(1) + '" y1="' + (pT - 6) + '" x2="' + xh.toFixed(1) + '" y2="' + (pT + THUA.length * rh) + '" stroke="var(--primary)" stroke-width="2" stroke-dasharray="3 3"/>';
+  s += '<rect x="' + (xh - 34).toFixed(1) + '" y="' + (pT - 18) + '" width="68" height="16" rx="4" fill="var(--primary)"/>';
+  s += '<text x="' + xh.toFixed(1) + '" y="' + (pT - 6) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">HÔM NAY</text>';
+
+  // Legend at bottom
+  s += '<g transform="translate(' + pL + ',' + (pT + THUA.length * rh + 32) + ')" font-size="9.5" fill="var(--muted-fg)">';
+  s += '<circle cx="6" cy="4" r="4.5" fill="#10b981"/><text x="16" y="7">Cạo mủ cao su (D3)</text>';
+  s += '<rect x="135" y="0" width="10" height="8" rx="2" fill="#3b82f6"/><text x="151" y="7">Tưới nước mùa khô (Cà phê/Tiêu)</text>';
+  s += '<rect x="330" y="0" width="10" height="8" rx="2" fill="#f59e0b"/><text x="346" y="7">Nuôi trái / Dưỡng cơi đọt (Cây ăn trái)</text>';
+  s += '<rect x="545" y="0" width="10" height="8" rx="2" fill="#d97706"/><text x="561" y="7">Cách ly trước gặt (Lúa/Rau)</text>';
+  s += '</g>';
+
+  s += '</svg>';
   return s;
 }
-
 /* ======================= 2. LÔ ĐẤT & BẢN ĐỒ VỆ TINH ======================= */
 var FARM_PRESETS = [
   { id: "nghean", ten: "📍 Nghệ An (TP Vinh / Nghi Lộc / Yên Thành)", lat: 18.664833, lng: 105.701297, zoom: 16 },
