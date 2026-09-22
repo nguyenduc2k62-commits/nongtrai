@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" class="dark">
+<html lang="vi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,12 +12,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
-// Mặc định NỀN TỐI. Chuyển sáng khi người dùng bấm nút.
-(function(){try{
-  if(localStorage.getItem("sr-theme")==="light")document.documentElement.classList.remove("dark");
-}catch(e){}})();
-</script>
 
 <style>
 /* ===== RESET ===== */
@@ -49,21 +43,7 @@ img,svg{vertical-align:middle}
   --glass:none;--sidebar-bg:#ffffff;--header-bg:rgba(238,242,239,.88);
 }
 
-/* ===== THEME — DARK (default) ===== */
-.dark{
-  --bg:#080d11;--fg:#d8e5de;
-  --card:rgba(12,24,18,.72);--card-fg:#d8e5de;
-  --muted:rgba(20,46,34,.45);--muted-fg:#6b8078;
-  --primary:#34d399;--primary-fg:#022c22;
-  --accent:rgba(52,211,153,.08);--accent-fg:#a7f3d0;
-  --border:rgba(52,211,153,.12);--ring:#34d399;--input:rgba(52,211,153,.15);
-  --ok:#34d399;--ok-bg:rgba(6,78,59,.35);--ok-bd:rgba(52,211,153,.25);--ok-solid:#059669;
-  --wait:#fbbf24;--wait-bg:rgba(120,53,15,.35);--wait-bd:rgba(251,191,36,.25);--wait-solid:#d97706;
-  --bad:#f87171;--bad-bg:rgba(127,29,29,.35);--bad-bd:rgba(248,113,113,.25);--bad-solid:#dc2626;
-  --inf:#60a5fa;--inf-bg:rgba(30,58,138,.35);--inf-bd:rgba(96,165,250,.25);--inf-solid:#2563eb;
-  --glow:0 0 30px rgba(52,211,153,.08);--card-sh:0 1px 4px rgba(0,0,0,.4),0 8px 24px -10px rgba(0,0,0,.6);
-  --glass:blur(20px);--sidebar-bg:rgba(8,16,12,.92);--header-bg:rgba(8,13,17,.82);
-}
+/* Dark mode removed — light only */
 body{background:var(--bg);color:var(--fg)}
 
 /* ===== LAYOUT ===== */
@@ -254,10 +234,7 @@ input::placeholder{color:var(--muted-fg)}
 @media(max-width:767px){.map-main{min-height:240px}}
 .leaflet-box{width:100%;height:100%;min-height:300px}
 @media(max-width:767px){.leaflet-box{min-height:240px}}
-.dark .leaflet-tile{filter:brightness(.85) contrast(1.1)}
 .leaflet-popup-content-wrapper{border-radius:10px!important;font-family:inherit!important}
-.dark .leaflet-popup-content-wrapper{background:var(--card)!important;color:var(--fg)!important}
-.dark .leaflet-popup-tip{border-top-color:var(--card)!important}
 
 /* ===== FIELD CARD ===== */
 .field-card{display:block;border-radius:12px;border:1px solid var(--border);background:var(--card);
@@ -294,7 +271,6 @@ input::placeholder{color:var(--muted-fg)}
         <div style="font-size:.78rem;font-weight:600;line-height:1.2">Trần Văn Đức</div>
         <div style="font-size:.66rem;color:var(--muted-fg)">Hộ sản xuất · 8 sào</div>
       </div>
-      <button id="tbtn" type="button" class="tb" aria-label="Đổi nền sáng tối">◐</button>
     </div>
   </aside>
 
@@ -1590,10 +1566,7 @@ function ghi(){
  di("tongquan");
 }
 
-document.getElementById("tbtn").addEventListener("click",function(){
- var r=document.documentElement,d=r.classList.toggle("dark");
- try{localStorage.setItem("sr-theme",d?"dark":"light")}catch(e){}
- if(SIM&&document.getElementById("simCv"))simDraw()});
+/* Theme toggle removed — light only */
 
 document.getElementById("mbtn").addEventListener("click",function(){
  document.getElementById("side").classList.toggle("show")});
