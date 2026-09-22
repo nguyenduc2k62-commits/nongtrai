@@ -311,10 +311,15 @@ input::placeholder{color:var(--muted-fg)}
 "use strict";
 
 /* ======================= DỮ LIỆU ======================= */
-var THUA=[
- {id:"db",ten:"Đồng Bưng",dt:3,cay:"lúa",giong:"Bắc thơm 7",gd:"Làm đòng",ngaycay:38},
- {id:"rt",ten:"Ruộng Trên",dt:5,cay:"lúa",giong:"Khang dân 18",gd:"Đẻ nhánh",ngaycay:24},
- {id:"vc",ten:"Vườn Cà phê",dt:12,cay:"cà phê",giong:"Robusta TR4",gd:"Nuôi quả",ngaycay:1240}];
+var THUA_KEY="so-ruong-thua";
+var THUA=(function(){try{var r=localStorage.getItem(THUA_KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v))return v}}catch(e){}return[]})();
+function luuThua(){try{localStorage.setItem(THUA_KEY,JSON.stringify(THUA))}catch(e){}}
+
+var DAT_LOAI=["Phù sa","Đất thịt","Đất cát pha","Đất sét","Đất đỏ bazan","Đất xám bạc màu","Đất phèn","Đất mặn","Đất mùn","Đất than bùn","Khác"];
+var GIAI_DOAN={"lúa":["Mạ","Đẻ nhánh","Làm đòng","Trổ","Chín"],
+ "cà phê":["Kinh doanh","Nuôi quả","Thu hoạch","Nghỉ đông"],
+ "hồ tiêu":["Kinh doanh","Ra hoa","Nuôi quả","Thu hoạch"],
+ "_":["Cây con","Sinh trưởng","Ra hoa","Nuôi quả","Thu hoạch"]};
 
 var D=null;
 
@@ -417,13 +422,7 @@ var V={bd:"var(--border)",cd:"var(--card)",mu:"var(--muted)",mf:"var(--muted-fg)
        pr:"var(--primary)",pf:"var(--primary-fg)"};
 
 var KEY="so-ruong-v3";
-function mdinh(){return[
- {id:"m1",thua:"db",ngay:addD(NAY,-6).getTime(),viec:"Xịt trừ đạo ôn lá",thuoc:"Tricyclazole 75WP",lieu:"15 g / bình 16 L",phi:14},
- {id:"m2",thua:"db",ngay:addD(NAY,-18).getTime(),viec:"Bón thúc đòng",thuoc:null,lieu:"Kali clorua 4 kg/sào",phi:0},
- {id:"m3",thua:"rt",ngay:addD(NAY,-23).getTime(),viec:"Xịt phòng khô vằn",thuoc:"Validamycin 5SL",lieu:"30 ml / bình 16 L",phi:7},
- {id:"m4",thua:"rt",ngay:addD(NAY,-31).getTime(),viec:"Cấy",thuoc:null,lieu:"Khang dân 18",phi:0},
- {id:"m5",thua:"db",ngay:addD(NAY,-40).getTime(),viec:"Cấy",thuoc:null,lieu:"Bắc thơm 7",phi:0}]}
-var so=(function(){try{var r=localStorage.getItem(KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v)&&v.length)return v}}catch(e){}return mdinh()})();
+var so=(function(){try{var r=localStorage.getItem(KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v))return v}}catch(e){}return[]})();
 function luu(){try{localStorage.setItem(KEY,JSON.stringify(so))}catch(e){}}
 
 function tt(id){var het=null,ng=null;
@@ -584,30 +583,102 @@ function veMap(){
  return s+"</svg>"}
 
 /* ======================= CÁC TRANG ======================= */
-var bw={cay:null,dh:null,thuoc:null,thua:"db"},chonPha=[];
+var bw={cay:null,dh:null,thuoc:null,thua:THUA.length?THUA[0].id:null},chonPha=[];
 
-function ve(){
- var h="";
- if(cur==="tongquan")h=pTong();else if(cur==="thua")h=pThua();
- else if(cur==="benh")h=pBenh();else if(cur==="so")h=pSo();
- else if(cur==="pha")h=pPha();else if(cur==="bando")h=pMap();
- else if(cur==="gia")h=pGia();else if(cur==="mophong")h=pSim();
- document.getElementById("page").innerHTML=h;
- if(cur==="mophong")simInit();
- ganTip()}
+/* ===== FORM THÊM THỬA ===== */
+var themThua={dang:false};
+function formThua(){
+ var cayDS=D?D.bang.cay:[];
+ var h='<div class="card" style="padding:24px">';
+ h+='<div style="font-size:1.1rem;font-weight:700;letter-spacing:-.01em;margin-bottom:20px">'
+  +(THUA.length?'Thêm thửa mới':'Tạo thửa đầu tiên')+'</div>';
 
-/* ===== COUNTDOWN RING SVG ===== */
-function ring(days,max,r,sw){
- var circ=2*Math.PI*r, pct=max>0?Math.min(days/max,1):0, off=circ*(1-pct);
- var col=days>0?"var(--wait)":"var(--ok)";
- return '<svg width="'+(2*r+sw+4)+'" height="'+(2*r+sw+4)+'" viewBox="0 0 '+(2*r+sw+4)+' '+(2*r+sw+4)+'">'
-  +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" class="rbg" stroke-width="'+sw+'"/>'
-  +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" class="rfg" stroke="'+col+'" stroke-width="'+sw+'"'
-  +' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"'
-  +' style="filter:drop-shadow(0 0 6px '+col+')"/></svg>'}
+ h+=lbl2("Tên thửa",1)+'<input id="fTen" type="text" placeholder="ví dụ: Đồng Bưng, Ruộng Trên, Vườn nhà…" autocomplete="off" style="width:100%">';
+
+ h+=lbl2("Cây trồng")+'<input id="fTimCay" type="search" placeholder="gõ tên cây: lúa, cà phê, sầu riêng, hồ tiêu…" autocomplete="off" style="width:100%">'
+  +'<div id="fKqCay" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>'
+  +'<div id="fCayChon" style="margin-top:8px"></div>';
+
+ h+=lbl2("Giống")+'<input id="fGiong" type="text" placeholder="tên giống, ví dụ: Bắc thơm 7, Robusta TR4…" autocomplete="off" style="width:100%">';
+
+ h+=lbl2("Loại đất")+'<div id="fDat" style="display:flex;flex-wrap:wrap;gap:6px">';
+ for(var d=0;d<DAT_LOAI.length;d++)
+  h+='<button type="button" data-dat="'+esc(DAT_LOAI[d])+'" class="rbtn" style="padding:6px 12px;font-size:.82rem">'+esc(DAT_LOAI[d])+'</button>';
+ h+='</div>';
+
+ h+=lbl2("Diện tích (sào)")+'<input id="fDt" type="number" min="0.1" step="0.1" placeholder="3" style="width:120px">';
+
+ h+=lbl2("Giai đoạn hiện tại")+'<div id="fGd" style="display:flex;flex-wrap:wrap;gap:6px"></div>';
+
+ h+=lbl2("Ngày trồng/cấy (nếu biết)")+'<input id="fNgay" type="date" style="width:180px">';
+
+ h+='<div id="fLoi" style="margin-top:12px;font-size:.82rem"></div>';
+ h+='<div style="margin-top:20px;display:flex;gap:10px">'
+  +'<button type="button" id="btnTao" class="btn btn-p">Tạo thửa</button>';
+ if(THUA.length)h+='<button type="button" id="btnHuy" class="btn">Huỷ</button>';
+ h+='</div></div>';
+ return h;
+}
+
+var fCay=null,fDat2=null;
+function ganFormThua(){
+ var el=document.getElementById("fTimCay");
+ if(el)el.addEventListener("input",function(){
+  var q=this.value.toLowerCase().trim(),o=document.getElementById("fKqCay"),h="";
+  if(o&&D&&q.length>=1){
+   for(var i=0,n=0;i<D.bang.cay.length&&n<20;i++){
+    var c=D.bang.cay[i];
+    if(c.toLowerCase().indexOf(q)>=0){
+     h+='<button type="button" data-fcay="'+esc(c)+'" class="rbtn">'+esc(c)+'</button>';n++}}
+   if(!h)h='<p style="font-size:.82rem;color:var(--muted-fg)">Không thấy cây nào khớp.</p>';
+  }
+  if(o)o.innerHTML=h;
+ });
+}
+
+function veGd(cay){
+ var el=document.getElementById("fGd");if(!el)return;
+ var ds=GIAI_DOAN[cay]||GIAI_DOAN["_"],h="";
+ for(var i=0;i<ds.length;i++)
+  h+='<button type="button" data-fgd="'+esc(ds[i])+'" class="rbtn" style="padding:6px 12px;font-size:.82rem">'+esc(ds[i])+'</button>';
+ el.innerHTML=h;
+}
+
+var fGd2=null;
+
+function taoThua(){
+ var ten=(document.getElementById("fTen")||{}).value||"",
+   giong=(document.getElementById("fGiong")||{}).value||"",
+   dt=parseFloat((document.getElementById("fDt")||{}).value)||0,
+   ngay=(document.getElementById("fNgay")||{}).value||"",
+   loi=document.getElementById("fLoi");
+ if(!ten.trim()){if(loi)loi.innerHTML='<span class="c-bad">Nhập tên thửa.</span>';return}
+ if(!fCay){if(loi)loi.innerHTML='<span class="c-bad">Chọn cây trồng.</span>';return}
+ if(dt<=0){if(loi)loi.innerHTML='<span class="c-bad">Nhập diện tích.</span>';return}
+ var id="t"+Date.now();
+ var ngaycay=0;
+ if(ngay){var parts=ngay.split("-");if(parts.length===3)ngaycay=dif(new Date(+parts[0],+parts[1]-1,+parts[2]),NAY)}
+ THUA.push({id:id,ten:ten.trim(),dt:dt,cay:fCay,giong:giong.trim()||"—",
+  gd:fGd2||"—",ngaycay:Math.max(0,ngaycay),dat:fDat2||"—"});
+ luuThua();fCay=null;fDat2=null;fGd2=null;themThua.dang=false;
+ veNav();ve();
+}
 
 /* ===== TRANG TỔNG QUAN ===== */
 function pTong(){
+ if(!THUA.length||themThua.dang){
+  var h2='';
+  if(!THUA.length){
+   h2+='<div class="card" style="padding:32px;text-align:center;margin-bottom:24px">'
+    +'<div style="font-size:3rem;margin-bottom:12px">🌾</div>'
+    +'<div style="font-size:1.2rem;font-weight:700;letter-spacing:-.01em">Chào mừng đến Sổ Ruộng</div>'
+    +'<p style="margin:8px auto 0;max-width:42ch;font-size:.88rem;color:var(--muted-fg)">'
+    +'Ghi một dòng vào sổ, biết ngay ngày sớm nhất được gặt. Bắt đầu bằng việc tạo thửa đầu tiên.</p></div>';
+  }
+  h2+=formThua();
+  return sec(THUA.length?'Thêm thửa':'Bắt đầu',h2);
+ }
+
  var i,ok=0,cho=0,dt=0;
  for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++;else ok++}
 
@@ -622,8 +693,6 @@ function pTong(){
     tieu:esc(th.ten)+" — gặt được",
     phu:"Đã qua thời gian cách ly của mọi lần xịt trên thửa này."});
  }
- viec.push({uu:2,mau:"inf",tieu:"Bón đón đòng — Ruộng Trên",
-   phu:"Đến hạn "+dm(addD(NAY,2))+"."});
  viec.sort(function(a,b){return a.uu-b.uu});
 
  var dsViec="";
@@ -632,7 +701,7 @@ function pTong(){
   dsViec+='<div style="display:flex;gap:14px;border-top:1px solid var(--border);padding:14px 16px">'
    +'<span class="b-'+v.mau+'" style="margin-top:6px;width:8px;height:8px;flex-shrink:0;border-radius:50%"></span>'
    +'<div style="min-width:0"><div style="font-size:.92rem;font-weight:600;line-height:1.4">'+v.tieu+'</div>'
-   +'<div style="margin-top:3px;font-size:.8rem;line-height:1.5;color:var(--muted-fg)">'+v.phu+"</div></div></div>";
+   +'<div style="margin-top:3px;font-size:.8rem;line-height:1.5;color:var(--muted-fg)">'+v.phu+'</div></div></div>';
  }
 
  var dau='<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;padding:16px 16px 12px">'
@@ -641,9 +710,10 @@ function pTong(){
   +(cho?'<b class="c-wait">'+cho+' thửa</b> đang chờ cách ly':'')
   +(cho&&ok?' · ':'')
   +(ok?'<b class="c-ok">'+ok+' thửa</b> gặt được':'')
-  +"</span></div>";
+  +((!cho&&!ok)?'<span style="color:var(--muted-fg)">Chưa có dữ liệu cách ly</span>':'')
+  +'</span></div>';
 
- var h=sec("Cần chú ý",card(dau+dsViec));
+ var h=sec("Cần chú ý",card(dau+(dsViec||'<div style="padding:14px 16px;font-size:.88rem;color:var(--muted-fg)">Chưa ghi việc nào. Bấm "Ghi việc mới" để bắt đầu.</div>')));
 
  /* Từng thửa — với countdown ring */
  var oThua="";
@@ -656,9 +726,12 @@ function pTong(){
    +'<span class="cdown-n'+(w?" num-p":"")+'" style="font-size:'+(w?"2rem":"1rem")+';color:'+(w?"var(--wait)":"var(--ok)")+'">'
    +(w?s2.con:"✓")+"</span></div>"
    +'<span style="min-width:0"><span style="display:block;font-size:.95rem;font-weight:700;line-height:1.3">'+esc(t2.ten)+"</span>"
-   +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+t2.dt+" sào · "+esc(t2.cay)+"</span>"
+   +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+t2.dt+" sào · "+esc(t2.cay)
+   +(t2.dat&&t2.dat!=="—"?' · '+esc(t2.dat):'')+"</span>"
    +(w?'<span style="display:block;margin-top:4px;font-size:.78rem;color:var(--muted-fg)">gặt từ '+dm(s2.het)+"</span>":"")
-   +"</span></div>"
+   +"</span>"
+   +'<button type="button" data-xoathua="'+t2.id+'" class="btn" style="margin-left:auto;flex-shrink:0;font-size:.72rem;color:var(--bad);border-color:var(--bad-bd)" title="Xoá thửa">✕</button>'
+   +"</div>"
    +'<div style="margin-top:14px;display:flex;border-top:1px solid var(--border);padding-top:12px">'
    +'<div style="flex:1"><b class="mono" style="display:block;font-size:.9rem;font-weight:600">'+t2.ngaycay+"</b>"
    +'<span style="display:block;font-size:.64rem;color:var(--muted-fg)">ngày sau trồng</span></div>'
@@ -667,7 +740,8 @@ function pTong(){
    +"</div></div>";
  }
  h+=sec("Từng thửa",'<div class="g3">'+oThua+"</div>",
-   '<span style="font-size:.78rem;color:var(--muted-fg)">'+THUA.length+" thửa · "+dt+" sào</span>");
+   '<span style="font-size:.78rem;color:var(--muted-fg)">'+THUA.length+' thửa · '+dt+' sào</span>'
+   +' <button type="button" id="btnThemThua" class="btn" style="font-size:.78rem">+ Thêm thửa</button>');
 
  /* Hồ sơ */
  var an=cho===0;
@@ -1166,6 +1240,27 @@ function simFrame(){
  if(SIM.run){simStep();simStep();simDraw();if(SIM.tick%22===0)veMtr()}
  requestAnimationFrame(simFrame)}
 
+function ve(){
+ var h="";
+ if(cur==="tongquan")h=pTong();else if(cur==="thua")h=pThua();
+ else if(cur==="benh")h=pBenh();else if(cur==="so")h=pSo();
+ else if(cur==="pha")h=pPha();else if(cur==="bando")h=pMap();
+ else if(cur==="gia")h=pGia();else if(cur==="mophong")h=pSim();
+ document.getElementById("page").innerHTML=h;
+ if(cur==="mophong")simInit();
+ if((cur==="tongquan")&&(!THUA.length||themThua.dang))ganFormThua();
+ ganTip()}
+
+/* ===== COUNTDOWN RING SVG ===== */
+function ring(days,max,r,sw){
+ var circ=2*Math.PI*r, pct=max>0?Math.min(days/max,1):0, off=circ*(1-pct);
+ var col=days>0?"var(--wait)":"var(--ok)";
+ return '<svg width="'+(2*r+sw+4)+'" height="'+(2*r+sw+4)+'" viewBox="0 0 '+(2*r+sw+4)+' '+(2*r+sw+4)+'">'
+  +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" class="rbg" stroke-width="'+sw+'"/>'
+  +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" class="rfg" stroke="'+col+'" stroke-width="'+sw+'"'
+  +' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"'
+  +' style="filter:drop-shadow(0 0 6px '+col+')"/></svg>'}
+
 function veTools(){
  var h="",el=document.getElementById("simTools");if(!el)return;
  for(var i=0;i<TOOLS.length;i++){var t=TOOLS[i],on=SIM.tool===t.id;
@@ -1233,7 +1328,10 @@ function ganTip(){
 /* ======================= SỰ KIỆN ======================= */
 document.addEventListener("click",function(ev){
  if(ev.target&&ev.target.id==="btnHoSo"){hoSo();return}
- var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool]";
+ if(ev.target&&ev.target.id==="btnTao"){taoThua();return}
+ if(ev.target&&ev.target.id==="btnHuy"){themThua.dang=false;ve();return}
+ if(ev.target&&ev.target.id==="btnThemThua"){themThua.dang=true;ve();return}
+ var S="[data-nav],[data-go],[data-cay],[data-dh],[data-thuoc],[data-thua],[data-back],[data-pha],[data-bo],[data-diem],[data-gia],[data-tool],[data-fcay],[data-dat],[data-fgd],[data-xoathua]";
  var el=ev.target.closest?ev.target.closest(S):null;if(!el)return;
  var v;
  if((v=el.getAttribute("data-nav"))){di(v);return}
@@ -1253,7 +1351,20 @@ document.addEventListener("click",function(ev){
  if((v=el.getAttribute("data-bo"))){var ib=chonPha.indexOf(v);if(ib>=0)chonPha.splice(ib,1);ve();return}
  if((v=el.getAttribute("data-diem"))){diemCur=diemCur===+v?null:+v;ve();return}
  if((v=el.getAttribute("data-gia"))){giaCur=v;ve();return}
- if((v=el.getAttribute("data-tool"))&&SIM){SIM.tool=+v;veTools();return}});
+ if((v=el.getAttribute("data-tool"))&&SIM){SIM.tool=+v;veTools();return}
+ if((v=el.getAttribute("data-fcay"))){fCay=v;var cc=document.getElementById("fCayChon");
+  if(cc)cc.innerHTML='<span class="tag tag-ok">'+esc(v)+'</span>';
+  var kq=document.getElementById("fKqCay");if(kq)kq.innerHTML="";veGd(v);return}
+ if((v=el.getAttribute("data-dat"))){fDat2=v;
+  var btns=document.querySelectorAll("[data-dat]");for(var b=0;b<btns.length;b++)btns[b].classList.toggle("on",btns[b].getAttribute("data-dat")===v);return}
+ if((v=el.getAttribute("data-fgd"))){fGd2=v;
+  var gbs=document.querySelectorAll("[data-fgd]");for(var g2=0;g2<gbs.length;g2++)gbs[g2].classList.toggle("on",gbs[g2].getAttribute("data-fgd")===v);return}
+ if((v=el.getAttribute("data-xoathua"))){
+  if(confirm("Xoá thửa này? Nhật ký liên quan cũng sẽ bị xoá.")){
+   THUA=THUA.filter(function(x){return x.id!==v});luuThua();
+   so=so.filter(function(x){return x.thua!==v});luu();
+   veNav();ve()}return}
+});
 
 function ghi(){
  if(!bw.thuoc)return;
