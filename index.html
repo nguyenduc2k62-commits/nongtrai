@@ -46,22 +46,92 @@ img,svg{vertical-align:middle}
 
 body{background:var(--bg);color:var(--fg)}
 
-/* ===== LAYOUT ===== */
-.layout{display:flex;min-height:100vh}
-.sidebar{position:sticky;top:0;height:100vh;width:250px;flex-shrink:0;
-  display:none;flex-direction:column;overflow-y:auto;
+/* ===== LAYOUT & RESPONSIVE SIDEBAR ===== */
+.layout{display:flex;min-height:100vh;position:relative}
+
+/* Mobile Sidebar Drawer (< 768px) */
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;
+  width:280px;max-width:85vw;height:100vh;
+  display:flex;flex-direction:column;overflow-y:auto;
   background:var(--sidebar-bg);border-right:1px solid var(--border);
-  backdrop-filter:var(--glass);z-index:40}
-@media(min-width:768px){.sidebar{display:flex}}
-.sidebar.show{display:flex;position:fixed;left:0}
-.main-wrap{flex:1;min-width:0;display:flex;flex-direction:column}
-.header{position:sticky;top:0;z-index:30;
+  backdrop-filter:var(--glass);z-index:1000;
+  transform:translateX(-100%);
+  transition:transform .28s cubic-bezier(0.4, 0, 0.2, 1), margin-left .28s cubic-bezier(0.4, 0, 0.2, 1), opacity .22s ease;
+  box-shadow:none;
+}
+.sidebar.show{
+  transform:translateX(0);
+  box-shadow:6px 0 28px rgba(0,0,0,.18);
+}
+
+/* Mobile Overlay Backdrop */
+.side-overlay{
+  position:fixed;inset:0;
+  background:rgba(15,23,42,.45);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  z-index:995;opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.side-overlay.show{
+  opacity:1;pointer-events:auto;
+}
+
+/* Desktop Sidebar (>= 768px) */
+@media(min-width:768px){
+  .sidebar{
+    position:sticky;top:0;height:100vh;width:250px;max-width:none;
+    transform:none!important;box-shadow:none!important;z-index:40;
+    flex-shrink:0;margin-left:0;opacity:1;pointer-events:auto;
+  }
+  .sidebar.show{
+    position:sticky;top:0;transform:none!important;box-shadow:none!important;
+  }
+  /* Khi thu gọn trên desktop (Chế độ Full màn hình) */
+  .sidebar.collapsed{
+    margin-left:-250px!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+}
+
+.main-wrap{
+  flex:1;min-width:0;display:flex;flex-direction:column;
+  transition:all .28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.header{
+  position:sticky;top:0;z-index:30;
   border-bottom:1px solid var(--border);
   background:var(--header-bg);backdrop-filter:blur(14px);
-  padding:12px 20px}
+  padding:12px 20px;
+}
 @media(min-width:768px){.header{padding:12px 32px}}
-.content{max-width:1280px;width:100%;margin:0 auto;padding:0 20px 96px}
+.content{max-width:1280px;width:100%;margin:0 auto;padding:0 20px 96px;transition:max-width .28s ease}
 @media(min-width:768px){.content{padding:0 32px 96px}}
+body.sidebar-collapsed .content{max-width:1440px}
+
+/* Nút Hamburger trong Header */
+.btn-hamburger{
+  padding:7px 9px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:9px;border:1px solid var(--border);
+  background:var(--card);color:var(--fg);cursor:pointer;
+  transition:all .2s ease;
+}
+.btn-hamburger:hover{
+  border-color:var(--primary);color:var(--primary);
+  background:var(--accent);
+}
+.btn-hamburger.is-collapsed{
+  background:var(--accent);border-color:var(--primary);color:var(--primary);
+  box-shadow:0 0 0 2px rgba(22,163,74,.18);
+}
+.sb-close-btn{
+  margin-left:auto;padding:5px 9px;font-size:1.1rem;line-height:1;
+  border-radius:8px;border:1px solid transparent;background:transparent;
+  color:var(--muted-fg);cursor:pointer;display:none;align-items:center;justify-content:center;
+}
+.sb-close-btn:hover{background:var(--muted);color:var(--fg)}
+@media(max-width:767px){.sb-close-btn{display:inline-flex}}
 
 /* ===== CARD ===== */
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
@@ -301,6 +371,9 @@ th.r,td.r{text-align:right}
 
 <body>
 <div class="layout">
+  <!-- Mobile Overlay Backdrop -->
+  <div id="sideOverlay" class="side-overlay" onclick="dongSidebarMobile()"></div>
+
   <!-- ==================== SIDEBAR ==================== -->
   <aside id="side" class="sidebar">
     <div class="sb-brand">
@@ -309,6 +382,7 @@ th.r,td.r{text-align:right}
         <div style="font-size:.95rem;font-weight:700;line-height:1.2">Sổ Ruộng</div>
         <div style="font-size:.68rem;color:var(--muted-fg)">HTX Nông Nghiệp Số</div>
       </div>
+      <button type="button" class="sb-close-btn" onclick="dongSidebarMobile()" title="Đóng menu" aria-label="Đóng menu">✕</button>
     </div>
     <nav id="nav" class="sb-nav scr"></nav>
     <div class="sb-sum" id="navTomTat"></div>
@@ -324,9 +398,9 @@ th.r,td.r{text-align:right}
   <!-- ==================== MAIN ==================== -->
   <div class="main-wrap">
     <header class="header">
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px">
-        <button id="mbtn" type="button" class="btn btn-g" style="padding:6px;display:inline-flex;md:hidden" aria-label="Mở menu">
-          <svg viewBox="0 0 24 24" style="width:20px;height:20px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;width:100%">
+        <button id="mbtn" type="button" class="btn-hamburger" title="Thu gọn / Mở rộng menu (Ctrl+B)" aria-label="Menu điều hướng">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
         <div style="min-width:0">
           <h1 id="pgTitle" style="margin:0;font-size:1.3rem;font-weight:700;letter-spacing:-.01em">Tổng quan</h1>
@@ -445,6 +519,16 @@ function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return{"&":"&
 function vnd(n){return Number(n||0).toLocaleString("vi-VN")}
 function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
 
+function ring(days, max, r, sw){
+  var circ = 2 * Math.PI * r, pct = max > 0 ? Math.min(days / max, 1) : 0, off = circ * (1 - pct);
+  var col = days > 0 ? "#d97706" : "#16a34a";
+  return '<svg width="' + (2*r+sw+4) + '" height="' + (2*r+sw+4) + '" viewBox="0 0 ' + (2*r+sw+4) + ' ' + (2*r+sw+4) + '">'
+    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="var(--muted)" stroke-width="' + sw + '"/>'
+    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" stroke-linecap="round"/>'
+    + '<text x="' + (r+sw/2+2) + '" y="' + (r+sw/2+6) + '" text-anchor="middle" font-size="' + (r*0.75) + '" font-weight="800" fill="' + col + '">' + (days > 0 ? days : '✓') + '</text>'
+    + '</svg>';
+}
+
 function tt(id){
   var het=null,ng=null;
   for(var i=0;i<so.length;i++){var e=so[i];if(e.thua!==id||!e.phi)continue;
@@ -538,7 +622,7 @@ function di(id){
     document.getElementById("pgTitle").textContent=p.ten;
     document.getElementById("pgSub").textContent=p.sub;
   }
-  document.getElementById("side").classList.remove("show");
+  dongSidebarMobile();
   veNav();ve();window.scrollTo(0,0);
 }
 
@@ -6684,9 +6768,127 @@ document.addEventListener("drop",function(ev){
   }
 });
 
-/* Mobile Menu Toggle */
-var mbtn=document.getElementById("mbtn");
-if(mbtn){mbtn.addEventListener("click",function(){document.getElementById("side").classList.toggle("show")})}
+/* ===== XỬ LÝ THANH ĐIỀU HƯỚNG (SIDEBAR) ĐA NỀN TẢNG (DESKTOP & MOBILE) ===== */
+var isResizingMap = false;
+function capNhatMapSize(){
+  if(isResizingMap) return;
+  isResizingMap = true;
+  try {
+    if(typeof bandoMap !== "undefined" && bandoMap && bandoMap.invalidateSize) bandoMap.invalidateSize();
+  } catch(e){}
+  try {
+    if(typeof mapInst !== "undefined" && mapInst && mapInst.invalidateSize) mapInst.invalidateSize();
+  } catch(e){}
+  try {
+    if(typeof window.thuaMap !== "undefined" && window.thuaMap && window.thuaMap.invalidateSize) window.thuaMap.invalidateSize();
+  } catch(e){}
+  setTimeout(function(){
+    isResizingMap = false;
+  }, 60);
+}
+
+function toggleSidebar(){
+  var isDesktop = window.innerWidth >= 768;
+  var side = document.getElementById("side");
+  var overlay = document.getElementById("sideOverlay");
+  var mbtn = document.getElementById("mbtn");
+  if(!side) return;
+
+  if(isDesktop){
+    // Desktop: Thu gọn / Mở rộng Sidebar (Chế độ Toàn màn hình)
+    var isCollapsed = side.classList.toggle("collapsed");
+    document.body.classList.toggle("sidebar-collapsed", isCollapsed);
+    try {
+      localStorage.setItem("sr_sidebar_collapsed", isCollapsed ? "1" : "0");
+    } catch(e){}
+
+    if(mbtn){
+      mbtn.setAttribute("title", isCollapsed ? "Mở rộng thanh menu (Ctrl+B)" : "Thu gọn thanh menu (Ctrl+B)");
+      mbtn.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+      if(isCollapsed) mbtn.classList.add("is-collapsed");
+      else mbtn.classList.remove("is-collapsed");
+    }
+
+    // Tự động điều chỉnh kích thước bản đồ vệ tinh sau khi hiệu ứng hoàn tất
+    capNhatMapSize();
+    setTimeout(capNhatMapSize, 120);
+    setTimeout(capNhatMapSize, 300);
+    setTimeout(capNhatMapSize, 450);
+  } else {
+    // Mobile: Trượt Drawer thanh bên từ mép trái kèm lớp mờ (Backdrop Overlay)
+    var isShow = side.classList.toggle("show");
+    if(overlay){
+      if(isShow) overlay.classList.add("show");
+      else overlay.classList.remove("show");
+    }
+    document.body.style.overflow = isShow ? "hidden" : "";
+  }
+}
+
+function dongSidebarMobile(){
+  var side = document.getElementById("side");
+  var overlay = document.getElementById("sideOverlay");
+  if(side) side.classList.remove("show");
+  if(overlay) overlay.classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+window.dongSidebarMobile = dongSidebarMobile;
+window.toggleSidebar = toggleSidebar;
+
+var mbtn = document.getElementById("mbtn");
+if(mbtn){
+  mbtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    toggleSidebar();
+  });
+}
+
+// Bắt sự kiện click overlay hoặc nút đóng sidebar qua event delegation
+document.addEventListener("click", function(e){
+  if(e.target && (e.target.id === "sideOverlay" || e.target.closest(".sb-close-btn"))){
+    dongSidebarMobile();
+  }
+});
+
+// Khôi phục trạng thái thu gọn sidebar đã lưu trên Desktop
+try {
+  if(window.innerWidth >= 768 && localStorage.getItem("sr_sidebar_collapsed") === "1"){
+    var sInit = document.getElementById("side");
+    if(sInit) sInit.classList.add("collapsed");
+    document.body.classList.add("sidebar-collapsed");
+    if(mbtn){
+      mbtn.classList.add("is-collapsed");
+      mbtn.setAttribute("title", "Mở rộng thanh menu (Ctrl+B)");
+    }
+  }
+} catch(e){}
+
+// Phím tắt Ctrl+B / Cmd+B để ẩn/hiện thanh bên nhanh chóng
+document.addEventListener("keydown", function(e){
+  if((e.ctrlKey || e.metaKey) && e.key && e.key.toLowerCase() === "b"){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT"){
+      e.preventDefault();
+      toggleSidebar();
+    }
+  }
+  if(e.key === "Escape" && window.innerWidth < 768){
+    dongSidebarMobile();
+  }
+});
+
+// Tự động đóng drawer mobile khi chuyển sang desktop và cập nhật bản đồ có debounce
+var resizeTimer = null;
+window.addEventListener("resize", function(){
+  if(window.innerWidth >= 768){
+    dongSidebarMobile();
+  }
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){
+    capNhatMapSize();
+  }, 150);
+});
 
 /* Khởi động ban đầu */
 veNav();ve();
