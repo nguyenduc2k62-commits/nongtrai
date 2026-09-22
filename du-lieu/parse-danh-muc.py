@@ -32,6 +32,24 @@ RE_PHAN = re.compile(r'^\s*(I{1,3}|IV|V|VI|VII|VIII)\s*\.\s*(THUỐC[^:\n]{0,60}
 # Dòng tiêu đề bảng lặp lại ở mỗi trang — phải bỏ, nếu không thành bản ghi rác
 RE_TIEUDE = re.compile(r'(TRADE NAME|COMMON NAME|PEST\s*/\s*CROP|APPLICANT|HOẠT CHẤT)', re.I)
 
+# Mã dạng thuốc đứng đầu chuỗi (100SP, 3.6EC) hoặc chuỗi còn dấu hai chấm.
+# Một sản phẩm nhiều dạng thì nguồn ghi "100SP: sâu cuốn lá/ lúa; 200WP: …",
+# tách ra có lúc lọt nguyên mã sang cột cây trồng. Không lọc thì Excel hiện
+# "100SP" như một loại cây.
+RE_RAC = re.compile(r'^\s*\d+(?:[.,]\d+)?\s?[A-Z]{2,4}\b\s*:?\s*$', re.I)
+# Mã dạng thuốc nằm GIỮA chuỗi: "ngô 600FS: xử lý hạt giống trừ …".
+# Phần TRƯỚC mã mới là tên cây, nên cắt lấy phần đó chứ không vứt cả dòng.
+RE_CAT = re.compile(r'^(.*?)\s*\d+(?:[.,]\d+)?\s?[A-Z]{2,4}\s*:.*$', re.I)
+
+
+def go_ma_dang(x):
+    """'ngô 600FS: xử lý hạt giống' -> 'ngô'; '100SP' -> '' (bỏ)"""
+    x = (x or '').strip()
+    m = RE_CAT.match(x)
+    if m:
+        x = m.group(1).strip(' ,;')
+    return '' if (not x or RE_RAC.match(x)) else x
+
 
 def cot_cua(x):
     for i, m in enumerate(COT):
@@ -41,6 +59,7 @@ def cot_cua(x):
 
 
 def sach(s):
+    #   la khoang trang khong ngat, PDF dung nhieu -> doi tuong minh truoc
     return re.sub(r'\s+', ' ', (s or '').replace(' ', ' ')).strip(' .;')
 
 
@@ -73,6 +92,11 @@ def tach_doi_tuong(s):
                 du, phai = phai[cat:].strip(), phai[:cat]
         dh = [sach(t) for t in trai.split(',') if sach(t)]
         ct = [sach(t) for t in phai.split(',') if sach(t)]
+        # Lọc rác: mã dạng thuốc (100SP, 3.6EC, "105SG: nhện") lọt sang cột
+        # cây trồng khi một sản phẩm có nhiều dạng, mỗi dạng một đối tượng.
+        # Không lọc thì Excel hiện "100SP" như một loại cây.
+        ct = [y for y in (go_ma_dang(c) for c in ct) if y]
+        dh = [y for y in (go_ma_dang(d) for d in dh) if y]
         if ct:
             kq.append({"dich_hai": dh, "cay_trong": ct})
         if du:

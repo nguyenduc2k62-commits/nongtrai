@@ -217,3 +217,36 @@ vì tiếng Việt ngắt ở ranh giới từ — "Sữa nguyên liệu" thành
 Phải áp riêng cho cột hoá chất Latin.
 
 Nguồn cũng có lỗi chính tả sẵn, ví dụ "Carbendazini" (đúng ra là Carbendazim).
+
+---
+
+# Xuất CSV để mở bằng Excel
+
+`python xuat-csv.py` → thư mục `csv/`
+
+| File | Dòng | Dùng để |
+|---|---|---|
+| `thuoc-theo-cay-va-dich-hai.csv` | 15.602 | **Bảng chính** — lọc cây + dịch hại ra danh sách thuốc |
+| `thuoc.csv` | 5.929 | Một dòng một thuốc, tra nhanh |
+| `mrl.csv` | 4.322 | Ngưỡng dư lượng |
+| `hoat-chat-cam.csv` | 33 | Danh mục cấm |
+| `so-thuoc-theo-cay.csv` | 367 | Cây nào dữ liệu dày, cây nào mỏng |
+
+File ghi kèm BOM (`utf-8-sig`). Không có BOM thì Excel trên Windows đọc UTF-8
+thành ký tự rác, tên thuốc tiếng Việt hỏng hết.
+
+## Đã lọc mã dạng thuốc khỏi cột cây trồng
+
+Nguồn ghi một sản phẩm nhiều dạng kiểu `"100SP: sâu cuốn lá/ lúa; 200WP: …"`.
+Tách ra thì mã dạng lọt sang cột cây trồng, Excel hiện `"100SP"` như một loại
+cây. Hai trường hợp, xử lý khác nhau:
+
+- Mã đứng **một mình** (`100SP`) → bỏ
+- Mã nằm **giữa** (`ngô 600FS: xử lý hạt giống`) → cắt lấy phần trước, còn `ngô`
+
+Kết quả: **800 → 367 tên cây**, không còn mã nào. Số thuốc theo cây *tăng*
+(lúa 2.580→2.601, cà phê 917→933) vì những dòng trước bị vứt giờ quy đúng về cây.
+
+Còn sót ~1%: `"Lạc"` viết hoa trùng `"lạc"`, `"rau cải)"` thừa ngoặc, và vài mục
+từ phần ngoài nông nghiệp (`đê`, `đập`, `nền móng` — mục tiêu của thuốc trừ mối,
+đúng là không phải cây trồng).

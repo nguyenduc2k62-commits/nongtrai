@@ -1,267 +1,300 @@
 <!doctype html>
-<html lang="vi" class="uk-theme-green">
+<html lang="vi" class="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sổ Ruộng — nhật ký canh tác</title>
 <meta name="description" content="Ghi một dòng vào sổ, biết ngay ngày sớm nhất được gặt.">
 
-<!-- Dự phòng khi CDN hỏng.
-     BẮT BUỘC nằm trong @layer: Franken UI đặt toàn bộ CSS của nó trong
-     @layer, mà theo quy tắc CSS thì rule KHÔNG có layer luôn thắng rule
-     có layer — bất kể thứ tự file. Để trần thì khối này đè chết token
-     của Franken, chữ thành đen trên nền đen.
-     Khai báo @layer fallback ở đây, trước Franken, nên nó thành layer
-     đầu tiên = ưu tiên thấp nhất. Franken thắng như mong muốn.
-     Giá trị viết theo dạng ba thành phần HSL cho khớp quy ước shadcn. -->
-<style>
-@layer fallback {
-  :root{
-    --background:0 0% 100%; --foreground:0 0% 4%;
-    --card:0 0% 100%; --card-foreground:0 0% 4%;
-    --muted:240 5% 96%; --muted-foreground:240 4% 46%;
-    --primary:142 71% 35%; --primary-foreground:0 0% 98%;
-    --accent:240 5% 96%; --accent-foreground:240 6% 10%;
-    --border:240 6% 90%; --input:240 6% 90%; --ring:142 71% 35%;
-  }
-  .dark{
-    --background:0 0% 4%; --foreground:0 0% 98%;
-    --card:150 8% 8%; --card-foreground:0 0% 98%;
-    --muted:150 6% 14%; --muted-foreground:240 5% 65%;
-    --primary:142 69% 58%; --primary-foreground:150 80% 6%;
-    --accent:150 6% 14%; --accent-foreground:0 0% 98%;
-    --border:150 8% 16%; --input:150 8% 16%;
-  }
-}
-</style>
-
-<!-- Franken UI: token màu kiểu shadcn + component thật (uk-btn, uk-card, uk-table…) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/franken-ui@2.1.0/dist/css/core.min.css">
-
-<!-- KHÔNG dùng utilities.min.css của Franken: đó là bản dựng sẵn tĩnh, không có
-     class giá trị tuỳ ý (text-[4.5rem], grid-cols-[minmax(…)]) lẫn truncate.
-     Tailwind Play sinh class lúc chạy nên có đủ. preflight tắt để khỏi đè
-     lên phần base của Franken. -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config={
-  darkMode:"class",
-  corePlugins:{preflight:false},
-  theme:{extend:{
-    colors:{
-      background:"hsl(var(--background))", foreground:"hsl(var(--foreground))",
-      card:"hsl(var(--card))", "card-foreground":"hsl(var(--card-foreground))",
-      muted:"hsl(var(--muted))", "muted-foreground":"hsl(var(--muted-foreground))",
-      primary:"hsl(var(--primary))", "primary-foreground":"hsl(var(--primary-foreground))",
-      accent:"hsl(var(--accent))", "accent-foreground":"hsl(var(--accent-foreground))",
-      border:"hsl(var(--border))",
-      ok:"var(--ok)", wait:"var(--wait)", bad:"var(--bad)", inf:"var(--inf)",
-      "ok-bg":"var(--ok-bg)", "wait-bg":"var(--wait-bg)",
-      "bad-bg":"var(--bad-bg)", "inf-bg":"var(--inf-bg)",
-      page:"var(--page)"
-    },
-    fontFamily:{
-      sans:['"Be Vietnam Pro"',"system-ui","sans-serif"],
-      mono:['"IBM Plex Mono"',"ui-monospace","monospace"]
-    }
-  }}
-};
-</script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 
 <script>
-// Mặc định NỀN SÁNG. Cố ý không theo cài đặt của máy: máy để tối thì trang
-// vẫn sáng. Chỉ chuyển sang tối khi người dùng tự bấm nút.
+// Mặc định NỀN TỐI. Chuyển sáng khi người dùng bấm nút.
 (function(){try{
-  if(localStorage.getItem("sr-theme")==="dark")document.documentElement.classList.add("dark");
+  if(localStorage.getItem("sr-theme")==="light")document.documentElement.classList.remove("dark");
 }catch(e){}})();
 </script>
 
 <style>
-/* ===== Chỉ những thứ Franken UI không lo:
-        phông chữ, màu nghiệp vụ, biểu đồ, canvas mô phỏng ===== */
-html,body{height:100%}
+/* ===== RESET ===== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
 body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
-  -webkit-font-smoothing:antialiased;margin:0}
+  -webkit-font-smoothing:antialiased;line-height:1.5}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
-/* .hint — ghi chú nhỏ dưới mỗi khối. Bị mất lúc viết lại CSS sang Franken
-   nên mọi ghi chú trong app đang hiện cỡ chữ thường. */
-.hint{font-size:.72rem;line-height:1.6;margin:.7rem 0 0;color:hsl(var(--muted-foreground))}
 .tnum{font-variant-numeric:tabular-nums}
-
-/* ===== Danh sách kiểm trước khi giao, lấy từ skill ui-ux-pro-max (MIT).
-   Đây là phần giá trị nhất của nó: các mục cụ thể, kiểm được, không phải
-   lời khuyên chung chung. ===== */
 button,[role="button"],a[href],summary,label[for]{cursor:pointer}
-button,a{transition:background-color .18s ease,border-color .18s ease,
-  color .18s ease,box-shadow .18s ease,opacity .18s ease}
-:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px;border-radius:6px}
-/* Không dùng ký tự làm biểu tượng — đã thay hết bằng SVG */
-.ic{width:1em;height:1em;flex:none;display:inline-block;vertical-align:-.125em}
+button,a{transition:all .2s ease}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:6px}
+img,svg{vertical-align:middle}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-/* ===== BẢNG MÀU =====
-   Khối này KHÔNG nằm trong @layer nên thắng token của Franken UI.
-   Cố ý: Franken lo phần component (uk-btn, uk-card…), còn màu thì mình nắm,
-   để bản nền sáng ra đúng ý chứ không phải trắng trơn mặc định.
-   Nền là trắng ngả xanh bạc hà, thẻ trắng tinh nổi lên trên — sáng nhưng
-   không chói, và vẫn giữ được chất đồng ruộng. */
+/* ===== THEME — LIGHT ===== */
 :root{
-  /* Quy ước canvas/surface của Primer: nền trang là bề mặt CHÌM, thẻ là bề
-     mặt NỔI. Trước tôi để 95.5% nên nhìn vẫn ra trắng tinh — hạ xuống 93.5%
-     để bậc chênh giữa nền và thẻ trắng thấy được rõ. */
-  --background:146 24% 93.5%;    /* nền trang: bạc hà nhạt */
-  --foreground:158 32% 13%;      /* mực: xanh rất đậm, không phải đen */
-  --card:0 0% 100%;              /* thẻ: trắng tinh, nổi lên nền */
-  --card-foreground:158 32% 13%;
-  --muted:145 22% 95%;
-  --muted-foreground:158 12% 42%;
-  --primary:142 70% 33%;         /* xanh lúa tươi */
-  --primary-foreground:0 0% 100%;
-  --accent:145 38% 93%;
-  --accent-foreground:158 38% 18%;
-  --border:145 20% 88%;
-  --input:145 20% 88%;
-  --ring:142 70% 33%;
-
-  /* Màu nghiệp vụ: dải độc trên nhãn thuốc BVTV + trạng thái cách ly.
-     Tách khỏi màu chủ đề vì chúng mang nghĩa, không phải trang trí. */
-  /* Màu chức năng theo cấu trúc của GitHub Primer: mỗi vai trò có BỐN biến
-     thể chứ không phải một mã dùng chung.
-       -bg      nền nhạt   (Primer bgColor-muted   ≈ Radix bậc 3)
-       -bd      viền       (borderColor-muted      ≈ Radix bậc 6–7)
-       -solid   màu đặc    (bgColor-emphasis       ≈ Radix bậc 9)
-       (không hậu tố) chữ  (fgColor                ≈ Radix bậc 11)
-     Trước đây tôi dùng một mã cho cả chữ lẫn thanh biểu đồ — nên chữ thì
-     nhợt mà thanh thì đục. Giá trị neo theo Primer vì đã kiểm tương phản. */
-  --ok:#1a7f37;   --ok-bg:#dafbe1;   --ok-bd:#aceebb;   --ok-solid:#1f883d;
-  --wait:#9a6700; --wait-bg:#fff8c5; --wait-bd:#eac54f; --wait-solid:#bf8700;
-  --bad:#cf222e;  --bad-bg:#ffebe9;  --bad-bd:#ffc1bc;  --bad-solid:#d1242f;
-  --inf:#0969da;  --inf-bg:#ddf4ff;  --inf-bd:#b6e3ff;  --inf-solid:#0969da;
-  --page:hsl(var(--background));
+  --bg:#eef2ef;--fg:#1a2e23;
+  --card:#ffffff;--card-fg:#1a2e23;
+  --muted:#e2e8e4;--muted-fg:#5a6e62;
+  --primary:#16a34a;--primary-fg:#fff;
+  --accent:#e0f0e6;--accent-fg:#14532d;
+  --border:#c0cec5;--ring:#16a34a;--input:#c0cec5;
+  --ok:#1a7f37;--ok-bg:#dafbe1;--ok-bd:#aceebb;--ok-solid:#1f883d;
+  --wait:#9a6700;--wait-bg:#fff8c5;--wait-bd:#eac54f;--wait-solid:#bf8700;
+  --bad:#cf222e;--bad-bg:#ffebe9;--bad-bd:#ffc1bc;--bad-solid:#d1242f;
+  --inf:#0969da;--inf-bg:#ddf4ff;--inf-bd:#b6e3ff;--inf-solid:#0969da;
+  --glow:none;--card-sh:0 1px 3px rgba(0,0,0,.06),0 6px 20px -8px rgba(0,0,0,.1);
+  --glass:none;--sidebar-bg:#ffffff;--header-bg:rgba(238,242,239,.88);
 }
+
+/* ===== THEME — DARK (default) ===== */
 .dark{
-  --background:158 20% 7%;
-  --foreground:150 12% 92%;
-  --card:158 16% 11%;
-  --card-foreground:150 12% 92%;
-  --muted:158 12% 16%;
-  --muted-foreground:150 8% 62%;
-  --primary:142 65% 55%;
-  --primary-foreground:158 45% 8%;
-  --accent:158 14% 17%;
-  --accent-foreground:150 12% 92%;
-  --border:158 12% 19%;
-  --input:158 12% 19%;
-
-  /* Nền tối: lấy theo bộ tối của Primer — chữ sáng hơn, nền chìm hơn */
-  --ok:#3fb950;   --ok-bg:#12261a;   --ok-bd:#1f6f2e;   --ok-solid:#238636;
-  --wait:#d29922; --wait-bg:#2b2413; --wait-bd:#7d5e16; --wait-solid:#9e6a03;
-  --bad:#f85149;  --bad-bg:#2d1618;  --bad-bd:#7d2a2a;  --bad-solid:#da3633;
-  --inf:#58a6ff;  --inf-bg:#10243e;  --inf-bd:#1f4d80;  --inf-solid:#1f6feb;
+  --bg:#080d11;--fg:#d8e5de;
+  --card:rgba(12,24,18,.72);--card-fg:#d8e5de;
+  --muted:rgba(20,46,34,.45);--muted-fg:#6b8078;
+  --primary:#34d399;--primary-fg:#022c22;
+  --accent:rgba(52,211,153,.08);--accent-fg:#a7f3d0;
+  --border:rgba(52,211,153,.12);--ring:#34d399;--input:rgba(52,211,153,.15);
+  --ok:#34d399;--ok-bg:rgba(6,78,59,.35);--ok-bd:rgba(52,211,153,.25);--ok-solid:#059669;
+  --wait:#fbbf24;--wait-bg:rgba(120,53,15,.35);--wait-bd:rgba(251,191,36,.25);--wait-solid:#d97706;
+  --bad:#f87171;--bad-bg:rgba(127,29,29,.35);--bad-bd:rgba(248,113,113,.25);--bad-solid:#dc2626;
+  --inf:#60a5fa;--inf-bg:rgba(30,58,138,.35);--inf-bd:rgba(96,165,250,.25);--inf-solid:#2563eb;
+  --glow:0 0 30px rgba(52,211,153,.08);--card-sh:0 1px 4px rgba(0,0,0,.4),0 8px 24px -10px rgba(0,0,0,.6);
+  --glass:blur(20px);--sidebar-bg:rgba(8,16,12,.92);--header-bg:rgba(8,13,17,.82);
 }
+body{background:var(--bg);color:var(--fg)}
 
-/* Nền sáng: thẻ trắng cần chút bóng mới tách khỏi nền, nếu không sẽ phẳng lì.
-   Nền tối thì bóng vô nghĩa nên bỏ. */
-:root:not(.dark) .uk-card{
-  box-shadow:0 1px 2px rgba(16,44,30,.04), 0 8px 22px -14px rgba(16,44,30,.18);
-}
-.c-ok{color:var(--ok)} .c-wait{color:var(--wait)} .c-bad{color:var(--bad)} .c-inf{color:var(--inf)}
-.b-ok{background:var(--ok-solid)} .b-wait{background:var(--wait-solid)} .b-bad{background:var(--bad-solid)} .b-inf{background:var(--inf-solid)}
-/* Nhãn trạng thái: nền nhạt + VIỀN cùng tông + chữ đậm màu.
-   Đây là cách Primer làm — có viền thì nhãn mới ra hình khối, không bị
-   trôi vào nền như bản trước. */
-.tag{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600;
-  padding:.15rem .5rem;border-radius:.35rem;white-space:nowrap;border:1px solid transparent}
+/* ===== LAYOUT ===== */
+.layout{display:flex;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;width:250px;flex-shrink:0;
+  display:none;flex-direction:column;overflow-y:auto;
+  background:var(--sidebar-bg);border-right:1px solid var(--border);
+  backdrop-filter:var(--glass);z-index:40}
+@media(min-width:768px){.sidebar{display:flex}}
+.sidebar.show{display:flex;position:fixed;left:0}
+.main-wrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.header{position:sticky;top:0;z-index:30;
+  border-bottom:1px solid var(--border);
+  background:var(--header-bg);backdrop-filter:blur(14px);
+  padding:12px 20px}
+@media(min-width:768px){.header{padding:12px 32px}}
+.content{max-width:1280px;width:100%;margin:0 auto;padding:0 20px 96px}
+@media(min-width:768px){.content{padding:0 32px 96px}}
+
+/* ===== CARD ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--card-sh);backdrop-filter:var(--glass);
+  transition:border-color .3s,box-shadow .3s,transform .3s}
+.card:hover{box-shadow:var(--card-sh),var(--glow)}
+
+/* ===== SECTION ===== */
+.sec{margin-top:32px}
+.sec-h{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sec-t{margin:0;flex-shrink:0;font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--muted-fg)}
+.sec-l{height:1px;flex:1;background:var(--border)}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font:inherit;font-size:.82rem;font-weight:600;padding:7px 15px;border-radius:9px;
+  border:1px solid var(--border);background:var(--card);color:var(--fg);
+  cursor:pointer;white-space:nowrap;transition:all .2s;backdrop-filter:var(--glass)}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--primary);color:var(--primary-fg);border-color:var(--primary);
+  box-shadow:0 0 20px rgba(52,211,153,.2)}
+.btn-p:hover{filter:brightness(1.15);box-shadow:0 0 30px rgba(52,211,153,.35)}
+.btn-g{background:transparent;border-color:transparent}
+.btn-g:hover{background:var(--accent)}
+
+/* ===== TAGS ===== */
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:600;
+  padding:3px 9px;border-radius:6px;white-space:nowrap;border:1px solid transparent}
 .tag-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
 .tag-wait{background:var(--wait-bg);color:var(--wait);border-color:var(--wait-bd)}
 .tag-bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-bd)}
-.tag-mut{background:hsl(var(--muted));color:hsl(var(--muted-foreground));border-color:hsl(var(--border))}
+.tag-mut{background:var(--muted);color:var(--muted-fg);border-color:var(--border)}
 
+/* ===== ROW BUTTON ===== */
+.rbtn{display:flex;width:100%;align-items:center;gap:12px;padding:12px;border-radius:12px;
+  text-align:left;font:inherit;color:var(--fg);cursor:pointer;
+  border:1px solid var(--border);background:var(--card);transition:all .22s;
+  backdrop-filter:var(--glass)}
+.rbtn:hover{border-color:var(--primary);box-shadow:0 0 16px rgba(52,211,153,.08)}
+.rbtn.on{border-color:var(--primary);background:var(--accent)}
+
+/* ===== ALERT BOX ===== */
+.abox{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:14px;
+  border:1px solid var(--bad-bd);background:var(--bad-bg);backdrop-filter:var(--glass)}
+.abox.abox-ok{border-color:var(--ok-bd);background:var(--ok-bg)}
+.abox-t{font-weight:700;font-size:.92rem;margin-bottom:3px;color:var(--bad)}
+.abox-ok .abox-t{color:var(--ok)}
+.abox-b{font-size:.84rem;line-height:1.6;color:var(--fg)}
+
+/* ===== TABLE ===== */
+.tbl-w{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th{white-space:nowrap;padding:0 14px 10px 0;text-align:left;font-size:.64rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--muted-fg);border-bottom:1px solid var(--border)}
+th.r{text-align:right}
+td{padding:10px 14px 10px 0;border-bottom:1px solid var(--border);vertical-align:top}
+td.r{text-align:right}
+
+/* ===== INPUTS ===== */
+input[type="search"],input[type="text"],input[type="number"],select{
+  font:inherit;font-size:.88rem;padding:8px 12px;border-radius:9px;
+  border:1px solid var(--border);background:var(--card);color:var(--fg);
+  backdrop-filter:var(--glass);transition:border-color .2s}
+input:focus,select:focus{border-color:var(--primary);outline:none;
+  box-shadow:0 0 0 3px rgba(52,211,153,.12)}
+input::placeholder{color:var(--muted-fg)}
+
+/* ===== BUSINESS COLORS ===== */
+.c-ok{color:var(--ok)}.c-wait{color:var(--wait)}.c-bad{color:var(--bad)}.c-inf{color:var(--inf)}
+.b-ok{background:var(--ok-solid)}.b-wait{background:var(--wait-solid)}.b-bad{background:var(--bad-solid)}.b-inf{background:var(--inf-solid)}
+
+/* ===== MISC ===== */
+.ic{width:1em;height:1em;flex-shrink:0;display:inline-block;vertical-align:-.125em}
+.hint{font-size:.72rem;line-height:1.6;margin:.7rem 0 0;color:var(--muted-fg)}
+
+/* ===== CHART ===== */
 .chart{position:relative}
 .chart svg{display:block;width:100%;height:auto;overflow:visible}
-.tip{position:absolute;pointer-events:none;z-index:20;background:hsl(var(--foreground));color:hsl(var(--background));
-  border-radius:.4rem;padding:.35rem .6rem;font-size:.75rem;white-space:nowrap;
-  transform:translate(-50%,-120%);font-variant-numeric:tabular-nums}
-.halo{paint-order:stroke;stroke:hsl(var(--card));stroke-width:2.5px;stroke-linejoin:round}
+.tip{position:absolute;pointer-events:none;z-index:20;background:var(--fg);color:var(--bg);
+  border-radius:8px;padding:5px 10px;font-size:.75rem;white-space:nowrap;
+  transform:translate(-50%,-120%);font-variant-numeric:tabular-nums;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.halo{paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
 
-#simCv{display:block;width:100%;height:auto;border-radius:.5rem;image-rendering:pixelated;
-  cursor:crosshair;touch-action:none}
+/* ===== SIM ===== */
+#simCv{display:block;width:100%;height:auto;border-radius:12px;image-rendering:pixelated;
+  cursor:crosshair;touch-action:none;border:1px solid var(--border)}
 
-.scroll-thin::-webkit-scrollbar{width:8px;height:8px}
-.scroll-thin::-webkit-scrollbar-thumb{background:hsl(var(--border));border-radius:4px}
-.scroll-thin::-webkit-scrollbar-track{background:transparent}
+/* ===== SCROLLBAR ===== */
+.scr::-webkit-scrollbar{width:6px;height:6px}
+.scr::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.scr::-webkit-scrollbar-track{background:transparent}
 
-@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+/* ===== COUNTDOWN RING ===== */
+.cdown{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.cdown svg{transform:rotate(-90deg)}
+.cdown .rbg{fill:none;stroke:var(--muted);stroke-width:5}
+.cdown .rfg{fill:none;stroke-width:5;stroke-linecap:round;
+  transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
+.cdown-n{position:absolute;font-family:"IBM Plex Mono",monospace;font-weight:700;
+  font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.04em}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes glow-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(52,211,153,.3))}50%{filter:drop-shadow(0 0 18px rgba(52,211,153,.5))}}
+@keyframes num-pulse{0%,100%{opacity:1}50%{opacity:.65}}
+.fade-up{animation:fadeUp .4s ease both}
+.glow-p{animation:glow-pulse 3s ease-in-out infinite}
+.num-p{animation:num-pulse 2.5s ease-in-out infinite}
+
+/* ===== SIDEBAR NAV ===== */
+.nav-g{padding:2px 10px;font-size:.6rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.15em;color:var(--muted-fg);margin-top:16px}
+.nav-i{display:flex;width:100%;align-items:center;gap:10px;padding:9px 12px;margin-bottom:2px;
+  border-radius:10px;border:none;background:transparent;font:inherit;font-size:.84rem;
+  font-weight:500;color:var(--muted-fg);cursor:pointer;transition:all .2s;text-align:left}
+.nav-i:hover{background:var(--accent);color:var(--fg)}
+.nav-i.on{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.nav-i.on svg{stroke:var(--primary)}
+.nav-i svg{width:18px;height:18px;flex-shrink:0}
+.nav-badge{margin-left:auto;display:grid;height:18px;min-width:18px;place-items:center;
+  border-radius:9px;padding:0 5px;font-size:.6rem;font-weight:700;
+  background:var(--wait);color:var(--bg)}
+
+/* ===== SIDEBAR STRUCTURE ===== */
+.sb-brand{display:flex;align-items:center;gap:12px;padding:16px 18px;
+  border-bottom:1px solid var(--border)}
+.sb-logo{width:38px;height:38px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;
+  font-size:.82rem;font-weight:800;background:var(--primary);color:var(--primary-fg);
+  box-shadow:0 0 16px rgba(52,211,153,.25)}
+.sb-nav{flex:1;padding:6px 10px;overflow-y:auto}
+.sb-sum{margin-top:auto;padding:14px 16px 14px}
+.sb-foot{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border)}
+.sb-avatar{width:32px;height:32px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;
+  font-size:.68rem;font-weight:700;background:var(--muted);color:var(--muted-fg)}
+.tb{width:34px;height:34px;flex-shrink:0;border-radius:9px;display:grid;place-items:center;
+  border:1px solid var(--border);background:var(--card);color:var(--muted-fg);
+  font-size:.9rem;cursor:pointer;transition:all .2s}
+.tb:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ===== GRID HELPERS ===== */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:639px){.g2,.g3{grid-template-columns:1fr}}
+@media(min-width:640px) and (max-width:1023px){.g3{grid-template-columns:repeat(2,1fr)}}
+.g-2col{display:grid;gap:24px}
+@media(min-width:1024px){.g-2col{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
+.g-2col-eq{display:grid;gap:24px}
+@media(min-width:1024px){.g-2col-eq{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
+.g-sim{display:grid;gap:24px}
+@media(min-width:1024px){.g-sim{grid-template-columns:minmax(0,1fr) 250px}}
+
+/* ===== WARN BANNER ===== */
+.warn-banner{display:flex;align-items:flex-start;gap:10px;border-radius:12px;
+  padding:12px 14px;font-size:.78rem;line-height:1.55;margin-top:16px;
+  border:1px solid var(--wait-bd);background:var(--wait-bg);color:var(--fg)}
+
+/* ===== MOBILE MENU BTN ===== */
+.mbtn{display:grid;width:36px;height:36px;flex-shrink:0;place-items:center;
+  border-radius:9px;border:1px solid var(--border);background:var(--card);cursor:pointer}
+@media(min-width:768px){.mbtn{display:none}}
 </style>
 </head>
 
-<body style="background:var(--page);color:hsl(var(--foreground))">
-
-<div class="flex min-h-screen">
+<body>
+<div class="layout">
   <!-- ==================== SIDEBAR ==================== -->
-  <aside id="side" class="scroll-thin sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto border-r md:flex"
-         style="border-color:hsl(var(--border));background:hsl(var(--card))">
-    <div class="flex items-center gap-3 border-b px-5 py-4" style="border-color:hsl(var(--border))">
-      <div class="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-bold"
-           style="background:hsl(var(--primary));color:hsl(var(--primary-foreground))">SR</div>
-      <div class="min-w-0">
-        <div class="truncate text-[0.95rem] font-bold leading-tight">Sổ Ruộng</div>
-        <div class="truncate text-[0.7rem]" style="color:hsl(var(--muted-foreground))">HTX Đồng Tiến</div>
+  <aside id="side" class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">SR</div>
+      <div style="min-width:0">
+        <div style="font-size:.95rem;font-weight:700;line-height:1.2">Sổ Ruộng</div>
+        <div style="font-size:.68rem;color:var(--muted-fg)">HTX Đồng Tiến</div>
       </div>
     </div>
-    <nav id="nav" class="px-3 py-3"></nav>
-    <!-- Khối tóm tắt vụ lấp khoảng trống dưới thanh bên, đồng thời cho biết
-         đang xem vụ nào mà không phải lên đầu trang nhìn lại. -->
-    <div class="mt-auto px-4 pb-4 pt-6" id="navTomTat"></div>
-    <div class="flex items-center gap-2.5 border-t px-4 py-3" style="border-color:hsl(var(--border))">
-      <div class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[0.7rem] font-bold"
-           style="background:hsl(var(--muted));color:hsl(var(--muted-foreground))">TĐ</div>
-      <div class="min-w-0 flex-1">
-        <div class="truncate text-xs font-semibold leading-tight">Trần Văn Đức</div>
-        <div class="truncate text-[0.68rem]" style="color:hsl(var(--muted-foreground))">Hộ sản xuất · 8 sào</div>
+    <nav id="nav" class="sb-nav scr"></nav>
+    <div class="sb-sum" id="navTomTat"></div>
+    <div class="sb-foot">
+      <div class="sb-avatar">TĐ</div>
+      <div style="min-width:0;flex:1">
+        <div style="font-size:.78rem;font-weight:600;line-height:1.2">Trần Văn Đức</div>
+        <div style="font-size:.66rem;color:var(--muted-fg)">Hộ sản xuất · 8 sào</div>
       </div>
-      <button id="tbtn" type="button" aria-label="Đổi nền sáng tối"
-        class="grid h-8 w-8 shrink-0 place-items-center rounded-md border text-sm"
-        style="border-color:hsl(var(--border));color:hsl(var(--muted-foreground))">◐</button>
+      <button id="tbtn" type="button" class="tb" aria-label="Đổi nền sáng tối">◐</button>
     </div>
   </aside>
 
   <!-- ==================== MAIN ==================== -->
-  <div class="flex min-w-0 flex-1 flex-col">
-    <header class="sticky top-0 z-30 border-b px-5 py-3 md:px-8"
-            style="border-color:hsl(var(--border));background:var(--page)">
-      <div class="flex flex-wrap items-end gap-4">
-        <button id="mbtn" type="button" aria-label="Mở menu"
-          class="grid h-9 w-9 shrink-0 place-items-center rounded-md border md:hidden"
-          style="border-color:hsl(var(--border))">
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  <div class="main-wrap">
+    <header class="header">
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px">
+        <button id="mbtn" type="button" class="mbtn" aria-label="Mở menu">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <div class="min-w-0">
-          <h1 id="pgTitle" class="truncate text-xl font-bold tracking-tight md:text-2xl">Tổng quan</h1>
-          <p id="pgSub" class="truncate text-xs" style="color:hsl(var(--muted-foreground))">Vụ mùa 2026</p>
+        <div style="min-width:0">
+          <h1 id="pgTitle" style="margin:0;font-size:1.3rem;font-weight:700;letter-spacing:-.01em">Tổng quan</h1>
+          <p id="pgSub" style="margin:0;font-size:.75rem;color:var(--muted-fg)">Vụ mùa 2026</p>
         </div>
-        <div class="ml-auto flex flex-wrap items-center gap-2">
-          <button type="button" class="uk-btn uk-btn-sm uk-btn-ghost">Vụ mùa 2026
-            <svg class="ic ml-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        <div style="margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+          <button type="button" class="btn btn-g">Vụ mùa 2026
+            <svg class="ic" style="margin-left:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <button type="button" data-go="benh" class="uk-btn uk-btn-sm uk-btn-primary">Ghi việc mới</button>
+          <button type="button" data-go="benh" class="btn btn-p">Ghi việc mới</button>
         </div>
       </div>
     </header>
 
-    <div class="mx-auto w-full max-w-[1260px] px-5 pb-24 md:px-8">
-      <div class="mt-4 flex items-start gap-2.5 rounded-lg border px-3.5 py-2.5 text-[0.78rem] leading-relaxed"
-           style="border-color:var(--wait);background:var(--wait-bg);color:hsl(var(--foreground))">
-        <svg class="ic c-wait mt-0.5" style="width:1.05em;height:1.05em" viewBox="0 0 24 24" fill="none"
+    <div class="content">
+      <div class="warn-banner">
+        <svg class="ic c-wait" style="width:1.1em;height:1.1em;flex-shrink:0;margin-top:2px" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
           <path d="M12 9v4M12 17h.01"/></svg>
-        <p class="m-0"><b class="c-wait">Bản mẫu.</b>
+        <p style="margin:0"><b class="c-wait">Bản mẫu.</b>
         <b>Danh mục thuốc, danh mục cấm và ngưỡng dư lượng là dữ liệu thật</b> từ Thông tư 75/2025,
         28/2026 và 50/2016 — nhưng chưa có ai thẩm định lại bản parse.
         <b>Thời gian cách ly do bạn tự nhập từ nhãn thuốc.</b>
@@ -278,22 +311,15 @@ button,a{transition:background-color .18s ease,border-color .18s ease,
 "use strict";
 
 /* ======================= DỮ LIỆU ======================= */
-// Mỗi thửa gắn với MỘT loại cây — app không còn chỉ cho lúa.
 var THUA=[
  {id:"db",ten:"Đồng Bưng",dt:3,cay:"lúa",giong:"Bắc thơm 7",gd:"Làm đòng",ngaycay:38},
  {id:"rt",ten:"Ruộng Trên",dt:5,cay:"lúa",giong:"Khang dân 18",gd:"Đẻ nhánh",ngaycay:24},
  {id:"vc",ten:"Vườn Cà phê",dt:12,cay:"cà phê",giong:"Robusta TR4",gd:"Nuôi quả",ngaycay:1240}];
 
-/* ===== DỮ LIỆU THẬT =====
-   Nạp du-lieu-app.json lúc chạy: 5.914 thuốc, 800 cây, 546 dịch hại,
-   4.322 ngưỡng MRL, 33 hoạt chất cấm. 808 KB, nén gzip còn 162 KB.
-   Dựng từ Thông tư 75/2025 + 28/2026 + 50/2016 — xem du-lieu/. */
 var D=null;
 
 function cayId(ten){return D?D.bang.cay.indexOf(ten):-1}
 
-// Dịch hại đã ĐĂNG KÝ trên đúng cây này. Không lấy chung, vì một thuốc
-// đăng ký trị sâu A trên cây X không có nghĩa dùng được trên cây Y.
 function dichHaiCuaCay(ci){
  var s={},i,j;
  if(!D||ci<0)return [];
@@ -318,7 +344,6 @@ function chuanHC(s){
  return s.toLowerCase().replace(/[^0-9a-z]/g,"");
 }
 
-// Hoạt chất bị CẤM. Phải chặn chứ không im lặng bỏ qua.
 function laCam(hc){
  if(!D||!hc)return null;
  var ks=hc.split("+").map(chuanHC),i,j;
@@ -328,10 +353,6 @@ function laCam(hc){
  return null;
 }
 
-/* Ngưỡng dư lượng cho (hoạt chất, cây).
-   Trả về null khi KHÔNG có ngưỡng — app phải nói "chưa có", không được đoán.
-   Tên cây khác tên thực phẩm nên phải qua bảng ánh xạ tay: dò chuỗi thì
-   "lúa" khớp nhầm "lúa mì" là wheat, ngưỡng khác hẳn. */
 function mrlCho(hc,cay){
  if(!D||!hc)return null;
  var mon=D.anh_xa_cay_thuc_pham[cay];
@@ -344,8 +365,6 @@ function mrlCho(hc,cay){
  return ra.length?{muc:ra}:{chua_co:true,ly_do:"hoat_chat"};
 }
 
-// PHI không có trong văn bản nào — người dùng đọc trên nhãn và nhập.
-// Nhập rồi thì nhớ lại cho lần sau.
 var PHI_KEY="so-ruong-phi";
 var PHI=(function(){try{return JSON.parse(localStorage.getItem(PHI_KEY))||{}}catch(e){return{}}})();
 function luuPhi(){try{localStorage.setItem(PHI_KEY,JSON.stringify(PHI))}catch(e){}}
@@ -383,11 +402,8 @@ function dm(d){return p2(d.getDate())+"/"+p2(d.getMonth()+1)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function vnd(n){return n.toLocaleString("vi-VN")}
 function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
-/* Biểu tượng SVG dùng chung. Khai báo ở ĐÂY, cạnh các hằng số khác, vì ba
-   biến này từng nằm lẫn trong khối mã bị xoá lúc thay trang — mất khai báo
-   mà không ai biết, tới lúc chạy mới ném ReferenceError và nuốt luôn cả
-   lần vẽ lại. */
-var ARROW="<svg class='ic shrink-0' style='width:1.15em;height:1.15em;color:hsl(var(--muted-foreground))'"
+
+var ARROW="<svg class='ic' style='width:1.15em;height:1.15em;color:var(--muted-fg);flex-shrink:0'"
  +" viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'"
  +" stroke-linejoin='round' aria-hidden='true'><path d='m9 18 6-6-6-6'/></svg>";
 var ICO_OK="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' fill='none'"
@@ -397,8 +413,8 @@ var ICO_X="<svg class='ic' style='width:1.2em;height:1.2em' viewBox='0 0 24 24' 
  +" stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'"
  +" aria-hidden='true'><path d='M18 6 6 18M6 6l12 12'/></svg>";
 
-var V={bd:"hsl(var(--border))",cd:"hsl(var(--card))",mu:"hsl(var(--muted))",mf:"hsl(var(--muted-foreground))",
-       pr:"hsl(var(--primary))",pf:"hsl(var(--primary-foreground))"};
+var V={bd:"var(--border)",cd:"var(--card)",mu:"var(--muted)",mf:"var(--muted-fg)",
+       pr:"var(--primary)",pf:"var(--primary-fg)"};
 
 var KEY="so-ruong-v3";
 function mdinh(){return[
@@ -418,24 +434,20 @@ function tt(id){var het=null,ng=null;
 
 /* ======================= MẢNH GIAO DIỆN ======================= */
 function card(inner,extra){
- return '<div class="uk-card rounded-xl border border-border bg-card '+(extra||"")+'">'+inner+"</div>"}
+ return '<div class="card '+(extra||"")+'" style="overflow:hidden">'+inner+"</div>"}
 function sec(lb,body,act){
- return '<section class="mt-8"><div class="mb-4 flex items-center gap-3">'
-  +'<h2 class="m-0 shrink-0 text-[0.7rem] font-bold uppercase tracking-[0.13em] text-muted-foreground">'+lb+"</h2>"
-  +'<span class="h-px flex-1 bg-border"></span>'
-  +(act?'<div class="flex shrink-0 gap-2">'+act+"</div>":"")+"</div>"+body+"</section>"}
+ return '<section class="sec fade-up"><div class="sec-h">'
+  +'<h2 class="sec-t">'+lb+"</h2>"
+  +'<span class="sec-l"></span>'
+  +(act?'<div style="display:flex;flex-shrink:0;gap:8px">'+act+"</div>":"")+"</div>"+body+"</section>"}
 function btn(txt,attrs,pri){
- return "<button type=\"button\" "+attrs+' class="uk-btn uk-btn-sm '
-  +(pri?"uk-btn-primary":"uk-btn-default")+'">'+txt+"</button>"}
+ return "<button type=\"button\" "+attrs+' class="btn'+(pri?" btn-p":"")+'">'+txt+"</button>"}
 function tag(txt,k){return '<span class="tag tag-'+k+'">'+txt+"</span>"}
 function rowBtn(inner,attrs,on){
- return "<button type=\"button\" "+attrs+' class="flex w-full items-center gap-3 rounded-lg border p-3 text-left'
-  +' transition-colors hover:border-primary '+(on?"border-primary bg-accent":"border-border bg-card")+'">'+inner+"</button>"}
-
-/* ======================= SƠ ĐỒ BỆNH ======================= */
-/* Sơ đồ bệnh vẽ tay đã bỏ: trước chỉ có 6 bệnh trên lúa nên vẽ được,
-   giờ dữ liệu có 546 dịch hại trên 800 cây. Ảnh thật sẽ lấy từ PlantDoc
-   (CC BY 4.0) và Bugwood — xem VIEC-CAN-LAM.md mục 2.3. */
+ return "<button type=\"button\" "+attrs+' class="rbtn'+(on?" on":"")+'">'+inner+"</button>"}
+function alertBox(type,ico,title,body){
+ return '<div class="abox'+(type==="ok"?" abox-ok":"")+'"><span style="line-height:1;flex-shrink:0">'+ico+'</span><div>'
+  +'<div class="abox-t">'+title+'</div><div class="abox-b">'+body+"</div></div></div>"}
 
 /* ======================= ĐIỀU HƯỚNG ======================= */
 var IC={tongquan:'<path d="M3 12 12 4l9 8v7a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-7Z"/>',
@@ -460,34 +472,32 @@ var cur="tongquan";
 function veNav(){
  var G=[[1,"Đồng ruộng"],[2,"Công cụ"],[3,"Thử nghiệm"]],h="",i,k;
  for(var g=0;g<G.length;g++){
-  h+='<div class="px-2 pb-1.5 pt-4 text-[0.62rem] font-bold uppercase tracking-[0.15em]" style="color:'+V.mf+'">'+G[g][1]+"</div>";
+  h+='<div class="nav-g">'+G[g][1]+"</div>";
   for(i=0;i<PAGES.length;i++){var p=PAGES[i];if(p.g!==G[g][0])continue;
    var on=cur===p.id,pl="";
    if(p.id==="tongquan"){var n=0;for(k=0;k<THUA.length;k++)if(tt(THUA[k].id).con>0)n++;
-    if(n)pl='<span class="ml-auto grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[0.62rem] font-bold" style="background:var(--wait);color:var(--page)">'+n+"</span>"}
-   h+='<button type="button" data-nav="'+p.id+'" class="mb-0.5 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[0.84rem] font-medium"'
-    +' style="'+(on?"background:hsl(var(--accent));color:hsl(var(--accent-foreground));font-weight:600":"color:"+V.mf)+'">'
-    +'<svg viewBox="0 0 24 24" class="h-[18px] w-[18px] shrink-0" fill="none" stroke="'+(on?V.pr:"currentColor")
-    +'" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">'+IC[p.id]+"</svg>"
+    if(n)pl='<span class="nav-badge">'+n+"</span>"}
+   h+='<button type="button" data-nav="'+p.id+'" class="nav-i'+(on?" on":"")+'">'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+    +' stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">'+IC[p.id]+"</svg>"
     +esc(p.ten)+pl+"</button>"}}
  document.getElementById("nav").innerHTML=h;
 
- // Tóm tắt vụ ở đáy thanh bên
  var dt=0,cho=0;
  for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++}
  var el=document.getElementById("navTomTat");
- if(el)el.innerHTML='<div class="rounded-lg border p-3" style="border-color:hsl(var(--border));background:hsl(var(--muted))">'
-  +'<div class="text-[0.62rem] font-bold uppercase tracking-[0.14em]" style="color:hsl(var(--muted-foreground))">Vụ mùa 2026</div>'
-  +'<div class="mt-1.5 flex items-baseline gap-1.5"><span class="mono text-xl font-bold leading-none">'+dt+"</span>"
-  +'<span class="text-xs" style="color:hsl(var(--muted-foreground))">sào · '+THUA.length+" thửa</span></div>"
-  +'<div class="mt-2 text-xs" style="color:hsl(var(--muted-foreground))">'
-  +(cho?'<span class="c-wait font-semibold">'+cho+" thửa</span> đang chờ cách ly":'<span class="c-ok font-semibold">Tất cả</span> đã đạt cách ly')
+ if(el)el.innerHTML='<div class="card" style="padding:14px">'
+  +'<div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted-fg)">Vụ mùa 2026</div>'
+  +'<div style="margin-top:8px;display:flex;align-items:baseline;gap:8px"><span class="mono" style="font-size:1.3rem;font-weight:700;line-height:1">'+dt+"</span>"
+  +'<span style="font-size:.78rem;color:var(--muted-fg)">sào · '+THUA.length+" thửa</span></div>"
+  +'<div style="margin-top:8px;font-size:.78rem;color:var(--muted-fg)">'
+  +(cho?'<span class="c-wait" style="font-weight:600">'+cho+" thửa</span> đang chờ cách ly":'<span class="c-ok" style="font-weight:600">Tất cả</span> đã đạt cách ly')
   +"</div></div>"}
 
 function di(id){cur=id;var p=byId(PAGES,id);
  document.getElementById("pgTitle").textContent=p.ten;
  document.getElementById("pgSub").textContent=p.sub;
- document.getElementById("side").classList.add("hidden");
+ document.getElementById("side").classList.remove("show");
  veNav();ve();window.scrollTo(0,0)}
 
 /* ======================= BIỂU ĐỒ LỊCH ======================= */
@@ -495,30 +505,30 @@ function chLich(){
  var moc=[],i;
  for(i=0;i<so.length;i++){var e=so[i];if(!e.phi)continue;
   moc.push({thua:e.thua,bd:sod(new Date(e.ngay)),kt:addD(new Date(e.ngay),e.phi),thuoc:e.thuoc,phi:e.phi})}
- if(!moc.length)return '<p class="py-8 text-center text-sm" style="color:'+V.mf+'">Chưa có lần dùng thuốc nào trong vụ.</p>';
+ if(!moc.length)return '<p style="padding:32px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Chưa có lần dùng thuốc nào trong vụ.</p>';
  var t0=addD(NAY,-34),t1=addD(NAY,21),tg=dif(t0,t1);
  var W=880,pL=100,pR=86,pT=24,rh=44,ax=26,H=pT+THUA.length*rh+ax,pw=W-pL-pR;
  function X(d){return pL+dif(t0,d)/tg*pw}
  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Lịch thời gian cách ly từng thửa">';
  for(var d=0;d<=tg;d+=7){var x=pL+d/tg*pw;
-  s+='<line x1="'+x.toFixed(1)+'" y1="'+pT+'" x2="'+x.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="hsl(var(--border))" stroke-width="1"/>';
-  s+='<text x="'+x.toFixed(1)+'" y="'+(pT+THUA.length*rh+17)+'" text-anchor="middle" font-size="10.5" fill="hsl(var(--muted-foreground))">'+dm(addD(t0,d))+"</text>"}
+  s+='<line x1="'+x.toFixed(1)+'" y1="'+pT+'" x2="'+x.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="var(--border)" stroke-width="1"/>';
+  s+='<text x="'+x.toFixed(1)+'" y="'+(pT+THUA.length*rh+17)+'" text-anchor="middle" font-size="10.5" fill="var(--muted-fg)">'+dm(addD(t0,d))+"</text>"}
  for(var r=0;r<THUA.length;r++){var th=THUA[r],cy=pT+r*rh+rh/2;
-  s+='<text x="'+(pL-14)+'" y="'+(cy+4)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="hsl(var(--foreground))">'+esc(th.ten)+"</text>";
-  s+='<line x1="'+pL+'" y1="'+cy+'" x2="'+(W-pR)+'" y2="'+cy+'" stroke="hsl(var(--border))" stroke-width="1"/>';
+  s+='<text x="'+(pL-14)+'" y="'+(cy+4)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="var(--fg)">'+esc(th.ten)+"</text>";
+  s+='<line x1="'+pL+'" y1="'+cy+'" x2="'+(W-pR)+'" y2="'+cy+'" stroke="var(--border)" stroke-width="1"/>';
   for(var m=0;m<moc.length;m++){var o=moc[m];if(o.thua!==th.id)continue;
    var x1=X(o.bd),x2=X(o.kt),con=dif(NAY,o.kt),c=con>0?"var(--wait-solid)":"var(--ok-solid)";
    s+='<rect x="'+x1.toFixed(1)+'" y="'+(cy-5)+'" width="'+Math.max(4,x2-x1).toFixed(1)+'" height="10" rx="5" fill="'+c+'"'
-    +(con>0?"":' opacity=".45"')+' data-tip="'+esc(o.thuoc)+" · cách ly "+o.phi+" ngày · "+dm(o.bd)+" → "+dm(o.kt)
+    +(con>0?"":" opacity=\".4\"")+' data-tip="'+esc(o.thuoc)+" · cách ly "+o.phi+" ngày · "+dm(o.bd)+" → "+dm(o.kt)
     +'" data-tx="'+((x1+x2)/2).toFixed(1)+'" data-ty="'+(cy-8)+'"/>';
    if(con>0)s+='<text class="halo" x="'+(x2+9).toFixed(1)+'" y="'+(cy+4)+'" font-size="11" font-weight="600" fill="var(--wait)">gặt '+dm(o.kt)+"</text>"}}
  var xh=X(NAY);
- s+='<line x1="'+xh.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xh.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="hsl(var(--primary))" stroke-width="1.5" stroke-dasharray="3 3"/>';
- s+='<text class="halo" x="'+xh.toFixed(1)+'" y="'+(pT-10)+'" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(var(--primary))" letter-spacing=".08em">HÔM NAY</text>';
+ s+='<line x1="'+xh.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xh.toFixed(1)+'" y2="'+(pT+THUA.length*rh)+'" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="3 3"/>';
+ s+='<text class="halo" x="'+xh.toFixed(1)+'" y="'+(pT-10)+'" text-anchor="middle" font-size="10" font-weight="700" fill="var(--primary)" letter-spacing=".08em">HÔM NAY</text>';
  s+="</svg>";
- return '<div class="chart">'+s+'</div><div class="mt-3 flex flex-wrap gap-4 text-[0.72rem]" style="color:'+V.mf+'">'
-  +'<span><i class="b-wait mr-1.5 inline-block h-[3px] w-2.5 rounded-sm align-middle"></i>Đang phải chờ cách ly</span>'
-  +'<span><i class="b-ok mr-1.5 inline-block h-[3px] w-2.5 rounded-sm align-middle opacity-50"></i>Đã qua cách ly</span></div>'}
+ return '<div class="chart">'+s+'</div><div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:16px;font-size:.72rem;color:var(--muted-fg)">'
+  +'<span><i class="b-wait" style="display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px"></i>Đang phải chờ cách ly</span>'
+  +'<span><i class="b-ok" style="display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px;opacity:.5"></i>Đã qua cách ly</span></div>'}
 
 /* ======================= BIỂU ĐỒ GIÁ ======================= */
 var giaCur="bt7";
@@ -531,18 +541,18 @@ function chGia(){
  function Y(v){return pT+ph-(v-y0)/(y1-y0)*ph}
  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Giá '+esc(g.ten)+' theo tuần">';
  for(var v=y0;v<=y1;v+=st*2){var y=Y(v);
-  s+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="hsl(var(--border))" stroke-width="1"/>';
-  s+='<text x="'+(pL-11)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="hsl(var(--muted-foreground))">'+vnd(v)+"</text>"}
- for(i=0;i<d.length;i++)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="10.5" fill="hsl(var(--muted-foreground))">'+TUAN[i]+"</text>";
+  s+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>';
+  s+='<text x="'+(pL-11)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="var(--muted-fg)">'+vnd(v)+"</text>"}
+ for(i=0;i<d.length;i++)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle" font-size="10.5" fill="var(--muted-fg)">'+TUAN[i]+"</text>";
  var ln="M"+X(0).toFixed(1)+" "+Y(d[0]).toFixed(1);
  for(i=1;i<d.length;i++)ln+=" L"+X(i).toFixed(1)+" "+Y(d[i]).toFixed(1);
- s+='<path d="'+ln+" L"+X(d.length-1).toFixed(1)+" "+(pT+ph)+" L"+X(0).toFixed(1)+" "+(pT+ph)+' Z" fill="hsl(var(--primary))" opacity=".1"/>';
- s+='<path d="'+ln+'" fill="none" stroke="hsl(var(--primary))" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+ s+='<path d="'+ln+" L"+X(d.length-1).toFixed(1)+" "+(pT+ph)+" L"+X(0).toFixed(1)+" "+(pT+ph)+' Z" fill="var(--primary)" opacity=".12"/>';
+ s+='<path d="'+ln+'" fill="none" stroke="var(--primary)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
  for(i=0;i<d.length;i++)s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(d[i]).toFixed(1)+'" r="14" fill="transparent" data-tip="'
   +TUAN[i]+" · "+vnd(d[i])+' đ/kg" data-tx="'+X(i).toFixed(1)+'" data-ty="'+(Y(d[i])-7).toFixed(1)+'"/>';
  var lx=X(d.length-1),ly=Y(d[d.length-1]);
- s+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="4.5" fill="hsl(var(--primary))" stroke="hsl(var(--card))" stroke-width="2"/>';
- s+='<text x="'+(lx+12).toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" font-size="13" font-weight="700" fill="hsl(var(--foreground))">'+vnd(d[d.length-1])+"</text>";
+ s+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="5" fill="var(--primary)" stroke="var(--bg)" stroke-width="2.5"/>';
+ s+='<text x="'+(lx+12).toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" font-size="13" font-weight="700" fill="var(--fg)">'+vnd(d[d.length-1])+"</text>";
  s+="</svg>";
  return '<div class="chart">'+s+"</div>"}
 
@@ -550,26 +560,26 @@ function chGia(){
 var diemCur=null;
 function veMap(){
  var s='<svg viewBox="0 0 640 470" role="img" aria-label="Sơ đồ điểm bán quanh vùng">';
- s+='<rect width="640" height="470" fill="hsl(var(--muted))"/>';
- s+='<path d="M20 20h270v200H20Z" fill="var(--ok)" opacity=".08" stroke="hsl(var(--border))"/>';
- s+='<path d="M290 20h330v230H290Z" fill="var(--inf)" opacity=".08" stroke="hsl(var(--border))"/>';
- s+='<path d="M20 220h270v230H20Z" fill="var(--wait)" opacity=".08" stroke="hsl(var(--border))"/>';
- s+='<path d="M290 250h330v200H290Z" fill="hsl(var(--muted-foreground))" opacity=".08" stroke="hsl(var(--border))"/>';
+ s+='<rect width="640" height="470" fill="var(--muted)"/>';
+ s+='<path d="M20 20h270v200H20Z" fill="var(--ok)" opacity=".08" stroke="var(--border)"/>';
+ s+='<path d="M290 20h330v230H290Z" fill="var(--inf)" opacity=".08" stroke="var(--border)"/>';
+ s+='<path d="M20 220h270v230H20Z" fill="var(--wait)" opacity=".08" stroke="var(--border)"/>';
+ s+='<path d="M290 250h330v200H290Z" fill="var(--muted-fg)" opacity=".08" stroke="var(--border)"/>';
  var lb=[[34,42,"XÃ ĐỒNG TIẾN"],[304,42,"XÃ TÂN LẬP"],[34,242,"VÙNG LÚA HTX"],[304,272,"XÃ HOÀ BÌNH"]];
- for(var q=0;q<lb.length;q++)s+='<text x="'+lb[q][0]+'" y="'+lb[q][1]+'" font-size="10.5" font-weight="600" letter-spacing=".1em" fill="hsl(var(--muted-foreground))">'+lb[q][2]+"</text>";
+ for(var q=0;q<lb.length;q++)s+='<text x="'+lb[q][0]+'" y="'+lb[q][1]+'" font-size="10.5" font-weight="600" letter-spacing=".1em" fill="var(--muted-fg)">'+lb[q][2]+"</text>";
  s+='<path d="M0 300c90-30 150 30 240 10s150-70 250-40 110 60 150 50" fill="none" stroke="var(--inf)" stroke-width="8" opacity=".35" stroke-linecap="round"/>';
- s+='<path d="M120 0v470M0 190h640" fill="none" stroke="hsl(var(--border))" stroke-width="2.5"/>';
- s+='<text x="127" y="464" font-size="10" fill="hsl(var(--muted-foreground))">ĐT-702</text>';
- s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="hsl(var(--primary))" opacity=".2"/>';
- s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="none" stroke="hsl(var(--primary))" stroke-width="2"/>';
- s+='<text x="185" y="276" text-anchor="middle" font-size="10.5" font-weight="700" fill="hsl(var(--primary))">RUỘNG NHÀ</text>';
+ s+='<path d="M120 0v470M0 190h640" fill="none" stroke="var(--border)" stroke-width="2.5"/>';
+ s+='<text x="127" y="464" font-size="10" fill="var(--muted-fg)">ĐT-702</text>';
+ s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="var(--primary)" opacity=".2"/>';
+ s+='<rect x="150" y="248" width="70" height="46" rx="3" fill="none" stroke="var(--primary)" stroke-width="2"/>';
+ s+='<text x="185" y="276" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--primary)">RUỘNG NHÀ</text>';
  for(var i=0;i<DIEM.length;i++){var d=DIEM[i];
   var c=d.loai==="Cây giống"?"var(--ok)":d.loai==="Vật tư"?"var(--inf)":"var(--wait)",on=diemCur===d.id;
   s+='<g style="cursor:pointer" data-diem="'+d.id+'">';
   if(on)s+='<circle cx="'+d.x+'" cy="'+d.y+'" r="17" fill="'+c+'" opacity=".22"/>';
-  s+='<circle cx="'+d.x+'" cy="'+d.y+'" r="9" fill="'+c+'" stroke="hsl(var(--muted))" stroke-width="2"/>';
-  s+='<text x="'+d.x+'" y="'+(d.y+3.6)+'" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(var(--muted))">'+d.id+"</text>";
-  s+='<text x="'+d.x+'" y="'+(d.y-16)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="hsl(var(--foreground))" style="paint-order:stroke;stroke:hsl(var(--muted));stroke-width:3px">'
+  s+='<circle cx="'+d.x+'" cy="'+d.y+'" r="9" fill="'+c+'" stroke="var(--muted)" stroke-width="2"/>';
+  s+='<text x="'+d.x+'" y="'+(d.y+3.6)+'" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">'+d.id+"</text>";
+  s+='<text x="'+d.x+'" y="'+(d.y-16)+'" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--fg)" style="paint-order:stroke;stroke:var(--bg);stroke-width:3px">'
    +esc(d.ten.split(" ").slice(-2).join(" "))+"</text></g>"}
  return s+"</svg>"}
 
@@ -586,342 +596,312 @@ function ve(){
  if(cur==="mophong")simInit();
  ganTip()}
 
-/* Trang Tổng quan trả lời đúng một câu: HÔM NAY CẦN LÀM GÌ.
+/* ===== COUNTDOWN RING SVG ===== */
+function ring(days,max,r,sw){
+ var circ=2*Math.PI*r, pct=max>0?Math.min(days/max,1):0, off=circ*(1-pct);
+ var col=days>0?"var(--wait)":"var(--ok)";
+ return '<svg width="'+(2*r+sw+4)+'" height="'+(2*r+sw+4)+'" viewBox="0 0 '+(2*r+sw+4)+' '+(2*r+sw+4)+'">'
+  +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" class="rbg" stroke-width="'+sw+'"/>'
+  +'<circle cx="'+(r+sw/2+2)+'" cy="'+(r+sw/2+2)+'" r="'+r+'" class="rfg" stroke="'+col+'" stroke-width="'+sw+'"'
+  +' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"'
+  +' style="filter:drop-shadow(0 0 6px '+col+')"/></svg>'}
 
-   Bản trước hỏng ba chỗ:
-   - Số lớn chỉ hiện MỘT thửa (thửa chờ lâu nhất). Có 3 thửa mà chỉ thấy 1,
-     hai thửa kia coi như vô hình.
-   - Khối "Các thửa" lặp lại đúng trang Thửa ruộng.
-   - Dãy "20 sào / 2 lần / 5 việc" không dẫn tới quyết định nào. Biết 20 sào
-     thì làm gì tiếp? Không làm gì cả.
-
-   Giờ: một danh sách việc cần chú ý, rồi trạng thái TỪNG thửa, rồi lịch. */
+/* ===== TRANG TỔNG QUAN ===== */
 function pTong(){
  var i,ok=0,cho=0,dt=0;
  for(i=0;i<THUA.length;i++){dt+=THUA[i].dt;if(tt(THUA[i].id).con>0)cho++;else ok++}
 
- /* ---- Việc cần chú ý, xếp theo mức gấp ---- */
  var viec=[];
  for(i=0;i<THUA.length;i++){
   var th=THUA[i],s=tt(th.id);
-  if(s.con>0)viec.push({uu:s.con,mau:"wait",ic:"cho",
+  if(s.con>0)viec.push({uu:s.con,mau:"wait",
     tieu:esc(th.ten)+" — còn "+s.con+" ngày mới được gặt",
     phu:"Sớm nhất "+dmy(s.het)+". Vì ngày "+dmy(new Date(s.ng.ngay))+" đã xịt <b>"
         +esc(s.ng.thuoc)+"</b>, cách ly "+s.ng.phi+" ngày."});
-  else viec.push({uu:900,mau:"ok",ic:"xong",
+  else viec.push({uu:900,mau:"ok",
     tieu:esc(th.ten)+" — gặt được",
     phu:"Đã qua thời gian cách ly của mọi lần xịt trên thửa này."});
  }
- viec.push({uu:2,mau:"inf",ic:"lich",tieu:"Bón đón đòng — Ruộng Trên",
+ viec.push({uu:2,mau:"inf",tieu:"Bón đón đòng — Ruộng Trên",
    phu:"Đến hạn "+dm(addD(NAY,2))+"."});
  viec.sort(function(a,b){return a.uu-b.uu});
 
  var dsViec="";
  for(i=0;i<viec.length;i++){
   var v=viec[i];
-  dsViec+='<div class="flex gap-3.5 border-t p-4" style="border-color:'+V.bd+'">'
-   +'<span class="b-'+v.mau+' mt-1 h-2 w-2 shrink-0 rounded-full"></span>'
-   +'<div class="min-w-0"><div class="text-[0.95rem] font-semibold leading-snug">'+v.tieu+'</div>'
-   +'<div class="mt-0.5 text-[0.82rem] leading-relaxed" style="color:'+V.mf+'">'+v.phu+'</div></div></div>';
+  dsViec+='<div style="display:flex;gap:14px;border-top:1px solid var(--border);padding:14px 16px">'
+   +'<span class="b-'+v.mau+'" style="margin-top:6px;width:8px;height:8px;flex-shrink:0;border-radius:50%"></span>'
+   +'<div style="min-width:0"><div style="font-size:.92rem;font-weight:600;line-height:1.4">'+v.tieu+'</div>'
+   +'<div style="margin-top:3px;font-size:.8rem;line-height:1.5;color:var(--muted-fg)">'+v.phu+"</div></div></div>";
  }
 
- var dau='<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 p-4 pb-3">'
-  +'<span class="text-[0.7rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">Hôm nay</span>'
-  +'<span class="text-[0.95rem]">'
+ var dau='<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;padding:16px 16px 12px">'
+  +'<span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg)">Hôm nay</span>'
+  +'<span style="font-size:.92rem">'
   +(cho?'<b class="c-wait">'+cho+' thửa</b> đang chờ cách ly':'')
   +(cho&&ok?' · ':'')
   +(ok?'<b class="c-ok">'+ok+' thửa</b> gặt được':'')
-  +'</span></div>';
+  +"</span></div>";
 
  var h=sec("Cần chú ý",card(dau+dsViec));
 
- /* ---- Trạng thái TỪNG thửa, mỗi thửa một đồng hồ riêng ---- */
+ /* Từng thửa — với countdown ring */
  var oThua="";
  for(i=0;i<THUA.length;i++){
   var t2=THUA[i],s2=tt(t2.id),w=s2.con>0;
-  oThua+='<div class="uk-card rounded-xl border border-border bg-card p-5">'
-   +'<div class="flex items-center gap-3">'
-   +'<span class="inline-grid shrink-0 place-items-center rounded-xl px-4 py-1.5" style="background:var(--'
-   +(w?'wait':'ok')+'-bg)">'
-   +(w?'<span style="color:var(--wait-solid)" class="text-[2.6rem] font-extrabold leading-[1.15] tracking-tighter">'+s2.con+'</span>'
-      :'<span class="c-ok text-[1.35rem] font-bold leading-[2.2]">gặt được</span>')
-   +'</span>'
-   +'<span class="min-w-0"><span class="block text-[0.95rem] font-bold leading-tight">'+esc(t2.ten)+'</span>'
-   +'<span class="block text-xs" style="color:'+V.mf+'">'+t2.dt+' sào · '+esc(t2.cay)+'</span>'
-   +(w?'<span class="mt-1 block text-xs" style="color:'+V.mf+'">gặt từ '+dm(s2.het)+'</span>':'')
-   +'</span></div>'
-   +'<div class="mt-3.5 flex border-t pt-3" style="border-color:'+V.bd+'">'
-   +'<div class="flex-1"><b class="mono block text-sm font-semibold">'+t2.ngaycay+'</b>'
-   +'<span class="block text-[0.66rem]" style="color:'+V.mf+'">ngày sau trồng</span></div>'
-   +'<div class="flex-1 border-l pl-3" style="border-color:'+V.bd+'"><b class="block text-sm font-semibold">'+esc(t2.gd)+'</b>'
-   +'<span class="block text-[0.66rem]" style="color:'+V.mf+'">giai đoạn</span></div>'
-   +'</div></div>';
+  oThua+='<div class="card" style="padding:20px">'
+   +'<div style="display:flex;align-items:center;gap:16px">'
+   +'<div class="cdown'+(w?" glow-p":"")+'">'
+   +ring(w?s2.con:0,w?Math.max(s2.con,14):14,38,5)
+   +'<span class="cdown-n'+(w?" num-p":"")+'" style="font-size:'+(w?"2rem":"1rem")+';color:'+(w?"var(--wait)":"var(--ok)")+'">'
+   +(w?s2.con:"✓")+"</span></div>"
+   +'<span style="min-width:0"><span style="display:block;font-size:.95rem;font-weight:700;line-height:1.3">'+esc(t2.ten)+"</span>"
+   +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+t2.dt+" sào · "+esc(t2.cay)+"</span>"
+   +(w?'<span style="display:block;margin-top:4px;font-size:.78rem;color:var(--muted-fg)">gặt từ '+dm(s2.het)+"</span>":"")
+   +"</span></div>"
+   +'<div style="margin-top:14px;display:flex;border-top:1px solid var(--border);padding-top:12px">'
+   +'<div style="flex:1"><b class="mono" style="display:block;font-size:.9rem;font-weight:600">'+t2.ngaycay+"</b>"
+   +'<span style="display:block;font-size:.64rem;color:var(--muted-fg)">ngày sau trồng</span></div>'
+   +'<div style="flex:1;border-left:1px solid var(--border);padding-left:12px"><b style="display:block;font-size:.9rem;font-weight:600">'+esc(t2.gd)+"</b>"
+   +'<span style="display:block;font-size:.64rem;color:var(--muted-fg)">giai đoạn</span></div>'
+   +"</div></div>";
  }
- h+=sec("Từng thửa",'<div class="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">'+oThua+'</div>',
-   '<span class="text-xs" style="color:'+V.mf+'">'+THUA.length+' thửa · '+dt+' sào</span>');
+ h+=sec("Từng thửa",'<div class="g3">'+oThua+"</div>",
+   '<span style="font-size:.78rem;color:var(--muted-fg)">'+THUA.length+" thửa · "+dt+" sào</span>");
 
- /* ---- Hồ sơ: câu hỏi duy nhất đáng hỏi là GIAO HÀNG ĐƯỢC CHƯA ---- */
+ /* Hồ sơ */
  var an=cho===0;
  h+=sec("Hồ sơ cách ly toàn vụ",
-   card('<div class="flex flex-wrap items-center gap-4 p-5">'
-    +'<span class="tag tag-'+(an?'ok':'wait')+'" style="font-size:0.85rem;padding:0.3rem 0.8rem">'
-    +(an?'Đạt — giao hàng được':'Chưa đạt — chưa nên giao hàng')+'</span>'
-    +'<span class="min-w-0 flex-1 text-sm" style="color:'+V.mf+'">'
-    +(an?'Mọi thửa đã qua thời gian cách ly.'
-        :'Còn '+cho+' thửa trong thời gian cách ly. Gặt và giao bây giờ thì có nguy cơ dư lượng vượt ngưỡng.')
-    +'</span>'
-    +'<button type="button" data-go="so" class="uk-btn uk-btn-sm uk-btn-default shrink-0">Mở nhật ký</button></div>'));
+   card('<div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:20px">'
+    +'<span class="tag tag-'+(an?"ok":"wait")+'" style="font-size:.84rem;padding:5px 14px">'
+    +(an?"Đạt — giao hàng được":"Chưa đạt — chưa nên giao hàng")+"</span>"
+    +'<span style="min-width:0;flex:1;font-size:.88rem;color:var(--muted-fg)">'
+    +(an?"Mọi thửa đã qua thời gian cách ly."
+        :"Còn "+cho+" thửa trong thời gian cách ly. Gặt và giao bây giờ thì có nguy cơ dư lượng vượt ngưỡng.")
+    +"</span>"
+    +'<button type="button" data-go="so" class="btn" style="flex-shrink:0">Mở nhật ký</button></div>'));
 
  h+=sec("Lịch cách ly",
-  card('<div class="p-6"><p class="mb-4 max-w-[62ch] text-sm" style="color:'+V.mf
-   +'">Mỗi thanh là một lần dùng thuốc và khoảng phải chờ sau đó. Đường đứt nét là hôm nay.</p>'
-   +chLich()+'</div>'));
+  card('<div style="padding:24px"><p style="margin:0 0 16px;max-width:62ch;font-size:.88rem;color:var(--muted-fg)">'
+   +"Mỗi thanh là một lần dùng thuốc và khoảng phải chờ sau đó. Đường đứt nét là hôm nay.</p>"
+   +chLich()+"</div>"));
  return h;
 }
-function cThuaGon(t){
- var s=tt(t.id),w=s.con>0;
- return '<div class="rounded-lg border p-3" style="border-color:'+V.bd+'">'
-  +'<div class="flex items-start gap-2"><div class="min-w-0 flex-1">'
-  +'<div class="truncate text-sm font-semibold">'+esc(t.ten)+"</div>"
-  +'<div class="truncate text-xs" style="color:'+V.mf+'">'+t.dt+" sào · "+esc(t.giong)+"</div></div>"
-  +tag(w?"chờ "+s.con+" ngày":"gặt được",w?"wait":"ok")+"</div>"
-  +'<div class="mt-2.5 flex gap-4 border-t pt-2" style="border-color:'+V.bd+'">'
-  +'<span class="text-xs" style="color:'+V.mf+'"><b class="mono" style="color:hsl(var(--foreground))">'+t.ngaycay+"</b> ngày sau cấy</span>"
-  +'<span class="text-xs" style="color:'+V.mf+'">'+esc(t.gd)+"</span></div></div>"}
-
-function nx(dot,t,s){
- return '<div class="flex gap-3 border-t py-2.5" style="border-color:'+V.bd+'">'
-  +'<span class="'+dot+' mt-[7px] h-[7px] w-[7px] shrink-0 rounded-full"></span>'
-  +'<div class="min-w-0"><b class="block text-[0.85rem] font-semibold leading-snug">'+t
-  +'</b><span class="block text-xs" style="color:'+V.mf+'">'+s+"</span></div></div>"}
-
-function fg(v,l,first){
- return '<div class="min-w-[145px] flex-1 border-l px-5 py-4'+(first?" !border-l-0 !pl-0":"")+'" style="border-color:'+V.bd+'">'
-  +'<div class="text-2xl font-bold tracking-tight">'+v+'</div>'
-  +'<div class="mt-0.5 text-xs" style="color:'+V.mf+'">'+l+"</div></div>"}
 
 function cThua(t){
  var s=tt(t.id),w=s.con>0,n=0;
  for(var i=0;i<so.length;i++)if(so[i].thua===t.id)n++;
- var inner='<div class="p-4"><div class="flex items-start gap-3">'
-  +'<div class="min-w-0"><div class="truncate text-base font-bold tracking-tight">'+esc(t.ten)+"</div>"
-  +'<div class="truncate text-xs" style="color:'+V.mf+'">'+t.dt+" sào · "+esc(t.giong)+" · "+esc(t.gd)+"</div></div>"
-  +'<span class="ml-auto shrink-0">'+tag(w?"chờ "+s.con+" ngày":"gặt được",w?"wait":"ok")+"</span></div>"
-  +'<div class="mt-4 flex border-t pt-3.5" style="border-color:'+V.bd+'">'
-  +st(t.ngaycay,"ngày sau cấy",1)+st(n,"việc đã ghi")+st(w?dm(s.het):"—","gặt sớm nhất")
+ var inner='<div style="padding:16px"><div style="display:flex;align-items:flex-start;gap:12px">'
+  +'<div style="min-width:0"><div style="font-size:1rem;font-weight:700;letter-spacing:-.01em">'+esc(t.ten)+"</div>"
+  +'<div style="font-size:.78rem;color:var(--muted-fg)">'+t.dt+" sào · "+esc(t.giong)+" · "+esc(t.gd)+"</div></div>"
+  +'<span style="margin-left:auto;flex-shrink:0">'+tag(w?"chờ "+s.con+" ngày":"gặt được",w?"wait":"ok")+"</span></div>"
+  +'<div style="margin-top:14px;display:flex;border-top:1px solid var(--border);padding-top:12px">'
+  +st2(t.ngaycay,"ngày sau cấy",1)+st2(n,"việc đã ghi")+st2(w?dm(s.het):"—","gặt sớm nhất")
   +"</div></div>";
  return card(inner)}
-function st(v,l,first){
- return '<div class="flex-1 border-l pl-3.5'+(first?" !border-l-0 !pl-0":"")+'" style="border-color:'+V.bd+'">'
-  +'<b class="mono block text-[0.95rem] font-semibold leading-tight">'+v+"</b>"
-  +'<span class="block text-[0.66rem] leading-snug" style="color:'+V.mf+'">'+l+"</span></div>"}
+function st2(v,l,first){
+ return '<div style="flex:1;'+(first?"":"border-left:1px solid var(--border);padding-left:12px")+'">'
+  +'<b class="mono" style="display:block;font-size:.92rem;font-weight:600;line-height:1.2">'+v+"</b>"
+  +'<span style="display:block;font-size:.64rem;line-height:1.3;color:var(--muted-fg)">'+l+"</span></div>"}
+
+function fg(v,l,first){
+ return '<div style="min-width:140px;flex:1;'+(first?"":"border-left:1px solid var(--border);")+'padding:16px">'
+  +'<div style="font-size:1.4rem;font-weight:700;letter-spacing:-.02em">'+v+"</div>"
+  +'<div style="margin-top:3px;font-size:.78rem;color:var(--muted-fg)">'+l+"</div></div>"}
 
 function pThua(){
  var pl="",i;for(i=0;i<THUA.length;i++)pl+=cThua(THUA[i]);
- var h=sec("Thửa trong vụ",'<div class="grid gap-3.5 sm:grid-cols-2">'+pl+"</div>");
+ var h=sec("Thửa trong vụ",'<div class="g2">'+pl+"</div>");
  var r="";
  for(i=0;i<so.length;i++){var e=so[i],t=byId(THUA,e.thua),d=new Date(e.ngay),s,cl;
   if(e.phi){var het=addD(d,e.phi),c=dif(NAY,het);cl=e.phi+" ngày";
    s=c>0?tag("còn "+c+" ngày","wait"):tag("đã qua","ok")}
   else{cl="—";s=tag("không cách ly","mut")}
-  r+=tr([esc(t?t.ten:"—"),dmy(d),esc(e.viec),esc(e.thuoc||e.lieu),{n:cl},s])}
- h+=sec("Việc theo từng thửa",tbl(["Thửa","Ngày","Việc","Vật tư",{n:"Cách ly"},"Trạng thái"],r));
+  r+=tr2([esc(t?t.ten:"—"),dmy(d),esc(e.viec),esc(e.thuoc||e.lieu),{n:cl},s])}
+ h+=sec("Việc theo từng thửa",tbl2(["Thửa","Ngày","Việc","Vật tư",{n:"Cách ly"},"Trạng thái"],r));
  return h}
 
-function tbl(cols,rows){
+function tbl2(cols,rows){
  var th="",i;
  for(i=0;i<cols.length;i++){var c=cols[i],n=c&&c.n;
-  th+='<th class="whitespace-nowrap border-b border-border pb-2.5 pr-4 text-[0.65rem] font-bold uppercase'
-   +' tracking-[0.1em] text-muted-foreground'+(n?" text-right":" text-left")+'">'+(n||c)+"</th>"}
- return '<div class="overflow-x-auto"><table class="uk-table uk-table-sm w-full min-w-[620px] border-collapse text-[0.85rem]">'
+  th+='<th'+(n?' class="r"':"")+">"+( n||c)+"</th>"}
+ return '<div class="tbl-w"><table style="min-width:620px">'
   +"<thead><tr>"+th+"</tr></thead><tbody>"+rows+"</tbody></table></div>"}
-function tr(cells){
+function tr2(cells){
  var h="",i;
  for(i=0;i<cells.length;i++){var c=cells[i],n=c&&c.n!==undefined;
-  h+='<td class="border-b border-border py-2.5 pr-4 align-top'+(n?" text-right tnum":"")+'">'+(n?c.n:c)+"</td>"}
+  h+='<td'+(n?' class="r tnum"':"")+">"+( n?c.n:c)+"</td>"}
  return "<tr>"+h+"</tr>"}
 
 function pBenh(){
- if(!D)return sec("Tra bệnh",card('<p class="p-8 text-center text-sm" style="color:'+V.mf+'">Đang nạp danh mục thuốc…</p>'));
+ if(!D)return sec("Tra bệnh",card('<p style="padding:32px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Đang nạp danh mục thuốc…</p>'));
  var i,L="",ten=["Cây trồng","Dịch hại","Chọn thuốc","Ghi sổ"];
  var bn=bw.thuoc?3:(bw.dh!=null?2:(bw.cay?1:0));
 
- L+='<div class="mb-5 flex flex-wrap border-b" style="border-color:'+V.bd+'">';
- for(i=0;i<4;i++)L+='<span class="relative pb-2.5 pr-5 text-[0.68rem] font-bold uppercase tracking-[0.1em]" style="color:'
-  +(i===bn?V.pr:V.mf)+'">'+(i+1)+". "+ten[i]
-  +(i===bn?'<span class="absolute -bottom-px left-0 right-5 h-0.5" style="background:'+V.pr+'"></span>':"")+"</span>";
+ L+='<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:20px;gap:2px">';
+ for(i=0;i<4;i++)L+='<span style="position:relative;padding-bottom:10px;padding-right:18px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:'
+  +(i===bn?"var(--primary)":"var(--muted-fg)")+'">'+(i+1)+". "+ten[i]
+  +(i===bn?'<span style="position:absolute;bottom:-1px;left:0;right:18px;height:2px;background:var(--primary);border-radius:1px"></span>':"")+  "</span>";
  L+="</div>";
 
- /* BƯỚC 1 — cây trồng. Gợi ý cây đang có thửa trước, rồi mới tới ô tìm
-    trong toàn bộ danh mục. */
  if(!bw.cay){
-  L+='<p class="mb-3 max-w-[56ch] text-sm" style="color:'+V.mf+'">Chọn cây đang bị hại. Danh mục phủ '
-   +D.bang.cay.length+' loại cây.</p><div class="mb-4 flex flex-col gap-2">';
+  L+='<p style="margin:0 0 12px;max-width:56ch;font-size:.88rem;color:var(--muted-fg)">Chọn cây đang bị hại. Danh mục phủ '
+   +D.bang.cay.length+' loại cây.</p><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">';
   var daCo={};
   for(i=0;i<THUA.length;i++){
    if(daCo[THUA[i].cay])continue; daCo[THUA[i].cay]=1;
    var ci0=cayId(THUA[i].cay),sl=ci0<0?0:dichHaiCuaCay(ci0).length;
-   L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(THUA[i].cay)
-    +'</span><span class="block text-xs" style="color:'+V.mf+'">thửa '+esc(THUA[i].ten)+' · '+sl
-    +' dịch hại có thuốc đăng ký</span></span>'+ARROW,'data-cay="'+esc(THUA[i].cay)+'"');
+   L+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(THUA[i].cay)
+    +'</span><span style="display:block;font-size:.78rem;color:var(--muted-fg)">thửa '+esc(THUA[i].ten)+" · "+sl
+    +" dịch hại có thuốc đăng ký</span></span>"+ARROW,'data-cay="'+esc(THUA[i].cay)+'"');
   }
-  L+='</div><label for="timCay" class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.13em]" style="color:'
-   +V.mf+'">Hoặc tìm cây khác</label>'
-   +'<input id="timCay" type="search" placeholder="gõ tên cây: sầu riêng, hồ tiêu, cao su…" autocomplete="off"'
-   +' class="w-full rounded-lg border px-3 py-2 text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'
-   +'<div id="kqCay" class="mt-2 flex flex-col gap-1.5"></div>';
+  L+='</div><label for="timCay" style="display:block;margin-bottom:6px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg)">Hoặc tìm cây khác</label>'
+   +'<input id="timCay" type="search" placeholder="gõ tên cây: sầu riêng, hồ tiêu, cao su…" autocomplete="off" style="width:100%">'
+   +'<div id="kqCay" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>';
 
- /* BƯỚC 2 — dịch hại đã đăng ký trên ĐÚNG cây đó */
  }else if(bw.dh==null){
   var ci=cayId(bw.cay),ds=dichHaiCuaCay(ci);
   L+=back("cay","Chọn lại cây")
-   +'<p class="mb-3 max-w-[58ch] text-sm" style="color:'+V.mf+'"><b style="color:hsl(var(--foreground))">'+esc(bw.cay)
+   +'<p style="margin:0 0 12px;max-width:58ch;font-size:.88rem;color:var(--muted-fg)"><b style="color:var(--fg)">'+esc(bw.cay)
    +'</b> có '+ds.length+' dịch hại được đăng ký thuốc. Số bên phải là số thuốc đăng ký cho dịch hại đó.</p>'
-   +'<div class="scroll-thin flex max-h-[30rem] flex-col gap-1.5 overflow-y-auto pr-1">';
+   +'<div class="scr" style="display:flex;max-height:30rem;flex-direction:column;gap:6px;overflow-y:auto;padding-right:4px">';
   for(i=0;i<ds.length;i++)
-   L+=rowBtn('<span class="min-w-0 flex-1 text-sm font-semibold">'+esc(ds[i].ten)+'</span>'
-    +'<span class="mono shrink-0 text-xs" style="color:'+V.mf+'">'+ds[i].n+'</span>','data-dh="'+ds[i].id+'"');
+   L+=rowBtn('<span style="min-width:0;flex:1;font-size:.88rem;font-weight:600">'+esc(ds[i].ten)+'</span>'
+    +'<span class="mono" style="flex-shrink:0;font-size:.78rem;color:var(--muted-fg)">'+ds[i].n+"</span>",'data-dh="'+ds[i].id+'"');
   L+='</div><p class="hint">Tên dịch hại lấy nguyên từ Thông tư. App chưa có ảnh đối chiếu — đó là việc còn phải làm.</p>';
 
- /* BƯỚC 3 — thuốc đăng ký cho đúng cặp (cây, dịch hại) */
  }else if(!bw.thuoc){
   var ci2=cayId(bw.cay),ds2=thuocCho(ci2,bw.dh);
   L+=back("dh","Chọn lại dịch hại")
-   +'<p class="mb-3 max-w-[58ch] text-sm" style="color:'+V.mf+'"><b style="color:hsl(var(--foreground))">'
-   +esc(D.bang.dich_hai[bw.dh])+'</b> trên <b style="color:hsl(var(--foreground))">'+esc(bw.cay)+'</b> — '
+   +'<p style="margin:0 0 12px;max-width:58ch;font-size:.88rem;color:var(--muted-fg)"><b style="color:var(--fg)">'
+   +esc(D.bang.dich_hai[bw.dh])+'</b> trên <b style="color:var(--fg)">'+esc(bw.cay)+'</b> — '
    +ds2.length+' thuốc được phép dùng.</p>'
-   +'<div class="scroll-thin flex max-h-[30rem] flex-col gap-2 overflow-y-auto pr-1">';
+   +'<div class="scr" style="display:flex;max-height:30rem;flex-direction:column;gap:8px;overflow-y:auto;padding-right:4px">';
   for(i=0;i<Math.min(ds2.length,120);i++){
    var t=ds2[i],hc=D.bang.hoat_chat[t.h],cm=laCam(hc);
-   L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.t)+'</span>'
-    +'<span class="block text-xs" style="color:'+V.mf+'">'+esc(hc)+'</span>'
-    +(cm?'<span class="tag tag-bad mt-1">HOẠT CHẤT CẤM</span>':'')+'</span>'
-    +'<span class="shrink-0 text-[0.68rem]" style="color:'+V.mf+'">'
-    +esc((D.nhom[t.n]||"").replace("Thuốc ",""))+'</span>','data-thuoc="'+esc(t.t)+'"');
+   L+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(t.t)+'</span>'
+    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(hc)+'</span>'
+    +(cm?'<span class="tag tag-bad" style="margin-top:4px">HOẠT CHẤT CẤM</span>':'')+'</span>'
+    +'<span style="flex-shrink:0;font-size:.68rem;color:var(--muted-fg)">'
+    +esc((D.nhom[t.n]||"").replace("Thuốc ",""))+"</span>",'data-thuoc="'+esc(t.t)+'"');
   }
-  if(!ds2.length)L+='<div class="rounded-lg border border-dashed p-5 text-center text-sm" style="border-color:'+V.bd
-   +';color:'+V.mf+'">Không có thuốc nào đăng ký cho cặp này trong Thông tư 75/2025.<br>'
-   +'Nghĩa là <b style="color:hsl(var(--foreground))">chưa được phép dùng</b> — không phải app thiếu dữ liệu.</div>';
-  if(ds2.length>120)L+='<p class="py-2 text-center text-xs" style="color:'+V.mf+'">… và '+(ds2.length-120)+' thuốc nữa</p>';
-  L+='</div>';
+  if(!ds2.length)L+='<div style="border:1px dashed var(--border);border-radius:12px;padding:20px;text-align:center;font-size:.88rem;color:var(--muted-fg)">'
+   +'Không có thuốc nào đăng ký cho cặp này trong Thông tư 75/2025.<br><b style="color:var(--fg)">chưa được phép dùng</b> — không phải app thiếu dữ liệu.</div>';
+  if(ds2.length>120)L+='<p style="padding:8px;text-align:center;font-size:.78rem;color:var(--muted-fg)">… và '+(ds2.length-120)+" thuốc nữa</p>";
+  L+="</div>";
 
- /* BƯỚC 4 — cảnh báo cấm + ngưỡng MRL + nhập PHI + ghi sổ */
  }else{
   var t2=null;
   for(i=0;i<D.thuoc.length;i++)if(D.thuoc[i].t===bw.thuoc){t2=D.thuoc[i];break}
   var hc2=t2?D.bang.hoat_chat[t2.h]:"",cm2=laCam(hc2);
   L+=back("thuoc","Chọn lại thuốc")
-   +'<div class="text-lg font-bold tracking-tight">'+esc(bw.thuoc)+'</div>'
-   +'<div class="mb-1 text-xs" style="color:'+V.mf+'">'+esc(hc2)+'</div>';
-  if(t2)L+='<div class="mb-3 text-xs" style="color:'+V.mf+'">Đăng ký bởi '+esc(D.bang.cong_ty[t2.y])+'</div>';
+   +'<div style="font-size:1.1rem;font-weight:700;letter-spacing:-.01em">'+esc(bw.thuoc)+'</div>'
+   +'<div style="margin-bottom:4px;font-size:.78rem;color:var(--muted-fg)">'+esc(hc2)+'</div>';
+  if(t2)L+='<div style="margin-bottom:12px;font-size:.78rem;color:var(--muted-fg)">Đăng ký bởi '+esc(D.bang.cong_ty[t2.y])+"</div>";
   if(cm2)L+=alertBox("bad",ICO_X,"Hoạt chất bị cấm sử dụng","<b>"+esc(cm2)
    +"</b> nằm trong Danh mục cấm (Phụ lục II Thông tư 75/2025). Không dùng.");
 
   var mr=mrlCho(hc2,bw.cay);
-  L+=lbl("Ngưỡng dư lượng tối đa (MRL)");
+  L+=lbl2("Ngưỡng dư lượng tối đa (MRL)");
   if(mr&&mr.muc){
-   L+='<div class="flex flex-col gap-1.5">';
+   L+='<div style="display:flex;flex-direction:column;gap:6px">';
    for(i=0;i<mr.muc.length;i++)
-    L+='<div class="flex items-center gap-3 rounded-lg border p-2.5" style="border-color:'+V.bd+'">'
-     +'<span class="min-w-0 flex-1 text-sm">'+esc(mr.muc[i].mon)+'</span>'
-     +'<span class="mono text-sm font-semibold">'+mr.muc[i].mrl
-     +' <span class="text-xs font-normal" style="color:'+V.mf+'">mg/kg</span></span></div>';
+    L+='<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:10px;padding:10px 12px">'
+     +'<span style="min-width:0;flex:1;font-size:.88rem">'+esc(mr.muc[i].mon)+'</span>'
+     +'<span class="mono" style="font-size:.88rem;font-weight:600">'+mr.muc[i].mrl
+     +' <span style="font-size:.78rem;font-weight:400;color:var(--muted-fg)">mg/kg</span></span></div>';
    L+='</div><p class="hint">Theo Thông tư 50/2016/TT-BYT. Hàng xuất khẩu phải theo ngưỡng của nước nhập.</p>';
   }else{
-   L+='<div class="rounded-lg border border-dashed p-3 text-sm" style="border-color:'+V.bd+';color:'+V.mf+'">'
+   L+='<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;font-size:.88rem;color:var(--muted-fg)">'
     +'<b>Chưa có ngưỡng trong luật Việt Nam.</b> '
     +((mr&&mr.ly_do==="cay")
-       ?'Thông tư 50/2016 không có ngưỡng riêng cho '+esc(bw.cay)+'.'
-       :'Hoạt chất này không nằm trong Thông tư 50/2016 — văn bản đó chỉ phủ 165 hoạt chất lấy từ CODEX 2016.')
-    +' Nếu xuất khẩu, tra ngưỡng của nước nhập.</div>';
+       ?"Thông tư 50/2016 không có ngưỡng riêng cho "+esc(bw.cay)+"."
+       :"Hoạt chất này không nằm trong Thông tư 50/2016 — văn bản đó chỉ phủ 165 hoạt chất lấy từ CODEX 2016.")
+    +" Nếu xuất khẩu, tra ngưỡng của nước nhập.</div>";
   }
 
   var cu=PHI[bw.thuoc];
-  L+=lbl("Thời gian cách ly (PHI)")
-   +'<div class="rounded-lg border p-3.5" style="border-color:'+V.bd+'">'
-   +'<p class="mb-2.5 text-sm" style="color:'+V.mf+'">Số ngày này <b style="color:hsl(var(--foreground))">in trên nhãn chai thuốc</b>, '
+  L+=lbl2("Thời gian cách ly (PHI)")
+   +'<div style="border:1px solid var(--border);border-radius:12px;padding:14px">'
+   +'<p style="margin:0 0 10px;font-size:.88rem;color:var(--muted-fg)">Số ngày này <b style="color:var(--fg)">in trên nhãn chai thuốc</b>, '
    +'không có trong Thông tư nào. Xem nhãn rồi nhập vào đây — app sẽ nhớ cho lần sau.</p>'
-   +'<div class="flex flex-wrap items-center gap-2">'
-   +'<input id="phiIn" type="number" min="0" max="120" value="'+(cu!=null?cu:"")+'" placeholder="số ngày"'
-   +' class="w-28 rounded-lg border px-3 py-2 text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'
-   +'<span class="text-sm" style="color:'+V.mf+'">ngày</span>'
-   +(cu!=null?'<span class="tag tag-ok">đã nhớ từ lần trước</span>':'')+'</div>'
-   +'<div id="phiLoi" class="mt-2 text-xs"></div>'
-   +'<p class="mt-2 text-xs" style="color:'+V.mf+'">Bỏ trống cũng ghi được — chỉ là thửa đó không có đồng hồ đếm ngược. '
-   +'Thà thiếu còn hơn bịa một con số.</p></div>';
+   +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">'
+   +'<input id="phiIn" type="number" min="0" max="120" value="'+(cu!=null?cu:"")+'" placeholder="số ngày" style="width:100px">'
+   +'<span style="font-size:.88rem;color:var(--muted-fg)">ngày</span>'
+   +(cu!=null?'<span class="tag tag-ok">đã nhớ từ lần trước</span>':'')+  '</div>'
+   +'<div id="phiLoi" style="margin-top:8px;font-size:.78rem"></div>'
+   +'<p style="margin:8px 0 0;font-size:.78rem;color:var(--muted-fg)">Bỏ trống cũng ghi được — chỉ là thửa đó không có đồng hồ đếm ngược. '
+   +"Thà thiếu còn hơn bịa một con số.</p></div>";
 
-  L+=lbl("Xịt cho thửa nào")+'<div class="flex flex-col gap-2">';
+  L+=lbl2("Xịt cho thửa nào")+'<div style="display:flex;flex-direction:column;gap:8px">';
   for(i=0;i<THUA.length;i++){
    var th=THUA[i],hop=th.cay===bw.cay;
-   L+=rowBtn('<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(th.ten)+'</span>'
-    +'<span class="block text-xs" style="color:'+V.mf+'">'+th.dt+' sào · '+esc(th.cay)+' · '+esc(th.giong)+'</span></span>'
-    +(hop?'':'<span class="tag tag-wait shrink-0">khác cây</span>'),'data-thua="'+th.id+'"',bw.thua===th.id);
+   L+=rowBtn('<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(th.ten)+'</span>'
+    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+th.dt+" sào · "+esc(th.cay)+" · "+esc(th.giong)+'</span></span>'
+    +(hop?'':'<span class="tag tag-wait" style="flex-shrink:0">khác cây</span>'),'data-thua="'+th.id+'"',bw.thua===th.id);
   }
-  L+='</div><button type="button" id="btnGhi" class="uk-btn uk-btn-primary mt-4 w-full">Ghi vào nhật ký</button>';
+  L+='</div><button type="button" id="btnGhi" class="btn btn-p" style="width:100%;margin-top:16px">Ghi vào nhật ký</button>';
  }
 
- var R=lbl("Dữ liệu đang dùng",1)
-  +'<div class="rounded-lg border p-3.5 text-xs leading-relaxed" style="border-color:'+V.bd+';color:'+V.mf+'">'
-  +'<div class="mb-2"><b class="mono" style="color:hsl(var(--foreground))">'+D.thuoc.length
-  +'</b> thuốc · <b class="mono" style="color:hsl(var(--foreground))">'+D.bang.cay.length
-  +'</b> cây · <b class="mono" style="color:hsl(var(--foreground))">'+D.bang.dich_hai.length+'</b> dịch hại</div>'
+ var R=lbl2("Dữ liệu đang dùng",1)
+  +'<div style="border:1px solid var(--border);border-radius:12px;padding:14px;font-size:.78rem;line-height:1.7;color:var(--muted-fg)">'
+  +'<div style="margin-bottom:8px"><b class="mono" style="color:var(--fg)">'+D.thuoc.length
+  +'</b> thuốc · <b class="mono" style="color:var(--fg)">'+D.bang.cay.length
+  +'</b> cây · <b class="mono" style="color:var(--fg)">'+D.bang.dich_hai.length+'</b> dịch hại</div>'
   +'Thông tư 75/2025 + sửa đổi 28/2026 — danh mục thuốc<br>'
   +'Thông tư 50/2016 — ngưỡng dư lượng<br>'
   +'Phụ lục II Thông tư 75/2025 — '+D.cam.length+' hoạt chất cấm</div>'
   +'<p class="hint">Thiếu: thời gian cách ly và ảnh bệnh. PHI phải đọc trên nhãn; ảnh sẽ lấy từ PlantDoc và Bugwood.</p>';
 
  return sec("Tra theo cây và dịch hại",
-  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]"><div>'+L+'</div><div>'+R+'</div></div>');
+  '<div class="g-2col"><div>'+L+'</div><div>'+R+"</div></div>");
 }
-function back(k,t){return '<button type="button" data-back="'+k+'" class="mb-3 text-xs font-semibold" style="color:'+V.mf+'">‹ '+t+"</button>"}
-function lbl(t,first){return '<div class="'+(first?"mb-2.5":"mb-2.5 mt-6")+' text-[0.68rem] font-bold uppercase tracking-[0.13em]" style="color:'+V.mf+'">'+t+"</div>"}
+function back(k,t){return '<button type="button" data-back="'+k+'" style="display:block;margin-bottom:12px;font-size:.78rem;font-weight:600;color:var(--muted-fg);background:none;border:none;padding:0;cursor:pointer">‹ '+t+"</button>"}
+function lbl2(t,first){return '<div style="margin-bottom:10px;'+(first?"":"margin-top:24px;")+'font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-fg)">'+t+"</div>"}
 
 function pSo(){
  var xit=0,i;for(i=0;i<so.length;i++)if(so[i].phi)xit++;
  var an=true;for(i=0;i<THUA.length;i++)if(tt(THUA[i].id).con>0)an=false;
- var h=sec("Tổng kết vụ",card('<div class="flex flex-wrap">'
+ var h=sec("Tổng kết vụ",card('<div style="display:flex;flex-wrap:wrap">'
   +fg(so.length,"việc đã ghi",1)+fg(xit,"lần dùng thuốc")+fg(THUA.length,"thửa trong vụ")
   +fg(tag(an?"Đạt":"Chưa đạt",an?"ok":"wait"),"cách ly toàn vụ")+"</div>"));
  var r="";
  for(i=0;i<so.length;i++){var e=so[i],t=byId(THUA,e.thua),d=new Date(e.ngay),cl="—",gt=tag("—","mut");
   if(e.phi){var het=addD(d,e.phi),c=dif(NAY,het);cl=e.phi+" ngày";
    gt=c>0?tag(dmy(het)+" · còn "+c,"wait"):tag(dmy(het)+" · đã qua","ok")}
-  r+=tr([dmy(d),esc(t?t.ten:"—"),"<b>"+esc(e.viec)+"</b>",esc(e.thuoc?e.thuoc+" · "+e.lieu:e.lieu),{n:cl},gt])}
+  r+=tr2([dmy(d),esc(t?t.ten:"—"),"<b>"+esc(e.viec)+"</b>",esc(e.thuoc?e.thuoc+" · "+e.lieu:e.lieu),{n:cl},gt])}
  h+=sec("Nhật ký canh tác",
-  card('<div class="p-5 pt-3">'+tbl(["Ngày","Thửa","Việc","Vật tư / liều",{n:"Cách ly"},"Gặt được từ"],r)+"</div>"),
+  card('<div style="padding:20px 20px 16px">'+tbl2(["Ngày","Thửa","Việc","Vật tư / liều",{n:"Cách ly"},"Gặt được từ"],r)+"</div>"),
   btn("Ghi việc mới",'data-go="benh"')+btn("Xuất hồ sơ",'id="btnHoSo"',1));
- h+='<section class="mt-8" id="hoSoOut"></section>';
+ h+='<section class="sec" id="hoSoOut"></section>';
  return h}
 
 function pPha(){
- if(!D)return sec("Pha thuốc",card('<p class="p-8 text-center text-sm" style="color:'+V.mf+'">Đang nạp danh mục thuốc…</p>'));
- var i,L='<p class="mb-3 max-w-[58ch] text-sm" style="color:'+V.mf+'">'
+ if(!D)return sec("Pha thuốc",card('<p style="padding:32px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Đang nạp danh mục thuốc…</p>'));
+ var i,L='<p style="margin:0 0 12px;max-width:58ch;font-size:.88rem;color:var(--muted-fg)">'
   +'Tìm hai thuốc định đổ chung một bình. Gõ tên thương phẩm hoặc hoạt chất.</p>'
-  +'<input id="timThuoc" type="search" placeholder="ví dụ: Tervigo, Abamectin, đồng…" autocomplete="off"'
-  +' class="w-full rounded-lg border px-3 py-2 text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'
-  +'<div id="kqThuoc" class="scroll-thin mt-2 flex max-h-72 flex-col gap-1.5 overflow-y-auto pr-1"></div>';
+  +'<input id="timThuoc" type="search" placeholder="ví dụ: Tervigo, Abamectin, đồng…" autocomplete="off" style="width:100%">'
+  +'<div id="kqThuoc" class="scr" style="margin-top:8px;display:flex;max-height:18rem;flex-direction:column;gap:6px;overflow-y:auto;padding-right:4px"></div>';
 
- // Hai thuốc đang chọn
- L+=lbl("Đang chọn");
+ L+=lbl2("Đang chọn");
  if(!chonPha.length){
-  L+='<p class="rounded-lg border border-dashed p-3 text-sm" style="border-color:'+V.bd+';color:'+V.mf
-   +'">Chưa chọn thuốc nào.</p>';
+  L+='<p style="border:1px dashed var(--border);border-radius:12px;padding:12px;font-size:.88rem;color:var(--muted-fg)">Chưa chọn thuốc nào.</p>';
  }else{
-  L+='<div class="flex flex-col gap-2">';
+  L+='<div style="display:flex;flex-direction:column;gap:8px">';
   for(i=0;i<chonPha.length;i++){
    var t=timThuocTen(chonPha[i]);
    if(!t)continue;
-   L+='<div class="flex items-center gap-3 rounded-lg border p-3" style="border-color:hsl(var(--primary));background:var(--accent)">'
-    +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.t)+'</span>'
-    +'<span class="block text-xs" style="color:'+V.mf+'">'+esc(D.bang.hoat_chat[t.h])+'</span></span>'
-    +'<button type="button" data-bo="'+esc(t.t)+'" class="uk-btn uk-btn-sm uk-btn-default shrink-0">Bỏ</button></div>';
+   L+='<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--primary);border-radius:12px;padding:12px;background:var(--accent)">'
+    +'<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(t.t)+'</span>'
+    +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(D.bang.hoat_chat[t.h])+"</span></span>"
+    +'<button type="button" data-bo="'+esc(t.t)+'" class="btn" style="flex-shrink:0">Bỏ</button></div>';
   }
-  L+='</div>';
+  L+="</div>";
  }
 
- var R='';
+ var R="";
  if(chonPha.length<2){
-  R+=card('<p class="py-9 text-center text-sm" style="color:'+V.mf+'">Chọn đủ hai thuốc để kiểm tra.</p>');
+  R+=card('<p style="padding:36px;text-align:center;font-size:.88rem;color:var(--muted-fg)">Chọn đủ hai thuốc để kiểm tra.</p>');
  }else{
   var a=timThuocTen(chonPha[0]),b=timThuocTen(chonPha[1]),va=null;
   if(a&&b){
@@ -938,25 +918,22 @@ function pPha(){
   }
  }
 
- /* Phải nói rõ giới hạn: nhóm hoạt chất ở đây là SUY RA TỪ TÊN, và bốn quy
-    tắc là nguyên lý chung chứ không phải bảng tương kỵ chính thức. Người
-    dùng cần biết mức tin cậy của thứ họ đang đọc. */
- R+='<div class="mt-4 rounded-lg border border-dashed p-3 text-xs leading-relaxed" style="border-color:var(--wait);color:'
-  +V.mf+'"><b class="c-wait">Mức tin cậy.</b> App phân nhóm hoạt chất bằng cách đọc TÊN hoạt chất '
+ R+='<div style="margin-top:16px;border:1px dashed var(--wait-bd);border-radius:12px;padding:12px;font-size:.78rem;line-height:1.7;color:var(--muted-fg)">'
+  +'<b class="c-wait">Mức tin cậy.</b> App phân nhóm hoạt chất bằng cách đọc TÊN hoạt chất '
   +'(thấy "đồng" thì xếp nhóm đồng, thấy "Bacillus" thì xếp nhóm sinh học…), không phải theo phân loại chính thức. '
   +'Bốn quy tắc dưới đây là nguyên lý chung, không phải bảng tương kỵ của nhà sản xuất. '
   +'Không có cảnh báo KHÔNG có nghĩa là chắc chắn pha được.</div>';
 
- R+=lbl("Bốn quy tắc đang áp dụng")+'<div class="flex flex-col gap-2">';
+ R+=lbl2("Bốn quy tắc đang áp dụng")+'<div style="display:flex;flex-direction:column;gap:8px">';
  for(i=0;i<KY.length;i++)
-  R+='<div class="flex items-start gap-3 rounded-lg border p-3" style="border-color:'+V.bd+';background:'+V.cd+'">'
-   +'<span class="b-bad mt-0.5 h-8 w-[3px] shrink-0 rounded-sm"></span><span class="min-w-0">'
-   +'<span class="block text-sm font-semibold">'+nt(KY[i].a)+' + '+nt(KY[i].b)+'</span>'
-   +'<span class="mt-0.5 block text-xs leading-relaxed" style="color:'+V.mf+'">'+esc(KY[i].ly)+'</span></span></div>';
- R+='</div>';
+  R+='<div style="display:flex;align-items:flex-start;gap:12px;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--card)">'
+   +'<span class="b-bad" style="margin-top:4px;width:3px;height:32px;flex-shrink:0;border-radius:2px"></span><span style="min-width:0">'
+   +'<span style="display:block;font-size:.88rem;font-weight:600">'+nt(KY[i].a)+' + '+nt(KY[i].b)+'</span>'
+   +'<span style="display:block;margin-top:3px;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">'+esc(KY[i].ly)+"</span></span></div>";
+ R+="</div>";
 
  return sec("Kiểm tra pha chung",
-  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"><div>'+L+'</div><div>'+R+'</div></div>');
+  '<div class="g-2col-eq"><div>'+L+'</div><div>'+R+"</div></div>");
 }
 
 function timThuocTen(ten){
@@ -965,8 +942,6 @@ function timThuocTen(ten){
  return null;
 }
 
-/* Tìm trong 5.914 thuốc. Lọc tuyến tính là đủ nhanh ở quy mô này và tránh
-   phải dựng chỉ mục — nhưng chỉ chạy khi đã gõ từ 2 ký tự trở lên. */
 function locThuoc(tu,gioi){
  var ra=[],q=(tu||"").toLowerCase().trim();
  if(!D||q.length<2)return ra;
@@ -979,60 +954,59 @@ function locThuoc(tu,gioi){
 function nt(k){return{dong:"Gốc đồng",visinh:"Chế phẩm sinh học",khangsinh:"Kháng sinh",hoahoc:"Hoá học",dau:"Dầu khoáng",luuhuynh:"Lưu huỳnh"}[k]||k}
 
 function pMap(){
- var R='<div class="flex flex-col gap-2">',i;
+ var R='<div style="display:flex;flex-direction:column;gap:8px">',i;
  for(i=0;i<DIEM.length;i++){var d=DIEM[i],c=d.loai==="Cây giống"?"ok":d.loai==="Vật tư"?"inf":"wait";
-  R+=rowBtn('<span class="b-'+c+' h-9 w-[3px] shrink-0 rounded-sm"></span>'
-   +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(d.ten)
-   +'</span><span class="block text-xs" style="color:'+V.mf+'">'+esc(d.loai)+" · "+esc(d.xa)
+  R+=rowBtn('<span class="b-'+c+'" style="width:3px;height:36px;flex-shrink:0;border-radius:2px"></span>'
+   +'<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(d.ten)
+   +'</span><span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(d.loai)+" · "+esc(d.xa)
    +(diemCur===d.id?"<br>"+esc(d.dc)+" · "+esc(d.sdt):"")+"</span></span>",'data-diem="'+d.id+'"',diemCur===d.id)}
- R+='</div><div class="mt-3 flex flex-wrap gap-4 text-[0.72rem]" style="color:'+V.mf+'">'
-  +'<span><i class="b-ok mr-1.5 inline-block h-[3px] w-2.5 rounded-sm align-middle"></i>Cây giống</span>'
-  +'<span><i class="b-inf mr-1.5 inline-block h-[3px] w-2.5 rounded-sm align-middle"></i>Vật tư</span>'
-  +'<span><i class="b-wait mr-1.5 inline-block h-[3px] w-2.5 rounded-sm align-middle"></i>Thu mua</span></div>'
-  +'<p class="mt-3 text-xs leading-relaxed" style="color:'+V.mf+'">Sơ đồ minh hoạ. Bản chạy thật dùng Leaflet + OpenStreetMap — miễn phí, không cần thẻ ngân hàng. '
+ R+='</div><div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:16px;font-size:.72rem;color:var(--muted-fg)">'
+  +'<span><i class="b-ok" style="display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px"></i>Cây giống</span>'
+  +'<span><i class="b-inf" style="display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px"></i>Vật tư</span>'
+  +'<span><i class="b-wait" style="display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px"></i>Thu mua</span></div>'
+  +'<p style="margin:12px 0 0;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">Sơ đồ minh hoạ. Bản chạy thật dùng Leaflet + OpenStreetMap — miễn phí, không cần thẻ ngân hàng. '
   +"Danh sách điểm do HTX tự gom nên chính xác hơn Google Maps ở cấp xã.</p>";
  return sec("Điểm bán quanh vùng",
-  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">'
-  +'<div class="overflow-hidden rounded-xl border" style="border-color:'+V.bd+'">'+veMap()+"</div><div>"+R+"</div></div>")}
+  '<div class="g-2col"><div style="overflow:hidden;border-radius:14px;border:1px solid var(--border)">'+veMap()+'</div><div>'+R+"</div></div>")}
 
 function pGia(){
  var g=byId(GIA,giaCur),d=g.chuoi,i,tiles="";
  for(i=0;i<GIA.length;i++){var x=GIA[i],c=x.gia-x.truoc,tone=c>0?"c-ok":c<0?"c-bad":"";
-  tiles+='<button type="button" data-gia="'+x.id+'" class="rounded-xl border p-4 text-left" style="border-color:'
-   +(giaCur===x.id?V.pr:V.bd)+';background:'+V.cd+'">'
-   +'<div class="tnum text-2xl font-bold tracking-tight">'+vnd(x.gia)+"</div>"
-   +'<div class="truncate text-xs" style="color:'+V.mf+'">'+esc(x.ten)+" · "+esc(x.dv)+"</div>"
-   +'<div class="mt-2 text-xs font-semibold '+tone+'">'+(c>0?"▲ +":c<0?"▼ −":"")+vnd(Math.abs(c))+" đ so với tuần trước</div></button>"}
- var h=sec("Giá thu mua hôm nay",'<div class="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">'+tiles+"</div>");
+  tiles+='<button type="button" data-gia="'+x.id+'" class="card" style="padding:16px;text-align:left;cursor:pointer;border-color:'
+   +(giaCur===x.id?"var(--primary)":"var(--border)")+'">'
+   +'<div class="tnum" style="font-size:1.5rem;font-weight:700;letter-spacing:-.02em">'+vnd(x.gia)+"</div>"
+   +'<div style="font-size:.78rem;color:var(--muted-fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.ten)+" · "+esc(x.dv)+"</div>"
+   +'<div style="margin-top:8px;font-size:.78rem;font-weight:600" class="'+tone+'">'+(c>0?"▲ +":c<0?"▼ −":"")+vnd(Math.abs(c))+" đ so với tuần trước</div></button>"}
+ var h=sec("Giá thu mua hôm nay",'<div class="g3">'+tiles+"</div>");
  var r="";
  for(i=d.length-1;i>=0;i--){var pr=i>0?d[i]-d[i-1]:0;
-  r+=tr([TUAN[i],{n:vnd(d[i])},{n:'<span class="'+(pr>0?"c-ok":pr<0?"c-bad":"")+'">'+(i>0?(pr>0?"+":"−")+vnd(Math.abs(pr)):"—")+"</span>"}])}
+  r+=tr2([TUAN[i],{n:vnd(d[i])},{n:'<span class="'+(pr>0?"c-ok":pr<0?"c-bad":"")+'">'+(i>0?(pr>0?"+":"−")+vnd(Math.abs(pr)):"—")+"</span>"}])}
  h+=sec(esc(g.ten)+" — 11 tuần gần nhất",
-  '<p class="mb-3 text-sm" style="color:'+V.mf+'">Đơn vị '+esc(g.dv)+". Nguồn: "+esc(g.vung)+", cập nhật "+dmy(NAY)
-  +'. <b class="c-wait">Số liệu mẫu.</b></p>'+chGia()+'<div class="mt-5">'+tbl(["Tuần",{n:"Giá (đ/kg)"},{n:"Thay đổi"}],r)+"</div>"
-  +'<p class="mt-3 text-xs leading-relaxed" style="color:'+V.mf+'">Việt Nam chưa có nguồn giá nông sản dạng API công khai. '
+  '<p style="margin:0 0 12px;font-size:.88rem;color:var(--muted-fg)">Đơn vị '+esc(g.dv)+". Nguồn: "+esc(g.vung)+", cập nhật "+dmy(NAY)
+  +'. <b class="c-wait">Số liệu mẫu.</b></p>'+chGia()+'<div style="margin-top:20px">'+tbl2(["Tuần",{n:"Giá (đ/kg)"},{n:"Thay đổi"}],r)+"</div>"
+  +'<p style="margin:12px 0 0;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">Việt Nam chưa có nguồn giá nông sản dạng API công khai. '
   +"Bản thật nên ghi rõ nguồn và thời điểm cho từng con số, hoặc lấy giá do chính người dùng báo rồi hiện trung vị theo huyện.</p>");
  return h}
 
 function pSim(){
- var L='<div class="overflow-hidden rounded-xl border p-4" style="border-color:'+V.bd+';background:'+V.cd+'">'
-  +'<canvas id="simCv" width="200" height="130" style="background:'+V.mu+'"></canvas>'
-  +'<div class="mt-3.5 flex flex-wrap gap-2">'
+ var L='<div style="overflow:hidden;border-radius:14px;border:1px solid var(--border);padding:16px;background:var(--card)">'
+  +'<canvas id="simCv" width="200" height="130" style="background:var(--muted)"></canvas>'
+  +'<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px">'
   +btn("Dừng",'id="simRun"')+btn("Cho mưa",'id="simMua"')+btn("Qua 1 ngày",'id="simNgay"')+btn("Làm lại",'id="simReset"')
-  +'</div><p class="mt-3 max-w-[66ch] text-xs leading-relaxed" style="color:'+V.mf+'">'
+  +'</div><p style="margin:12px 0 0;max-width:66ch;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">'
   +"Giữ chuột hoặc ngón tay rê trên ruộng để rắc thứ đang chọn. Mỗi điểm ảnh là một ô đất, nước, phân, rễ hoặc nấm, "
   +"và chúng phản ứng với hàng xóm theo từng nhịp — engine kiểu The Powder Toy.</p></div>";
- var R=lbl("Rắc gì",1)+'<div class="grid grid-cols-2 gap-1.5" id="simTools"></div>'
-  +lbl("Ruộng đang thế nào")+'<div id="simMeters"></div>'
-  +'<p class="text-xs leading-relaxed" id="simDay" style="color:'+V.mf+'"></p>'
-  +lbl("Luật đang chạy")+'<ul class="m-0 list-disc pl-4 text-xs leading-loose" style="color:'+V.mf+'">'
+ var R=lbl2("Rắc gì",1)+'<div id="simTools" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>'
+  +lbl2("Ruộng đang thế nào")+'<div id="simMeters"></div>'
+  +'<p id="simDay" style="font-size:.78rem;color:var(--muted-fg)"></p>'
+  +lbl2("Luật đang chạy")+'<ul style="margin:0;padding-left:16px;font-size:.78rem;line-height:2;color:var(--muted-fg);list-style:disc">'
   +"<li>Nước thấm xuống làm đất ẩm dần</li><li>Phân chỉ tan khi đất đã ẩm</li>"
   +"<li>Rễ chỉ ăn được đất vừa ẩm vừa có dinh dưỡng</li><li>Đủ chất thì thân mới vươn lên và ra lá</li>"
   +"<li>Nấm lan nhanh khi ẩm cao, ăn dần lá và thân</li><li>Thuốc diệt nấm nhưng để lại tồn dư, giảm dần theo ngày</li></ul>"
-  +'<p class="mt-3 text-xs leading-relaxed" style="color:'+V.mf+'">Luật ở đây là mô hình rút gọn để minh hoạ, '
+  +'<p style="margin:12px 0 0;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">Luật ở đây là mô hình rút gọn để minh hoạ, '
   +"không phải mô hình nông học đã kiểm chứng. Dùng để dạy và demo.</p>";
  return sec("Mô phỏng đồng ruộng",
-  '<div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_240px]"><div>'+L+"</div><div>"+R+"</div></div>")}
+  '<div class="g-sim"><div>'+L+"</div><div>"+R+"</div></div>")}
 
 /* ======================= MÔ PHỎNG ======================= */
 var SIM=null,AIR=0,SOIL=1,WATER=2,FERT=3,ROOT=4,STEM=5,LEAF=6,FUNG=7,SPRAY=8,DEAD=9;
@@ -1111,9 +1085,9 @@ function simStep(){
     continue}
 
    if(ty===SPRAY){
-    for(d=0;d<4;d++){var nx=x+DX[d],ny=y+DY[d];
-     if(nx<0||ny<0||nx>=W||ny>=H)continue;
-     j=ix(nx,ny);if(t[j]===FUNG){t[j]=DEAD;a[j]=0;t[i]=AIR;break}}
+    for(d=0;d<4;d++){var nx2=x+DX[d],ny2=y+DY[d];
+     if(nx2<0||ny2<0||nx2>=W||ny2>=H)continue;
+     j=ix(nx2,ny2);if(t[j]===FUNG){t[j]=DEAD;a[j]=0;t[i]=AIR;break}}
     if(t[i]!==SPRAY)continue;
     b=y<H-1?ix(x,y+1):-1;
     if(b<0){t[i]=AIR;continue}
@@ -1142,8 +1116,8 @@ function simStep(){
 
    if(ty===STEM){
     if(y>0&&t[ix(x,y-1)]===AIR&&SIM.nuoi>5&&Math.random()<.14){t[ix(x,y-1)]=STEM;SIM.nuoi-=5}
-    else if(Math.random()<.05&&SIM.nuoi>3){var lx=x+(Math.random()<.5?-1:1);
-     if(lx>=0&&lx<W&&t[ix(lx,y)]===AIR){t[ix(lx,y)]=LEAF;SIM.nuoi-=3}}
+    else if(Math.random()<.05&&SIM.nuoi>3){var lx2=x+(Math.random()<.5?-1:1);
+     if(lx2>=0&&lx2<W&&t[ix(lx2,y)]===AIR){t[ix(lx2,y)]=LEAF;SIM.nuoi-=3}}
     continue}
 
    if(ty===FUNG){a[i]++;
@@ -1152,11 +1126,11 @@ function simStep(){
     for(d=0;d<4;d++){var fx=x+DX[d],fy=y+DY[d];
      if(fx<0||fy<0||fx>=W||fy>=H)continue;
      j=ix(fx,fy);if(t[j]===WATER||(t[j]===SOIL&&m[j]>2))am++}
-    var pr=.008+am*.012;
+    var pr2=.008+am*.012;
     for(d=0;d<4;d++){var gx=x+DX[d],gy=y+DY[d];
      if(gx<0||gy<0||gx>=W||gy>=H)continue;
      j=ix(gx,gy);
-     if((t[j]===LEAF||t[j]===STEM)&&Math.random()<pr){t[j]=FUNG;a[j]=0}}
+     if((t[j]===LEAF||t[j]===STEM)&&Math.random()<pr2){t[j]=FUNG;a[j]=0}}
     continue}
 
    if(ty===DEAD){a[i]++;if(a[i]>220){t[i]=AIR;a[i]=0}}
@@ -1168,13 +1142,13 @@ function simNgay(){SIM.ngay++;SIM.ton=Math.max(0,SIM.ton-7.5)}
 
 function simMau(){
  var dk=document.documentElement.classList.contains("dark");
- return dk?{air:[22,26,23],sd:[76,62,44],sw:[40,33,22],wa:[47,101,176],fe:[205,168,52],
+ return dk?{air:[12,16,14],sd:[76,62,44],sw:[40,33,22],wa:[47,101,176],fe:[205,168,52],
    ro:[152,112,66],se:[63,160,100],le:[92,200,130],fu:[176,92,166],sp:[78,200,194],de:[92,78,64]}
-  :{air:[242,242,240],sd:[154,130,95],sw:[84,68,47],wa:[58,122,208],fe:[212,174,56],
+  :{air:[238,242,239],sd:[154,130,95],sw:[84,68,47],wa:[58,122,208],fe:[212,174,56],
    ro:[166,124,74],se:[20,130,80],le:[76,178,110],fu:[158,79,148],sp:[66,190,184],de:[126,106,86]}}
 
 function simDraw(){
- var W=SIM.W,H=SIM.H,t=SIM.t,m=SIM.m,n=SIM.n,P=simMau(),D=SIM.img.data;
+ var W=SIM.W,H=SIM.H,t=SIM.t,m=SIM.m,n=SIM.n,P=simMau(),Da=SIM.img.data;
  for(var i=0;i<W*H;i++){var c,ty=t[i];
   if(ty===SOIL){var f=m[i]/4;
    c=[P.sd[0]+(P.sw[0]-P.sd[0])*f,P.sd[1]+(P.sw[1]-P.sd[1])*f,P.sd[2]+(P.sw[2]-P.sd[2])*f];
@@ -1182,7 +1156,7 @@ function simDraw(){
   else if(ty===AIR)c=P.air;else if(ty===WATER)c=P.wa;else if(ty===FERT)c=P.fe;
   else if(ty===ROOT)c=P.ro;else if(ty===STEM)c=P.se;else if(ty===LEAF)c=P.le;
   else if(ty===FUNG)c=P.fu;else if(ty===SPRAY)c=P.sp;else c=P.de;
-  var o=i*4;D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2];D[o+3]=255}
+  var o=i*4;Da[o]=c[0];Da[o+1]=c[1];Da[o+2]=c[2];Da[o+3]=255}
  SIM.octx.putImageData(SIM.img,0,0);
  SIM.ctx.imageSmoothingEnabled=false;
  SIM.ctx.drawImage(SIM.off,0,0,SIM.cv.width,SIM.cv.height)}
@@ -1195,9 +1169,10 @@ function simFrame(){
 function veTools(){
  var h="",el=document.getElementById("simTools");if(!el)return;
  for(var i=0;i<TOOLS.length;i++){var t=TOOLS[i],on=SIM.tool===t.id;
-  h+='<button type="button" data-tool="'+t.id+'" class="flex flex-col items-center gap-1.5 rounded-lg border px-1.5 py-2 text-[0.72rem] font-semibold leading-tight"'
-   +' style="border-color:'+(on?V.pr:V.bd)+';background:'+(on?"hsl(var(--accent))":V.cd)+'">'
-   +'<i class="block h-[15px] w-[15px] rounded" style="background:'+t.c+'"></i>'+esc(t.ten)+"</button>"}
+  h+='<button type="button" data-tool="'+t.id+'" style="display:flex;flex-direction:column;align-items:center;gap:6px;border-radius:10px;border:1px solid '
+   +(on?"var(--primary)":"var(--border)")+";background:"+(on?"var(--accent)":"var(--card)")
+   +';padding:8px 6px;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--fg)">'
+   +'<i style="display:block;width:15px;height:15px;border-radius:4px;background:'+t.c+'"></i>'+esc(t.ten)+"</button>"}
  el.innerHTML=h}
 
 function veMtr(){
@@ -1208,10 +1183,10 @@ function veMtr(){
   else if(t[i]===LEAF||t[i]===STEM)sk++;
   else if(t[i]===FUNG)bn++}
  function mt(l,v,c,tx){
-  return '<div class="mb-2.5"><div class="mb-1 flex justify-between text-[0.72rem]" style="color:'+V.mf+'">'
-   +"<span>"+l+'</span><b class="tnum font-semibold" style="color:hsl(var(--foreground))">'+(tx||Math.round(v)+"%")+"</b></div>"
-   +'<div class="h-[5px] overflow-hidden rounded-full" style="background:'+V.mu+'">'
-   +'<div class="h-full rounded-full" style="width:'+Math.max(2,Math.min(100,v))+"%;background:"+c+'"></div></div></div>'}
+  return '<div style="margin-bottom:10px"><div style="margin-bottom:4px;display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted-fg)">'
+   +"<span>"+l+'</span><b class="tnum" style="font-weight:600;color:var(--fg)">'+(tx||Math.round(v)+"%")+"</b></div>"
+   +'<div style="height:5px;overflow:hidden;border-radius:3px;background:var(--muted)">'
+   +'<div style="height:100%;border-radius:3px;width:'+Math.max(2,Math.min(100,v))+"%;background:"+c+'"></div></div></div>'}
  el.innerHTML=mt("Độ ẩm đất",sc?sm/(sc*4)*100:0,"var(--inf)")
   +mt("Dinh dưỡng",sc?sn/(sc*4)*100:0,"var(--wait)")
   +mt("Sinh khối cây",Math.min(100,sk/2.2),"var(--ok)")
@@ -1229,14 +1204,14 @@ function hoSo(){
  var r="";
  for(i=0;i<THUA.length;i++){var t=THUA[i],s=tt(t.id),c=0;
   for(var k=0;k<so.length;k++)if(so[k].thua===t.id&&so[k].phi)c++;
-  r+=tr(["<b>"+esc(t.ten)+"</b>",{n:t.dt+" sào"},{n:c},
+  r+=tr2(["<b>"+esc(t.ten)+"</b>",{n:t.dt+" sào"},{n:c},
    s.con>0?tag("chưa đạt · gặt từ "+dmy(s.het),"wait"):tag("đạt cách ly","ok")])}
- var inner='<div class="p-5"><div class="text-base font-bold tracking-tight">Hồ sơ vụ mùa 2026 — HTX Đồng Tiến</div>'
-  +'<p class="mb-4 text-xs" style="color:'+V.mf+'">Lập ngày '+dmy(NAY)+"</p>"
-  +tbl(["Thửa",{n:"Diện tích"},{n:"Lần dùng thuốc"},"Trạng thái"],r)
-  +'<div class="mt-5 flex flex-wrap items-center gap-4">'
-  +'<div class="grid h-[58px] w-[58px] shrink-0 place-items-center rounded-lg border border-dashed text-center text-[0.6rem] leading-tight" style="border-color:'+V.bd+';color:'+V.mf+'">MÃ<br>QR</div>'
-  +'<p class="min-w-[220px] flex-1 text-xs leading-relaxed" style="color:'+V.mf+'">Bên thu mua quét mã là xem được toàn bộ nhật ký và ngày cách ly từng thửa.<br>'
+ var inner='<div style="padding:20px"><div style="font-size:1rem;font-weight:700;letter-spacing:-.01em">Hồ sơ vụ mùa 2026 — HTX Đồng Tiến</div>'
+  +'<p style="margin:4px 0 16px;font-size:.78rem;color:var(--muted-fg)">Lập ngày '+dmy(NAY)+"</p>"
+  +tbl2(["Thửa",{n:"Diện tích"},{n:"Lần dùng thuốc"},"Trạng thái"],r)
+  +'<div style="margin-top:20px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">'
+  +'<div style="width:58px;height:58px;flex-shrink:0;border-radius:10px;border:1px dashed var(--border);display:grid;place-items:center;text-align:center;font-size:.58rem;line-height:1.3;color:var(--muted-fg)">MÃ<br>QR</div>'
+  +'<p style="margin:0;min-width:220px;flex:1;font-size:.78rem;line-height:1.6;color:var(--muted-fg)">Bên thu mua quét mã là xem được toàn bộ nhật ký và ngày cách ly từng thửa.<br>'
   +'<b class="'+(an?"c-ok":"c-wait")+'">'+(an?"Tất cả các thửa đã đạt thời gian cách ly.":"Còn thửa chưa đạt — chưa nên giao hàng.")+"</b></p></div></div>";
  document.getElementById("hoSoOut").innerHTML=card(inner)}
 
@@ -1262,7 +1237,7 @@ document.addEventListener("click",function(ev){
  var el=ev.target.closest?ev.target.closest(S):null;if(!el)return;
  var v;
  if((v=el.getAttribute("data-nav"))){di(v);return}
- if((v=el.getAttribute("data-go"))){bw={bp:null,tc:null,benh:null,thua:bw.thua};di(v);return}
+ if((v=el.getAttribute("data-go"))){bw={cay:null,dh:null,thuoc:null,thua:bw.thua};di(v);return}
  if((v=el.getAttribute("data-cay"))){bw.cay=v;bw.dh=null;bw.thuoc=null;ve();return}
  if((v=el.getAttribute("data-dh"))){bw.dh=+v;bw.thuoc=null;ve();return}
  if((v=el.getAttribute("data-thuoc"))){bw.thuoc=v;ve();return}
@@ -1272,17 +1247,14 @@ document.addEventListener("click",function(ev){
   if(v==="dh"){bw.dh=null;bw.thuoc=null}
   if(v==="thuoc")bw.thuoc=null;
   ve();return}
- if((v=el.getAttribute("data-pha"))){var ix=chonPha.indexOf(v);
-  if(ix>=0)chonPha.splice(ix,1);else{chonPha.push(v);if(chonPha.length>2)chonPha.shift()}
+ if((v=el.getAttribute("data-pha"))){var ix2=chonPha.indexOf(v);
+  if(ix2>=0)chonPha.splice(ix2,1);else{chonPha.push(v);if(chonPha.length>2)chonPha.shift()}
   ve();return}
  if((v=el.getAttribute("data-bo"))){var ib=chonPha.indexOf(v);if(ib>=0)chonPha.splice(ib,1);ve();return}
  if((v=el.getAttribute("data-diem"))){diemCur=diemCur===+v?null:+v;ve();return}
  if((v=el.getAttribute("data-gia"))){giaCur=v;ve();return}
  if((v=el.getAttribute("data-tool"))&&SIM){SIM.tool=+v;veTools();return}});
 
-/* Ghi vào nhật ký. PHI KHÔNG có trong dữ liệu — người dùng đọc trên nhãn
-   và nhập. Không có PHI thì vẫn ghi được, chỉ là thửa đó không có đồng hồ
-   đếm ngược; thà thiếu còn hơn bịa một con số. */
 function ghi(){
  if(!bw.thuoc)return;
  var el=document.getElementById("phiIn"),loi=document.getElementById("phiLoi");
@@ -1311,7 +1283,7 @@ document.getElementById("tbtn").addEventListener("click",function(){
  if(SIM&&document.getElementById("simCv"))simDraw()});
 
 document.getElementById("mbtn").addEventListener("click",function(){
- document.getElementById("side").classList.toggle("hidden")});
+ document.getElementById("side").classList.toggle("show")});
 
 document.addEventListener("input",function(ev){
  var id=ev.target&&ev.target.id;
@@ -1319,14 +1291,14 @@ document.addEventListener("input",function(ev){
   var q=ev.target.value.toLowerCase().trim(),o=document.getElementById("kqCay"),h2="";
   if(o){
    if(q.length>=2){
-    for(var i=0,n=0;i<D.bang.cay.length&&n<25;i++){
+    for(var i=0,n2=0;i<D.bang.cay.length&&n2<25;i++){
      var c=D.bang.cay[i];
      if(c.toLowerCase().indexOf(q)>=0){
-      h2+='<button type="button" data-cay="'+esc(c)+'" class="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm" style="border-color:'+V.bd+';background:'+V.cd+'">'+esc(c)+"</button>";
-      n++;
+      h2+='<button type="button" data-cay="'+esc(c)+'" class="rbtn">'+esc(c)+"</button>";
+      n2++;
      }
     }
-    if(!h2)h2='<p class="p-2 text-sm" style="color:'+V.mf+'">Không thấy cây nào khớp.</p>';
+    if(!h2)h2='<p style="padding:8px;font-size:.88rem;color:var(--muted-fg)">Không thấy cây nào khớp.</p>';
    }
    o.innerHTML=h2;
   }
@@ -1336,11 +1308,11 @@ document.addEventListener("input",function(ev){
   if(o2){
    for(var k=0;k<ds.length;k++){
     var t=ds[k],on=chonPha.indexOf(t.t)>=0;
-    h3+='<button type="button" data-pha="'+esc(t.t)+'" class="flex w-full items-center gap-3 rounded-lg border p-2.5 text-left" style="border-color:'+(on?"hsl(var(--primary))":V.bd)+';background:'+(on?"var(--accent)":V.cd)+'">'
-      +'<span class="min-w-0 flex-1"><span class="block text-sm font-semibold">'+esc(t.t)+"</span>"
-      +'<span class="block text-xs" style="color:'+V.mf+'">'+esc(D.bang.hoat_chat[t.h])+"</span></span></button>";
+    h3+='<button type="button" data-pha="'+esc(t.t)+'" class="rbtn'+(on?" on":"")+'">'
+      +'<span style="min-width:0;flex:1"><span style="display:block;font-size:.88rem;font-weight:600">'+esc(t.t)+"</span>"
+      +'<span style="display:block;font-size:.78rem;color:var(--muted-fg)">'+esc(D.bang.hoat_chat[t.h])+"</span></span></button>";
    }
-   if(!h3&&ev.target.value.trim().length>=2)h3='<p class="p-2 text-sm" style="color:'+V.mf+'">Không thấy thuốc nào khớp.</p>';
+   if(!h3&&ev.target.value.trim().length>=2)h3='<p style="padding:8px;font-size:.88rem;color:var(--muted-fg)">Không thấy thuốc nào khớp.</p>';
    o2.innerHTML=h3;
   }
  }
@@ -1350,9 +1322,6 @@ document.addEventListener("click",function(ev){
  if(ev.target&&ev.target.id==="btnGhi")ghi();
 });
 
-/* Nạp dữ liệu thật rồi vẽ lại. Vẽ trước một lần để trang không trắng
-   trong lúc chờ — các trang không cần dữ liệu (Tổng quan, Nhật ký, Mô
-   phỏng) chạy được ngay. */
 veNav();ve();
 fetch("du-lieu-app.json")
  .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
@@ -1361,9 +1330,9 @@ fetch("du-lieu-app.json")
   D=null;
   var el=document.getElementById("page");
   if(el&&(cur==="benh"||cur==="pha"))el.innerHTML=sec("Lỗi",
-   '<div class="alert"><span class="leading-none">'+ICO_X+'</span><div>'
-   +'<span class="hh">Không nạp được danh mục thuốc</span>'
-   +'<div class="bb">'+esc(String(e.message||e))+'. Trang cần chạy qua http:// chứ không phải mở thẳng file.</div></div></div>');
+   '<div class="abox"><span style="line-height:1">'+ICO_X+'</span><div>'
+   +'<div class="abox-t">Không nạp được danh mục thuốc</div>'
+   +'<div class="abox-b">'+esc(String(e.message||e))+'. Trang cần chạy qua http:// chứ không phải mở thẳng file.</div></div></div>');
  });
 })();
 </script>
