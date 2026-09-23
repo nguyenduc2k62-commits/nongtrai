@@ -2865,7 +2865,93 @@ function setFarmCenter(lat, lng, name){
 
 var POLYS = [];
 try{ POLYS = JSON.parse(localStorage.getItem("sr-polygons")) || []; }catch(e){ POLYS = []; }
+// Gán thuaId cho dữ liệu cũ nếu chưa có
+(function(){
+  try{
+    if(POLYS && POLYS.length && typeof THUA !== "undefined" && THUA.length){
+      var defaultThuaId = THUA[0].id;
+      for(var _i = 0; _i < POLYS.length; _i++){
+        if(!POLYS[_i].thuaId) POLYS[_i].thuaId = defaultThuaId;
+      }
+    }
+  }catch(e){}
+})();
+
 function savePoly(){ try{ localStorage.setItem("sr-polygons", JSON.stringify(POLYS)); }catch(e){} }
+
+function getPolysOfThua(thuaId){
+  if(!thuaId) return [];
+  return POLYS.filter(function(p){ return p.thuaId === thuaId; });
+}
+window.getPolysOfThua = getPolysOfThua;
+
+function tinhTongDienTichThua(thuaId){
+  var plotPolys = getPolysOfThua(thuaId);
+  var totalM2 = 0;
+  for(var i = 0; i < plotPolys.length; i++){
+    totalM2 += (plotPolys[i].dienTich || 0);
+  }
+  return totalM2;
+}
+window.tinhTongDienTichThua = tinhTongDienTichThua;
+
+function dongBoDienTichThua(thuaId){
+  var th = byId(THUA, thuaId);
+  if(!th) return;
+  var totalM2 = tinhTongDienTichThua(thuaId);
+  if(totalM2 > 0){
+    th.dt = parseFloat((totalM2 / 360).toFixed(2));
+  } else {
+    th.dt = 0;
+  }
+  luuThua();
+}
+window.dongBoDienTichThua = dongBoDienTichThua;
+
+function chonVaBayToiLoiDat(thuaId){
+  if(!mapInst) return;
+  var thObj = byId(THUA, thuaId);
+  var plotPolys = getPolysOfThua(thuaId);
+
+  if(plotPolys.length > 0){
+    var allCoords = [];
+    for(var i = 0; i < plotPolys.length; i++){
+      var p = plotPolys[i];
+      if(p.coords && p.coords.length >= 3){
+        for(var j = 0; j < p.coords.length; j++){
+          allCoords.push(p.coords[j]);
+        }
+      }
+    }
+    if(allCoords.length > 0){
+      var bounds = L.latLngBounds(allCoords);
+      mapInst.fitBounds(bounds, { padding: [60, 60], maxZoom: 18 });
+      var firstPoly = plotPolys[0];
+      if(DRAW_MGR.polyLayersMap && DRAW_MGR.polyLayersMap[firstPoly.id]){
+        try { DRAW_MGR.polyLayersMap[firstPoly.id].openPopup(); } catch(e){}
+      }
+      return;
+    }
+  }
+
+  var center = (thObj && thObj.center) ? thObj.center : null;
+  if(!center){
+    var farmC = getFarmCenter();
+    // Default distributed offsets for demo plots so each plot has distinct location
+    var offsets = {
+      "thua1": { lat: farmC.lat, lng: farmC.lng },
+      "thua2": { lat: farmC.lat + 0.0035, lng: farmC.lng + 0.0042 },
+      "thua3": { lat: farmC.lat - 0.0038, lng: farmC.lng - 0.0032 },
+      "thua4": { lat: farmC.lat + 0.0045, lng: farmC.lng - 0.0048 }
+    };
+    center = offsets[thuaId] || farmC;
+  }
+  mapInst.flyTo([center.lat, center.lng], 16, { animate: true, duration: 1.0 });
+  if(thObj){
+    showToast("📍 Đang xem " + thObj.ten + ". Bấm '+ Chia nhỏ phân khu' để khoanh đất!", "ok");
+  }
+}
+window.chonVaBayToiLoiDat = chonVaBayToiLoiDat;
 
 function polyArea(c){
   if(!c || c.length < 3) return 0;
@@ -3177,6 +3263,7 @@ var DRAW_MGR = {
 
     var newPoly = {
       id: 'poly_' + Date.now(),
+      thuaId: thuaCur,
       ten: ten,
       cay: cay,
       color: this.selectedColor || '#10b981',
@@ -3186,6 +3273,7 @@ var DRAW_MGR = {
     };
     POLYS.push(newPoly);
     savePoly();
+    dongBoDienTichThua(thuaCur);
 
     var modal = document.getElementById('modalSavePoly');
     if(modal) modal.style.display = 'none';
@@ -3198,25 +3286,32 @@ var DRAW_MGR = {
 
   addPolyLayerToMap: function(poly){
     if(!mapInst || !poly.coords || poly.coords.length < 3) return;
+    var isCurrentPlot = (!poly.thuaId || poly.thuaId === thuaCur);
+    var color = poly.color || '#10b981';
     var pg = L.polygon(poly.coords, {
-      color: poly.color || '#10b981',
-      weight: 3,
-      fillColor: poly.color || '#10b981',
-      fillOpacity: 0.28
+      color: isCurrentPlot ? color : '#94a3b8',
+      weight: isCurrentPlot ? 3.5 : 1.5,
+      dashArray: isCurrentPlot ? null : '4, 4',
+      fillColor: color,
+      fillOpacity: isCurrentPlot ? 0.32 : 0.08
     }).addTo(mapInst);
 
     pg.polyId = poly.id;
     this.polyLayersMap[poly.id] = pg;
 
+    var thParent = byId(THUA, poly.thuaId);
+    var tenLoMe = thParent ? thParent.ten : "Lô đất";
+
     var popupContent = '<div style="font-size:13px;line-height:1.4">'
-      + '<div style="font-size:14px;font-weight:700;color:' + poly.color + ';margin-bottom:3px">⬡ ' + esc(poly.ten) + '</div>'
-      + '<div>🌱 Cây trồng: <b>' + esc(poly.cay) + '</b></div>'
+      + '<div style="font-size:11px;color:#64748b;font-weight:700">LÔ ĐẤT: ' + esc(tenLoMe) + '</div>'
+      + '<div style="font-size:15px;font-weight:800;color:' + color + ';margin:2px 0 4px">⬡ ' + esc(poly.ten) + '</div>'
+      + '<div>🌱 Cây trồng riêng: <b style="color:#047857">' + esc(poly.cay) + '</b></div>'
       + '<div>📐 Diện tích: <b>' + fmtArea(poly.dienTich) + '</b></div>'
       + (poly.ghiChu ? '<div style="font-size:11px;color:#666;margin-top:2px">📝 ' + esc(poly.ghiChu) + '</div>' : '')
       + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-      + '<button type="button" class="btn btn-p" data-polyid="' + poly.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">📐 Sửa đỉnh ranh giới</button>'
-      + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:11px;padding:3px 8px">✏️ Đổi tên & Cây</button>'
-      + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="event.stopPropagation();DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:11px;padding:3px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xóa</button>'
+      + '<button type="button" class="btn btn-p" data-polyid="' + poly.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:11px;padding:4px 8px">📐 Sửa mốc ranh giới</button>'
+      + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:11px;padding:4px 8px">✏️ Tùy chỉnh (Đổi cây/Tên)</button>'
+      + '<button type="button" class="btn" data-polyid="' + poly.id + '" onclick="event.stopPropagation();DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:11px;padding:4px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xóa khu này</button>'
       + '</div></div>';
 
     pg.bindPopup(popupContent);
@@ -3310,6 +3405,7 @@ var DRAW_MGR = {
       poly.coords = this.editCoords.slice();
       poly.dienTich = Math.round(polyArea(poly.coords));
       savePoly();
+      dongBoDienTichThua(poly.thuaId || thuaCur);
 
       var pgLayer = this.polyLayersMap[poly.id];
       if(pgLayer){
@@ -3385,6 +3481,7 @@ var DRAW_MGR = {
     // 3. Remove from POLYS and persist
     POLYS = POLYS.filter(function(x){ return x.id !== polyId; });
     savePoly();
+    dongBoDienTichThua(thuaCur);
 
     // 4. Cancel active edit or close modal if open
     if(this.activePolyId === polyId) this.cancelEdit();
@@ -3569,40 +3666,66 @@ var DRAW_MGR = {
     var container = document.getElementById('polySidebarListContainer');
     if(!container) return;
 
-    var h = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      + '<span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">✏️ Ranh giới & Phân khu</span>'
-      + '<span class="mono" style="font-size:.72rem;background:var(--accent);padding:2px 6px;border-radius:6px">' + POLYS.length + ' khu</span>'
+    var curTh = byId(THUA, thuaCur);
+    var plotPolys = getPolysOfThua(thuaCur);
+    var tenLo = curTh ? curTh.ten : "Lô canh tác";
+
+    var h = '<div style="background:#f8faf8;border:1px solid #d1fae5;border-radius:12px;padding:12px;margin-bottom:12px">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      + '<div style="font-size:.76rem;font-weight:800;text-transform:uppercase;color:#065f46">🌱 Phân Khu Trong Lô:</div>'
+      + '<span class="mono" style="font-size:.72rem;background:#dcfce7;color:#166534;font-weight:800;padding:2px 7px;border-radius:6px">' + plotPolys.length + ' khu vực</span>'
+      + '</div>'
+      + '<div style="font-size:.82rem;font-weight:700;color:var(--fg);margin-bottom:8px">' + esc(tenLo) + '</div>'
+      + '<button type="button" class="btn btn-p" onclick="DRAW_MGR.startDraw()" style="width:100%;padding:9px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">'
+      + '<span>➕ Chia nhỏ thêm phân khu trong lô này</span>'
+      + '</button>'
       + '</div>';
 
-    if(!POLYS.length){
-      h += '<p style="font-size:.78rem;color:var(--muted-fg);padding:10px;border:1px dashed var(--border);border-radius:8px;text-align:center;line-height:1.5">'
-        + 'Chưa có phân khu nào được vẽ.<br><b style="color:var(--primary)">Bấm nút "✏️ Bắt đầu vẽ phân khu"</b> trên bản đồ để khoanh đất.'
-        + '</p>';
+    if(!plotPolys.length){
+      h += '<div style="font-size:.78rem;color:var(--muted-fg);padding:14px;border:1.5px dashed #bbf7d0;border-radius:10px;text-align:center;line-height:1.5;background:#fff">'
+        + 'Lô này chưa có phân khu nào được vẽ.<br><b style="color:var(--primary)">Bấm nút trên để chia nhỏ và khoanh đất</b>, trồng nhiều loại cây khác nhau bên trong.'
+        + '</div>';
     } else {
       var totalArea = 0;
-      for(var p = 0; p < POLYS.length; p++){
-        var py = POLYS[p];
+      for(var p = 0; p < plotPolys.length; p++){
+        var py = plotPolys[p];
         totalArea += (py.dienTich || 0);
+      }
+
+      for(var p = 0; p < plotPolys.length; p++){
+        var py = plotPolys[p];
         var isEditing = (this.mode === 'editing' && this.activePolyId === py.id);
-        h += '<div class="poly-item-card" style="border-color:' + (isEditing ? 'var(--primary)' : 'var(--border)') + ';background:' + (isEditing ? 'var(--accent)' : 'var(--card)') + '">'
-          + '<div style="display:flex;align-items:center;gap:8px">'
-          + '<span style="width:12px;height:12px;border-radius:3px;background:' + py.color + ';flex-shrink:0"></span>'
-          + '<span style="flex:1;min-width:0;font-size:.85rem;font-weight:700;cursor:pointer" data-polyid="' + py.id + '" onclick="DRAW_MGR.panToPoly(this.dataset.polyid)">' + esc(py.ten) + '</span>'
-          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.deletePoly(this.dataset.polyid)" style="border:none;background:rgba(239,68,68,.1);color:var(--bad);cursor:pointer;font-size:.75rem;padding:2px 6px;border-radius:4px" title="Xóa khu này">🗑️</button>'
+        var pct = totalArea > 0 ? Math.round((py.dienTich / totalArea) * 100) : 0;
+        h += '<div class="poly-item-card" style="border-color:' + (isEditing ? 'var(--primary)' : 'var(--border)') + ';background:' + (isEditing ? '#ecfdf5' : '#ffffff') + ';margin-bottom:10px">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+          + '<div style="display:flex;align-items:center;gap:8px;min-width:0">'
+          + '<span style="width:14px;height:14px;border-radius:4px;background:' + py.color + ';flex-shrink:0"></span>'
+          + '<span style="font-size:.88rem;font-weight:800;color:var(--fg);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" data-polyid="' + py.id + '" onclick="DRAW_MGR.panToPoly(this.dataset.polyid)">' + esc(py.ten) + '</span>'
           + '</div>'
-          + '<div style="font-size:.75rem;color:var(--muted-fg);margin-top:4px;padding-left:20px">'
-          + '🌱 ' + esc(py.cay) + ' · 📐 <b>' + fmtArea(py.dienTich) + '</b>'
+          + '<span style="font-size:.7rem;font-weight:700;color:#047857;background:#ecfdf5;padding:2px 6px;border-radius:4px">' + pct + '% lô</span>'
           + '</div>'
-          + '<div style="display:flex;gap:6px;margin-top:8px;padding-left:20px;flex-wrap:wrap">'
-          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.panToPoly(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px">👁️ Xem</button>'
-          + '<button type="button" class="btn btn-p" data-polyid="' + py.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px">📐 Sửa đỉnh</button>'
-          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px">✏️ Đổi tên & Cây</button>'
-          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:.7rem;padding:3px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700" title="Xóa phân khu">🗑️ Xóa</button>'
+
+          + '<div style="font-size:.76rem;color:var(--muted-fg);margin-top:6px;display:flex;flex-wrap:wrap;gap:8px">'
+          + '<span>🌱 Trồng: <b style="color:var(--fg)">' + esc(py.cay) + '</b></span>'
+          + '<span>·</span>'
+          + '<span>📐 <b>' + fmtArea(py.dienTich) + '</b></span>'
+          + '</div>'
+
+          + '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.panToPoly(this.dataset.polyid)" style="font-size:.72rem;padding:4px 8px">👁️ Xem</button>'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.openEditInfoModal(this.dataset.polyid)" style="font-size:.72rem;padding:4px 8px;font-weight:700;color:#047857">✏️ Tùy chỉnh (Đổi cây)</button>'
+          + '<button type="button" class="btn btn-p" data-polyid="' + py.id + '" onclick="DRAW_MGR.startEdit(this.dataset.polyid)" style="font-size:.72rem;padding:4px 8px">📐 Sửa mốc</button>'
+          + '<button type="button" class="btn" data-polyid="' + py.id + '" onclick="DRAW_MGR.deletePoly(this.dataset.polyid)" style="font-size:.72rem;padding:4px 8px;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;font-weight:700" title="Xóa phân khu">🗑️ Xóa</button>'
           + '</div>'
           + '</div>';
       }
-      h += '<div style="margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:8px;font-size:.72rem;color:var(--muted-fg);display:flex;justify-content:space-between">'
-        + '<span>Tổng diện tích đã khoanh:</span><b class="mono" style="color:var(--fg)">' + fmtArea(totalArea) + '</b>'
+
+      h += '<div style="margin-top:10px;padding:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;font-size:.76rem">'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        + '<span style="color:#065f46;font-weight:700">Tổng diện tích đo đạc của lô:</span>'
+        + '<b style="color:#15803d;font-size:.88rem">' + fmtArea(totalArea) + '</b>'
+        + '</div>'
+        + '<div style="font-size:.7rem;color:#047857">Diện tích này tự động cộng dồn từ các phân khu con bên trong.</div>'
         + '</div>';
     }
 
@@ -3668,6 +3791,9 @@ function pThua(){
   }
 
   var list = '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Danh sách lô đất</div>';
+  if(!THUA.length){
+    list += '<div style="padding:14px 10px;text-align:center;background:var(--bg);border-radius:10px;border:1.5px dashed var(--border);color:var(--muted-fg);font-size:.8rem;margin-bottom:10px">Chưa có lô đất nào trong sổ.<br>Bấm nút bên dưới để tạo lô mới.</div>';
+  } else {
   for(i = 0; i < THUA.length; i++){
     var th = THUA[i], on = thuaCur === th.id, s = tt(th.id);
     var cropEmoji = "🌱";
@@ -3684,12 +3810,13 @@ function pThua(){
       + '<span class="field-emoji">' + cropEmoji + '</span>'
       + '<div style="min-width:0;flex:1">'
       + '<div style="font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(th.ten) + '</div>'
-      + '<div style="font-size:.72rem;color:var(--muted-fg)">' + esc(th.cay) + ' · ' + th.dt + ' sào · ' + esc(th.gd || "") + '</div>'
+      + '<div style="font-size:.72rem;color:var(--muted-fg)">' + esc(th.cay) + ' · ' + (th.dt > 0 ? th.dt + ' sào' : 'Chưa khoanh ranh giới') + ' · ' + esc(th.gd || "") + '</div>'
       + '</div>'
       + tag(s.con > 0 ? 'Chờ ' + s.con + 'n' : 'Đạt', s.con > 0 ? 'wait' : 'ok')
       + '</button>'
-      + (THUA.length > 1 ? '<button type="button" data-xoathua="' + th.id + '" class="btn" style="padding:4px 7px;font-size:.72rem;color:var(--bad);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);flex-shrink:0" title="Xóa lô đất này">🗑️</button>' : '')
+      + '<button type="button" data-xoathua="' + th.id + '" class="btn" style="padding:4px 7px;font-size:.72rem;color:var(--bad);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);flex-shrink:0" title="Xóa lô đất này">🗑️</button>'
       + '</div>';
+  }
   }
 
   list += '<div id="polySidebarListContainer" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"></div>';
@@ -3803,10 +3930,7 @@ function pThua(){
         + '</div>'
       + '</div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-        + '<label style="font-size:.82rem;font-weight:700">Diện tích (sào):'
-          + '<input type="number" id="themThuaDt" value="3" min="0.5" step="0.5" style="width:100%;margin-top:4px">'
-        + '</label>'
-        + '<label style="font-size:.82rem;font-weight:700">Loại đất:'
+        + '<label style="font-size:.82rem;font-weight:700">Loại đất thổ nhưỡng:'
           + '<select id="themThuaDat" class="btn" style="width:100%;margin-top:4px;font-size:.85rem;padding:8px">'
             + '<option value="Phù sa">Đất phù sa ngọt</option>'
             + '<option value="Đất đỏ Bazan">Đất đỏ Bazan</option>'
@@ -3815,16 +3939,22 @@ function pThua(){
             + '<option value="Đất phèn nhẹ">Đất phèn nhẹ</option>'
           + '</select>'
         + '</label>'
+        + '<label style="font-size:.82rem;font-weight:700">Giai đoạn canh tác:'
+          + '<select id="themThuaGd" class="btn" style="width:100%;margin-top:4px;font-size:.85rem;padding:8px">'
+            + '<option value="Cây con / Mới trồng">Cây con / Mới xuống giống</option>'
+            + '<option value="Sinh trưởng thân lá / Đẻ nhánh">Sinh trưởng / Đẻ nhánh</option>'
+            + '<option value="Làm đòng / Ra hoa">Làm đòng / Ra hoa</option>'
+            + '<option value="Nuôi trái non / Vào hạt">Nuôi trái non / Vào hạt</option>'
+            + '<option value="Chín / Chuẩn bị thu hoạch">Chuẩn bị thu hoạch</option>'
+          + '</select>'
+        + '</label>'
       + '</div>'
-      + '<label style="font-size:.82rem;font-weight:700">Giai đoạn canh tác hiện tại:'
-        + '<select id="themThuaGd" class="btn" style="width:100%;margin-top:4px;font-size:.85rem;padding:8px">'
-          + '<option value="Cây con / Mới trồng">Cây con / Mới xuống giống</option>'
-          + '<option value="Sinh trưởng thân lá / Đẻ nhánh">Sinh trưởng thân lá / Đẻ nhánh</option>'
-          + '<option value="Làm đòng / Ra hoa">Làm đòng / Phân hóa mầm hoa</option>'
-          + '<option value="Nuôi trái non / Vào hạt">Nuôi trái non / Vào hạt</option>'
-          + '<option value="Chín / Chuẩn bị thu hoạch">Chín / Chuẩn bị thu hoạch</option>'
-        + '</select>'
-      + '</label>'
+      + '<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;font-size:.78rem;color:#166534;line-height:1.5">'
+        + '<div style="font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:4px;color:#15803d;font-size:.84rem">'
+          + '<span>🛰️ Diện tích đo tự động qua vệ tinh:</span>'
+        + '</div>'
+        + 'Bác không cần ước lượng hay nhập tay. Sau khi tạo lô, bác chỉ cần dùng bút vẽ trên bản đồ vệ tinh để khoanh ranh giới, hệ thống sẽ tự động đo đạc chính xác diện tích (m², sào, công, ha) theo từng phân khu!'
+      + '</div>'
     + '</div>'
     + '<div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">'
       + '<button type="button" class="btn" onclick="dongModal(this.dataset.closemodal)" data-closemodal="modalThemThuaMoi">Hủy bỏ</button>'
@@ -3857,7 +3987,15 @@ function pThua(){
     + '</div></div>';
 
   var thCur = byId(THUA, thuaCur);
-  if(thCur){
+  if(!thCur){
+    h += sec('Chi tiết lô đất',
+      card('<div style="padding:32px 20px;text-align:center">'
+        + '<div style="font-size:2.8rem;margin-bottom:10px">🏡</div>'
+        + '<h3 style="font-size:1.1rem;font-weight:700;margin:0 0 8px;color:var(--fg)">Chưa có lô đất nào trong sổ canh tác</h3>'
+        + '<p style="font-size:.85rem;color:var(--muted-fg);max-width:440px;margin:0 auto 16px;line-height:1.5">Bác hãy tạo lô đất đầu tiên để bắt đầu định vị GPS, vẽ ranh giới vệ tinh và chia các phân khu trồng cây.</p>'
+        + '<button type="button" class="btn btn-p" onclick="moModalThemThuaMoi()" style="font-size:.88rem;padding:9px 22px;font-weight:700">🌱 + Thêm lô đất canh tác mới</button>'
+        + '</div>'));
+  } else {
     var st = tt(thCur.id), w = st.con > 0;
     var rows = '', k = 0;
     for(var j = 0; j < so.length; j++){
@@ -3881,13 +4019,15 @@ function pThua(){
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
         + '<div class="detail-cell"><span class="detail-lbl">Cây trồng</span><span class="detail-val">' + esc(thCur.cay) + '</span></div>'
         + '<div class="detail-cell"><span class="detail-lbl">Giống cây</span><span class="detail-val">' + esc(thCur.giong || "Chuẩn F1") + '</span></div>'
-        + '<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">📐 Diện tích quy đổi đa vùng miền</span>'
+        + '<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">📐 Diện tích đo đạc vệ tinh (Đa vùng miền)</span>'
         + '<span class="detail-val" style="color:var(--primary);font-size:.85rem;line-height:1.4">'
-        + '<b>' + (thCur.dt * 360).toLocaleString('vi-VN') + ' m²</b> · '
-        + thCur.dt + ' sào Bắc Bộ · '
-        + (thCur.dt * 360 / 500).toFixed(1) + ' sào Trung Bộ · '
-        + (thCur.dt * 360 / 1000).toFixed(2) + ' công Nam Bộ · '
-        + (thCur.dt * 360 / 10000).toFixed(3) + ' ha'
+        + (thCur.dt > 0
+           ? ('<b>' + (thCur.dt * 360).toLocaleString('vi-VN') + ' m²</b> · '
+              + thCur.dt + ' sào Bắc Bộ · '
+              + (thCur.dt * 360 / 500).toFixed(1) + ' sào Trung Bộ · '
+              + (thCur.dt * 360 / 1000).toFixed(2) + ' công Nam Bộ · '
+              + (thCur.dt * 360 / 10000).toFixed(3) + ' ha')
+           : '<span style="color:#d97706;font-weight:700">Chưa đo đạc (0 m²) — Bấm "+ Chia nhỏ thêm phân khu" trên bản đồ để khoanh đất</span>')
         + '</span></div>'
         + '<div class="detail-cell"><span class="detail-lbl">Loại thổ nhưỡng</span><span class="detail-val">' + esc(thCur.dat || "Phù sa") + '</span></div>'
         + '<div class="detail-cell"><span class="detail-lbl">Giai đoạn sinh học</span><span class="detail-val">' + esc(thCur.gd || "Sinh trưởng") + '</span></div>'
@@ -3922,7 +4062,7 @@ function pThua(){
       + '</div>',
       '<button type="button" data-go="benh" class="btn btn-p" style="font-size:.82rem">Ghi việc xịt thuốc</button>'
       + '<button type="button" onclick="locateUserGps()" class="btn" style="font-size:.82rem">📍 Định vị GPS lô này</button>'
-      + (THUA.length > 1 ? '<button type="button" data-xoathua="' + thCur.id + '" class="btn" style="font-size:.82rem;color:var(--bad)">Xoá lô này</button>' : ''));
+      + '<button type="button" data-xoathua="' + thCur.id + '" class="btn" style="font-size:.82rem;color:var(--bad);background:#fef2f2;border:1px solid #fecaca;font-weight:700">🗑️ Xoá lô này</button>');
   }
   return h;
 }
@@ -3985,23 +4125,23 @@ function xacNhanThemThuaMoi(){
   var sel = document.getElementById('themThuaCaySelect');
   var customInp = document.getElementById('themThuaCayCustom');
   var cay = (sel && sel.value !== 'khac') ? sel.value : (customInp && customInp.value.trim() ? customInp.value.trim() : 'lúa');
-  var dtInp = document.getElementById('themThuaDt');
-  var dt = dtInp ? (parseFloat(dtInp.value) || 3) : 3;
   var datSel = document.getElementById('themThuaDat');
   var dat = datSel ? datSel.value : 'Phù sa';
   var gdSel = document.getElementById('themThuaGd');
   var gd = gdSel ? gdSel.value : 'Cây con';
 
   var id = "thua" + Date.now();
+  var centerFarm = getFarmCenter();
   THUA.push({
     id: id,
     ten: ten,
     cay: cay,
     giong: "Chuẩn F1",
-    dt: dt,
+    dt: 0,
     dat: dat,
     gd: gd,
-    ngaycay: 10
+    ngaycay: 1,
+    center: { lat: centerFarm.lat, lng: centerFarm.lng }
   });
   luuThua();
   thuaCur = id;
@@ -4010,6 +4150,10 @@ function xacNhanThemThuaMoi(){
   if(modal) modal.style.display = 'none';
   veNav();
   ve();
+  setTimeout(function(){
+    chonVaBayToiLoiDat(id);
+    showToast("✓ Đã tạo '" + ten + "'. Hãy bấm '+ Chia nhỏ thêm phân khu' để khoanh đất!", "ok");
+  }, 150);
 }
 window.moModalThemThuaMoi = moModalThemThuaMoi;
 window.onThemThuaSelectChange = onThemThuaSelectChange;
@@ -4022,12 +4166,21 @@ window.dongModal=dongModal;
 function thucHienXoaThua(){
   var v = window.pendingDeleteThuaId;
   if(!v) return;
+
+  // Xóa toàn bộ các phân khu thuộc lô đất này
+  POLYS = POLYS.filter(function(x){ return x.thuaId !== v; });
+  savePoly();
+
+  // Xóa lô đất
   THUA = THUA.filter(function(x){ return x.id !== v; });
   luuThua();
+
   thuaCur = THUA.length ? THUA[0].id : null;
   window.pendingDeleteThuaId = null;
   var m = document.getElementById("modalConfirmDeleteThua");
   if(m) m.style.display = "none";
+
+  showToast("✓ Đã xóa lô đất thành công", "ok");
   veNav();
   ve();
 }
@@ -4092,7 +4245,12 @@ function initMap(){
   DRAW_MGR.updateToolbarDOM();
   DRAW_MGR.renderSidebarList();
 
-  setTimeout(function(){ if(mapInst) mapInst.invalidateSize(); }, 200);
+  setTimeout(function(){
+    if(mapInst){
+      mapInst.invalidateSize();
+      if(thuaCur) chonVaBayToiLoiDat(thuaCur);
+    }
+  }, 120);
 }
 
 
@@ -9094,7 +9252,12 @@ document.addEventListener("click",function(ev){
     return;
   }
 
-  if((v=el.getAttribute("data-chothua"))){thuaCur=v;di("thua");return}
+  if((v=el.getAttribute("data-chothua"))){
+    thuaCur=v;
+    di("thua");
+    setTimeout(function(){ chonVaBayToiLoiDat(v); }, 150);
+    return;
+  }
   if((v=el.getAttribute("data-setcay"))){benhState.cay=v;benhState.loaiTru={};chayChuanDoanAI();ve();return}
   if((v=el.getAttribute("data-setbophan"))){benhState.boPhan=v;benhState.loaiTru={};chayChuanDoanAI();ve();return}
   if((v=el.getAttribute("data-setmode"))){benhState.mode=v;ve();return}
