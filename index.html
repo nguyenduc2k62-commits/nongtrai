@@ -576,9 +576,9 @@ var PHI=(function(){try{return JSON.parse(localStorage.getItem(PHI_KEY))||{}}cat
 function luuPhi(){try{localStorage.setItem(PHI_KEY,JSON.stringify(PHI))}catch(e){}}
 
 var KEY="so-ruong-v3";
-var so=(function(){try{var r=localStorage.getItem(KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v))return v}}catch(e){}
+var so=(function(){try{var r=localStorage.getItem(KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v)){for(var i=0;i<v.length;i++){if(v[i].thuoc==="Ababetter 5EC"){v[i].thuoc="Ababetter 3.6 EC";v[i].lieu="Abamectin 36g/l · Lúa"}}return v}}}catch(e){}
   return [
-    {id:"s1", thua:"thua1", ngay:Date.now()-864e5*4, viec:"Xịt trừ đạo ôn lá", thuoc:"Ababetter 5EC", lieu:"Abamectin · Lúa", phi:7},
+    {id:"s1", thua:"thua1", ngay:Date.now()-864e5*4, viec:"Xịt trừ sâu cuốn lá", thuoc:"Ababetter 3.6 EC", lieu:"Abamectin 36g/l · Lúa", phi:7},
     {id:"s2", thua:"thua2", ngay:Date.now()-864e5*12, viec:"Tưới trừ tuyến trùng rễ", thuoc:"Tervigo 020SC", lieu:"Abamectin · Cà phê", phi:14}
   ];
 })();
@@ -3924,6 +3924,13 @@ function pBenh(){
           }
         }
       }
+      if(typeof coAnhThat === "function"){
+        thuocList.sort(function(a, b){
+          var aR = coAnhThat(a.t) ? 1 : 0;
+          var bR = coAnhThat(b.t) ? 1 : 0;
+          return bR - aR;
+        });
+      }
       if(!benhState.thuocChon&&thuocList.length>0){
         benhState.thuocChon=thuocList[0].t;
       }
@@ -3999,7 +4006,7 @@ var DAI_LY=[
   {id:1, ten:"Đại lý VTNN Ba Hùng — Cấp 1 Syngenta & Lộc Trời", loai:"Vật tư & BVTV", loaiIcon:"🧪",
    kenh:"Google Maps", kenhBadge:"google", dc:"QL1A, Ngã 3 Chợ Đồng Tiến, Cạnh Petrolimex",
    lat:10.458, lng:106.656, dist:"1.1 km", sdt:"0912.345.431", fb:"https://facebook.com", web:"https://vtnnbahung.vn", zalo:"https://zalo.me/0912345431",
-   hang:"Phân bón Bình Điền, Đạm Phú Mỹ, Thuốc trừ bệnh Amistar Top, Ridomil Gold, Tervigo, Ababetter",
+   hang:"Phân bón Bình Điền, Đạm Phú Mỹ, Thuốc trừ bệnh Amistar Top, Ridomil Gold, Tervigo, Ababetter 3.6 EC",
    danhGia:"4.8 ★ (142 đánh giá)", gioMoCua:"06:00 - 18:30"},
   {id:2, ten:"Cửa Hàng Nông Dược 24/7 Bảy Thắng (Tiểu thương)", loai:"Bán lẻ địa phương", loaiIcon:"📦",
    kenh:"Facebook & Zalo", kenhBadge:"facebook", dc:"Ấp Tân Lập, đường liên thôn (Giao tận ruộng)",
@@ -5974,25 +5981,87 @@ var KY=[
 
 var THUOC_ANH_MAP = {
   "ababetter": "assets/thuoc/ababetter.jpg",
-  "aba": "assets/thuoc/ababetter.jpg",
   "tervigo": "assets/thuoc/tervigo.jpg",
+  "amistar top": "assets/thuoc/amistar_top.jpg",
+  "amistar® top": "assets/thuoc/amistar_top.jpg",
   "amistar": "assets/thuoc/amistar_top.jpg",
   "anvil": "assets/thuoc/anvil.jpg",
+  "ridomil gold": "assets/thuoc/ridomil_gold.jpg",
   "ridomil": "assets/thuoc/ridomil_gold.jpg",
+  "tilt super": "assets/thuoc/tilt_super.jpg",
   "tilt": "assets/thuoc/tilt_super.jpg",
   "score": "assets/thuoc/score.jpg",
   "antracol": "assets/thuoc/antracol.jpg",
   "aliette": "assets/thuoc/aliette.jpg",
   "filia": "assets/thuoc/filia.jpg",
-  "regent": "assets/thuoc/regent.jpg"
+  "regent": "assets/thuoc/regent.jpg",
+  "map logic": "assets/thuoc/map_logic.jpg",
+  "ortiva": "assets/thuoc/ortiva.jpg",
+  "tt-over": "assets/thuoc/ttover.jpg",
+  "tt over": "assets/thuoc/ttover.jpg",
+  "over 325": "assets/thuoc/ttover.jpg",
+  "trobin top": "assets/thuoc/trobintop.jpg",
+  "beam 75": "assets/thuoc/beam.jpg",
+  "beam®": "assets/thuoc/beam.jpg",
+  "fuji-one": "assets/thuoc/fujione.jpg",
+  "fujione": "assets/thuoc/fujione.jpg",
+  "kasumin": "assets/thuoc/kasumin.jpg",
+  "nativo": "assets/thuoc/nativo.jpg",
+  "coc 85": "assets/thuoc/coc85.jpg",
+  "coc85": "assets/thuoc/coc85.jpg",
+  "curenox": "assets/thuoc/coc85.jpg",
+  "mancozeb": "assets/thuoc/mancozeb.jpg",
+  "dithane": "assets/thuoc/mancozeb.jpg",
+  "bordeaux": "assets/thuoc/bordeaux.jpg",
+  "booc-do": "assets/thuoc/bordeaux.jpg"
 };
+
+function layAnhThatThuoc(ten){
+  if(!ten) return null;
+  var t = ten.toLowerCase();
+  for(var k in THUOC_ANH_MAP){
+    if(t.indexOf(k) >= 0) return THUOC_ANH_MAP[k];
+  }
+  return null;
+}
+
+function coAnhThat(ten){
+  return layAnhThatThuoc(ten) !== null;
+}
+
+function layMoTaAnhThuoc(ten, realImg){
+  var t = (ten||'').toLowerCase();
+  if(t.indexOf('ababetter')>=0) return 'Ảnh chụp bao bì chai thuốc bảo vệ thực vật chính hãng: ABABETTER 3.6 EC (Hoạt chất: Abamectin 36g/l - Công ty TNHH MTV Lucky - Đặc trị sâu cuốn lá, nhện đỏ, bọ trĩ).';
+  if(t.indexOf('ttover')>=0 || t.indexOf('tt-over')>=0 || t.indexOf('over 325')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TT-OVER 325SC (Azoxystrobin 200g/l + Difenoconazole 125g/l - Tân Thành - Đặc trị lem lép hạt, khô vằn).';
+  if(t.indexOf('trobin')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TROBIN TOP 325SC (Azoxystrobin 200g/l + Difenoconazole 125g/l - Phú Nông - Đặc trị lem lép hạt).';
+  if(t.indexOf('map logic')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: MAP LOGIC 90WP (Clinoptilolite 900g/kg - Map Pacific Singapore - Bổ sung khoáng chất, đánh bật tuyến trùng).';
+  if(t.indexOf('ortiva')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: ORTIVA 600 SC (Azoxystrobin 100g/l + Chlorothalonil 500g/l - Syngenta - Đặc trị thán thư, sương mai, đốm lá).';
+  if(t.indexOf('beam')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: BEAM 75 WP (Tricyclazole 75% w/w - Dow AgroSciences - Cắt ngay cháy lá, đặc trị đạo ôn lúa).';
+  if(t.indexOf('fuji')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: FUJI-ONE 40EC (Isoprothiolane 40% w/w - VIPESCO - Đặc trị đạo ôn lá và cổ bông).';
+  if(t.indexOf('kasumin')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: KASUMIN 2SL (Kasugamycin 2% w/w - UPL / Hokko Nhật Bản - Chuyên gia trị vi khuẩn bạc lá, loét sẹo).';
+  if(t.indexOf('nativo')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: NATIVO 750WG (Trifloxystrobin 250g/kg + Tebuconazole 500g/kg - Bayer - Trừ thán thư, đốm lá, rỉ sắt).';
+  if(t.indexOf('coc 85')>=0 || t.indexOf('curenox')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: COC 85 WP (Copper Oxychloride 85% w/w - Ngan Anh / Tây Ban Nha - Trừ nấm khuẩn phổ rộng gốc đồng).';
+  if(t.indexOf('mancozeb')>=0 || t.indexOf('dithane')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: DITHANE M-45 80 WP XANH (Mancozeb 80% w/w - Dow AgroSciences - Áo giáp kẽm mangan trừ nấm).';
+  if(t.indexOf('bordeaux')>=0 || t.indexOf('booc')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: BORDEAUX M 25WP (Boóc-đô Đồng + Vôi - Phòng trừ nấm bệnh và vi khuẩn).';
+  if(t.indexOf('amistar')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: AMISTAR TOP 325SC (Azoxystrobin 200g/l + Difenoconazole 125g/l - Syngenta - Trừ lem lép hạt, đạo ôn).';
+  if(t.indexOf('filia')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: FILIA 525 SE (Tricyclazole 400g/l + Propiconazole 125g/l - Syngenta - Đặc trị đạo ôn lá & cổ bông).';
+  if(t.indexOf('tilt')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TILT SUPER 300EC (Propiconazole 150g/l + Difenoconazole 150g/l - Syngenta - Trừ lem lép hạt, rỉ sắt).';
+  if(t.indexOf('anvil')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: ANVIL 5SC (Hexaconazole 50g/l - Syngenta - Đặc trị khô vằn, lem lép hạt, rỉ sắt).';
+  if(t.indexOf('ridomil')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: RIDOMIL GOLD 68 WG (Metalaxyl M 40g/kg + Mancozeb 640g/kg - Syngenta - Đặc trị sương mai, loét sọc, thối rễ).';
+  if(t.indexOf('antracol')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: ANTRACOL 70 WP (Propineb 700g/kg - Bayer - Áo giáp kẽm bảo vệ cây trồng).';
+  if(t.indexOf('aliette')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: ALIETTE 800 WG (Fosetyl Aluminium 800g/kg - Bayer - Lưu dẫn 2 chiều trừ nấm Phytophthora).';
+  if(t.indexOf('score')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: SCORE 250EC (Difenoconazole 250g/l - Syngenta - Đặc trị thán thư, phấn trắng, rỉ sắt).';
+  if(t.indexOf('tervigo')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TERVIGO 020SC (Abamectin 20g/l - Syngenta - Đặc trị tuyến trùng rễ).';
+  if(t.indexOf('regent')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: REGENT 0.3 G (Fipronil 3g/kg - Bayer - Diệt sâu đục thân, rầy nâu hại lúa).';
+  return 'Ảnh chụp bao bì chai/gói thuốc bảo vệ thực vật chính hãng: ' + (ten||'');
+}
 
 function veThuocSvgChuan(ten, sw, sh){
   var t=(ten||'').toLowerCase();
   var capColor='#dc2626',bodyColor='#ffffff',labelBg='#16a34a',bandColor='#2563eb',formText='EC';
   if(t.indexOf('tervigo')>=0){
     capColor='#15803d';bodyColor='#e2e8f0';labelBg='#0284c7';bandColor='#16a34a';formText='SC';
-  }else if(t.indexOf('ababetter')>=0||t.indexOf('aba')>=0){
+  }else if(t.indexOf('ababetter')>=0){
     capColor='#dc2626';bodyColor='#ffffff';labelBg='#15803d';bandColor='#2563eb';formText='EC';
   }else if(t.indexOf('anvil')>=0){
     capColor='#dc2626';bodyColor='#fef08a';labelBg='#ca8a04';bandColor='#2563eb';formText='SC';
@@ -6021,16 +6090,11 @@ function veThuocSvgChuan(ten, sw, sh){
 function anhThuocSVG(ten,hoatChat,w,h){
   var t=(ten||'').toLowerCase();
   var sw=w||48,sh=h||68;
-  var realImg=null;
-  for(var k in THUOC_ANH_MAP){
-    if(t.indexOf(k)>=0){
-      realImg=THUOC_ANH_MAP[k];
-      break;
-    }
-  }
+  var realImg=layAnhThatThuoc(ten);
 
   if(realImg){
-    return '<div class="thuoc-real-badge" style="width:'+sw+'px;height:'+sh+'px;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;cursor:pointer" onclick="moXemAnh(\''+realImg+'\',\''+esc(ten)+'\',\'Ảnh chụp bao bì chai/gói thuốc bảo vệ thực vật chính hãng.\')" title="Nhấn để phóng to ảnh chai thuốc thật">'
+    var moTaAnh=layMoTaAnhThuoc(ten, realImg);
+    return '<div class="thuoc-real-badge" style="width:'+sw+'px;height:'+sh+'px;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;cursor:pointer" onclick="moXemAnh(\''+realImg+'\',\''+esc(ten)+'\',\''+esc(moTaAnh)+'\')" title="Nhấn để phóng to ảnh chai thuốc thật">'
       +'<img src="'+realImg+'" alt="'+esc(ten)+'" style="max-width:92%;max-height:92%;object-fit:contain;display:block" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'
       +'<div style="display:none;width:100%;height:100%">'+veThuocSvgChuan(ten,sw,sh)+'</div>'
       +'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(15,23,42,.78);color:#86efac;font-size:7px;font-weight:800;text-align:center;padding:1px 0;letter-spacing:.02em">ẢNH THẬT</div>'
@@ -6370,29 +6434,36 @@ function timThuocTen(ten){
   return null;
 }
 function locThuoc(tu, gioi, nhom){
-  var ra = [], q = (tu || "").toLowerCase().trim();
-  if(!D || !D.thuoc) return ra;
+  var danhSach = [], q = (tu || "").toLowerCase().trim();
+  if(!D || !D.thuoc) return [];
   var limit = gioi || 30;
 
-  for(var i = 0; i < D.thuoc.length && ra.length < limit; i++){
+  for(var i = 0; i < D.thuoc.length; i++){
     var t = D.thuoc[i];
     var hc = (D.bang.hoat_chat[t.h] || "").toLowerCase();
     var ten = (t.t || "").toLowerCase();
 
     if(nhom && nhom !== "tatca"){
       var matchNhom = false;
-      if(nhom === "nam" && (t.g.indexOf("dong")>=0 || t.g.indexOf("hoahoc")>=0 || hc.indexOf("bin")>=0 || hc.indexOf("zole")>=0 || hc.indexOf("manc")>=0 || ten.indexOf("anvil")>=0 || ten.indexOf("ridomil")>=0)) matchNhom = true;
+      if(nhom === "nam" && (t.g.indexOf("dong")>=0 || t.g.indexOf("hoahoc")>=0 || hc.indexOf("bin")>=0 || hc.indexOf("zole")>=0 || hc.indexOf("manc")>=0 || ten.indexOf("anvil")>=0 || ten.indexOf("ridomil")>=0 || ten.indexOf("beam")>=0 || ten.indexOf("fuji")>=0 || ten.indexOf("nativo")>=0 || ten.indexOf("filia")>=0 || ten.indexOf("tilt")>=0 || ten.indexOf("score")>=0 || ten.indexOf("antracol")>=0 || ten.indexOf("aliette")>=0 || ten.indexOf("trobin")>=0 || ten.indexOf("over")>=0 || ten.indexOf("ortiva")>=0)) matchNhom = true;
       else if(nhom === "sau" && (hc.indexOf("mectin")>=0 || hc.indexOf("thiam")>=0 || hc.indexOf("chlor")>=0 || hc.indexOf("pro")>=0 || hc.indexOf("fip")>=0 || ten.indexOf("regent")>=0 || ten.indexOf("ababetter")>=0)) matchNhom = true;
-      else if(nhom === "khuan" && (t.g.indexOf("khangsinh")>=0 || hc.indexOf("kawa")>=0 || hc.indexOf("mycin")>=0 || hc.indexOf("oxolinic")>=0 || ten.indexOf("kasu")>=0)) matchNhom = true;
-      else if(nhom === "tuyentrung" && (hc.indexOf("abamectin")>=0 || hc.indexOf("fluensulfone")>=0 || ten.indexOf("tervigo")>=0)) matchNhom = true;
+      else if(nhom === "khuan" && (t.g.indexOf("khangsinh")>=0 || hc.indexOf("kawa")>=0 || hc.indexOf("mycin")>=0 || hc.indexOf("oxolinic")>=0 || ten.indexOf("kasu")>=0 || ten.indexOf("coc 85")>=0 || ten.indexOf("curenox")>=0 || ten.indexOf("bordeaux")>=0 || ten.indexOf("dong")>=0)) matchNhom = true;
+      else if(nhom === "tuyentrung" && (hc.indexOf("abamectin")>=0 || hc.indexOf("fluensulfone")>=0 || hc.indexOf("clinoptilolite")>=0 || ten.indexOf("tervigo")>=0 || ten.indexOf("map logic")>=0)) matchNhom = true;
       if(!matchNhom) continue;
     }
 
     if(!q || ten.indexOf(q) >= 0 || hc.indexOf(q) >= 0){
-      ra.push(t);
+      danhSach.push(t);
     }
   }
-  return ra;
+
+  danhSach.sort(function(a, b){
+    var aReal = (typeof coAnhThat === "function" && coAnhThat(a.t)) ? 1 : 0;
+    var bReal = (typeof coAnhThat === "function" && coAnhThat(b.t)) ? 1 : 0;
+    return bReal - aReal;
+  });
+
+  return danhSach.slice(0, limit);
 }
 
 function renderDanhSachThuocPha(){
