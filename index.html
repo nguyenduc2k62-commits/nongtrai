@@ -492,7 +492,7 @@ input:checked + .switch-slider:before{transform:translateX(20px)}
     <div class="content">
       <div class="warn-banner">
         <svg style="width:1.2em;height:1.2em;flex-shrink:0;color:var(--wait)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <p style="margin:0"><b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Mô phỏng đồng ruộng mở rộng.</p>
+        <p style="margin:0"><b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu thật 100%, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Hệ sinh thái đồng ruộng mô phỏng hạt sinh học.</p>
       </div>
       <main id="page"></main>
     </div>
@@ -686,7 +686,7 @@ var PAGES=[
   {id:"pha", ten:"Pha thuốc", sub:"Hình ảnh bình thuốc · Tương thích Cây & Đất · Dẫn chứng khoa học", g:2},
   {id:"bando", ten:"Điểm bán quanh vùng", sub:"Bản đồ đại lý VTNN · SĐT · Facebook · Google Maps", g:2},
   {id:"gia", ten:"Giá thị trường", sub:"Realtime 30p-1h · 100% Nông sản · Đối soát web uy tín", g:2},
-  {id:"mophong", ten:"Mô phỏng đồng ruộng", sub:"Lát cắt sinh thái đất, rễ, sâu bệnh, thời tiết mở rộng", g:3},
+  {id:"mophong", ten:"Hệ sinh thái đồng ruộng", sub:"Mô phỏng sinh thái học đất & rễ cây (Cellular Automata) · Sinh trưởng thực vật", g:3},
   {id:"taikhoan", ten:"Hồ sơ & Tài khoản", sub:"Thông tin nông hộ · Chứng nhận VietGAP · Quản lý nhân sự & Dữ liệu", g:2}
 ];
 var cur="tongquan";
@@ -6453,7 +6453,7 @@ function pSim(){
     + '</div>'
     + '</div>';
 
-  return sec("Mô phỏng sinh thái đồng ruộng đa cây trồng",
+  return sec("Hệ sinh thái đồng ruộng — Mô phỏng sinh thái đất & sinh trưởng cây trồng",
     cropCards + stageSteps + '<div class="g-sim"><div>' + L + '</div><div>' + R + '</div></div>');
 }
 
