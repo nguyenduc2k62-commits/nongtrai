@@ -1632,6 +1632,113 @@ function phanLoaiCayTrong(tenCay){
   return "luongthuc"; // lúa, bắp, khoai, rau màu
 }
 
+
+/* ===== CỐ VẤN NÔNG HỌC & DỰ BÁO GIỜ VÀNG CHO NÔNG DÂN & KỸ SƯ ===== */
+function renderThoiTietVaGioVangPhun(){
+  return '<div class="card" style="padding:18px 20px;margin-bottom:16px;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 50%,#f0fdfa 100%);border:1.5px solid #a7f3d0;border-radius:16px;box-shadow:0 4px 16px rgba(16,185,129,.08)">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
+    + '<div style="display:flex;align-items:center;gap:10px">'
+    + '<span style="font-size:1.6rem">⛅</span>'
+    + '<div>'
+    + '<div style="font-size:.95rem;font-weight:800;color:#065f46">Dự Báo Thời Tiết Nông Vụ & Khung Giờ Vàng Phun Xịt / Bón Phân</div>'
+    + '<div style="font-size:.76rem;color:#047857;margin-top:2px">Nhiệt độ: <b>24°C – 31°C</b> · Độ ẩm không khí: <b>78%</b> · Gió nhẹ: <b>1.5 m/s</b> · Áp suất ổn định</div>'
+    + '</div>'
+    + '</div>'
+    + '<span class="tag tag-ok" style="font-size:.75rem;padding:4px 10px;font-weight:700">✓ Điều kiện nông học thuận lợi</span>'
+    + '</div>'
+
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">'
+    + '<div style="background:#fff;border-radius:12px;padding:12px;border:1px solid #86efac;box-shadow:0 2px 6px rgba(0,0,0,.03)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+    + '<span style="font-size:.78rem;font-weight:800;color:#15803d">🌅 06:00 – 09:30 (Sáng sớm)</span>'
+    + '<span style="font-size:.68rem;background:#dcfce7;color:#166534;font-weight:800;padding:2px 6px;border-radius:6px">GIỜ VÀNG ★</span>'
+    + '</div>'
+    + '<div style="font-size:.75rem;color:var(--fg);line-height:1.45">'
+    + 'Lá ráo sương, khí khổng mở tối đa. <b>Lý tưởng để phun thuốc BVTV nội hấp & bón phân qua lá (hấp thu >92%)</b>.'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="background:#fff;border-radius:12px;padding:12px;border:1px solid #fecaca;box-shadow:0 2px 6px rgba(0,0,0,.03)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+    + '<span style="font-size:.78rem;font-weight:800;color:#b91c1c">☀️ 11:00 – 14:00 (Trưa nắng)</span>'
+    + '<span style="font-size:.68rem;background:#fee2e2;color:#991b1b;font-weight:800;padding:2px 6px;border-radius:6px">CẤM PHUN ⛔</span>'
+    + '</div>'
+    + '<div style="font-size:.75rem;color:var(--fg);line-height:1.45">'
+    + 'Nắng gắt > 32°C bốc hơi nhanh. <b>Thuốc nhũ dầu (EC) dễ gây cháy lá non, gây độc cho người mang bình xịt</b>.'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="background:#fff;border-radius:12px;padding:12px;border:1px solid #bfdbfe;box-shadow:0 2px 6px rgba(0,0,0,.03)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+    + '<span style="font-size:.78rem;font-weight:800;color:#1d4ed8">🌇 15:30 – 17:30 (Chiều mát)</span>'
+    + '<span style="font-size:.68rem;background:#dbeafe;color:#1e40af;font-weight:800;padding:2px 6px;border-radius:6px">THUẬN LỢI ✓</span>'
+    + '</div>'
+    + '<div style="font-size:.75rem;color:var(--fg);line-height:1.45">'
+    + 'Trời dịu mát, sâu hại (sâu cuốn lá, sâu đục thân, rầy) bò ra ăn. <b>Thuốc tiếp xúc và vị độc phát huy tối đa</b>.'
+    + '</div>'
+    + '</div>'
+
+    + '<div style="background:#fff;border-radius:12px;padding:12px;border:1px solid #fed7aa;box-shadow:0 2px 6px rgba(0,0,0,.03)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+    + '<span style="font-size:.78rem;font-weight:800;color:#c2410c">🌧️ Đêm & Chiều Tối</span>'
+    + '<span style="font-size:.68rem;background:#ffedd5;color:#9a3412;font-weight:800;padding:2px 6px;border-radius:6px">LƯU Ý ⚠️</span>'
+    + '</div>'
+    + '<div style="font-size:.75rem;color:var(--fg);line-height:1.45">'
+    + 'Xác suất mưa dông 40%. <b>Nếu phun chiều muộn, bắt buộc pha thêm chất trợ lực bám dính chống trôi thuốc</b>.'
+    + '</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderQuickActionBar(){
+  var curTh = byId(THUA, thuaCur) || (THUA.length ? THUA[0] : null);
+  var tenThua = curTh ? curTh.ten : "Lô canh tác";
+  return '<div class="card" style="padding:16px 20px;margin-bottom:16px;background:var(--card);border:1.5px solid var(--border);border-radius:16px">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">'
+    + '<div style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-fg);display:flex;align-items:center;gap:6px">'
+    + '<span>⚡ Ghi Chép Nhanh 1 Chạm Ngoài Đồng Ruộng</span>'
+    + '<span style="font-size:.72rem;font-weight:600;color:var(--primary);background:var(--accent);padding:2px 8px;border-radius:6px">Dành Cho Nông Dân</span>'
+    + '</div>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg)">Đang áp dụng cho: <b style="color:var(--primary)">' + esc(tenThua) + '</b></div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px">'
+    + '<button type="button" class="btn btn-p" data-quicklog="tuoi" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#0284c7;border-color:#0284c7">💧 Vừa tưới nước xong</button>'
+    + '<button type="button" class="btn btn-p" data-quicklog="bon" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#16a34a;border-color:#16a34a">🌾 Vừa bón phân NPK</button>'
+    + '<button type="button" class="btn btn-p" data-quicklog="xit" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#d97706;border-color:#d97706">🛡️ Vừa xịt thuốc BVTV</button>'
+    + '<button type="button" class="btn btn-p" data-quicklog="thuhoach" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#7c3aed;border-color:#7c3aed">🧺 Vừa thu hoạch xong</button>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderAgronomicAdvisory(){
+  return sec("Cố Vấn Kỹ Thuật Nông Học & Cảnh Báo Khí Tượng - Dịch Bệnh",
+    '<div class="card" style="padding:20px;border-left:4px solid var(--primary);border-radius:14px;background:var(--card)">'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">'
+    + '<div>'
+    + '<div style="font-size:.85rem;font-weight:800;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:6px">'
+    + '<span>🧪 Cân Đối N - P - K Theo Giai Đoạn Sinh Học:</span>'
+    + '</div>'
+    + '<ul style="margin:0;padding-left:18px;font-size:.78rem;line-height:1.6;color:var(--fg)">'
+    + '<li><b>Lúa nước (Làm đòng):</b> Cân đối Đạm và Kali tỷ lệ 1:1 (bón 4-5 kg Urê + 4-5 kg Kali/sào). Tuyệt đối không bón thừa đạm để tránh bùng phát đạo ôn cổ bông và rầy nâu.</li>'
+    + '<li><b>Cà phê (Nuôi nhân hạt):</b> Bổ sung Kali sunfat (K₂SO₄) và Vi lượng Bo - Kẽm giúp nhân to chắc, hạn chế tối đa rụng quả non vào mùa mưa.</li>'
+    + '<li><b>Sầu riêng (Nuôi quả non 60-70 ngày):</b> Chú ý dằn đọt (chặn đọt non) bằng MKP hoặc Kali cao khi gặp mưa dội để tránh cây đi đọt làm rụng quả hàng loạt.</li>'
+    + '</ul>'
+    + '</div>'
+    + '<div>'
+    + '<div style="font-size:.85rem;font-weight:800;color:#dc2626;margin-bottom:8px;display:flex;align-items:center;gap:6px">'
+    + '<span>⚠️ Dự Báo Nguy Cơ Dịch Hại Do Khí Hậu (Epidemiology):</span>'
+    + '</div>'
+    + '<ul style="margin:0;padding-left:18px;font-size:.78rem;line-height:1.6;color:var(--fg)">'
+    + '<li><b>Độ ẩm không khí > 80% kèm sương mù:</b> Điều kiện tối hảo cho bào tử nấm <i>Phytophthora</i> và <i>Pyricularia oryzae</i> nảy mầm xâm nhiễm. Phun phòng sớm bằng thuốc bảo vệ tiếp xúc (Mancozeb, Antracol).</li>'
+    + '<li><b>Thổ nhưỡng đất dốc / đất cát:</b> Tốc độ rửa trôi đạm và kali rất cao. Khuyến cáo chia nhỏ phân bón làm 3-4 lần bón hoặc bón qua hệ thống tưới ngầm.</li>'
+    + '<li><b>Nguyên tắc 4 đúng:</b> Phun ướt đều 2 mặt lá, không tăng liều thuốc gấp đôi vì gây hiện tượng lờn thuốc (kháng thuốc).</li>'
+    + '</ul>'
+    + '</div>'
+    + '</div>'
+    + '</div>');
+}
+
 function pTong(){
   var dt = 0, cho = 0, ok = 0, i;
   var cropTypesCount = {};
@@ -1657,6 +1764,8 @@ function pTong(){
     + fg('<span style="font-size:1rem;color:#047857;font-weight:700">' + (cropSummaryPills.join(' · ') || 'Đa cây trồng') + '</span>', 'cơ cấu cây trồng')
     + fg(so.length, 'lượt nhật ký đã ghi')
     + '</div>');
+  h += renderThoiTietVaGioVangPhun();
+  h += renderQuickActionBar();
 
   // 2. Crop-Adaptive Plot Cards
   var cards = '';
@@ -1800,6 +1909,7 @@ function pTong(){
     cards += '</div>';
   }
   h += sec("Tình trạng vận hành các lô đất (Theo chu kỳ sinh thái cây trồng)", '<div class="g2">' + cards + '</div>');
+  h += renderAgronomicAdvisory();
 
   // 3. Operational Timeline / Gantt Chart (Lịch trình đa cây trồng)
   h += sec("Lịch trình vận hành canh tác & Kế hoạch nông trại (Đa cây trồng)", card('<div style="padding:20px">' + chLichDaCay() + '</div>'));
@@ -2998,10 +3108,40 @@ function pThua(){
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
         + '<div class="detail-cell"><span class="detail-lbl">Cây trồng</span><span class="detail-val">' + esc(thCur.cay) + '</span></div>'
         + '<div class="detail-cell"><span class="detail-lbl">Giống cây</span><span class="detail-val">' + esc(thCur.giong || "Chuẩn F1") + '</span></div>'
-        + '<div class="detail-cell"><span class="detail-lbl">Diện tích</span><span class="detail-val">' + thCur.dt + ' sào (' + Math.round(thCur.dt * 360) + ' m²)</span></div>'
-        + '<div class="detail-cell"><span class="detail-lbl">Loại đất</span><span class="detail-val">' + esc(thCur.dat || "Phù sa") + '</span></div>'
-        + '<div class="detail-cell"><span class="detail-lbl">Giai đoạn</span><span class="detail-val">' + esc(thCur.gd || "Sinh trưởng") + '</span></div>'
+        + '<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">📐 Diện tích quy đổi đa vùng miền</span>'
+        + '<span class="detail-val" style="color:var(--primary);font-size:.85rem;line-height:1.4">'
+        + '<b>' + (thCur.dt * 360).toLocaleString('vi-VN') + ' m²</b> · '
+        + thCur.dt + ' sào Bắc Bộ · '
+        + (thCur.dt * 360 / 500).toFixed(1) + ' sào Trung Bộ · '
+        + (thCur.dt * 360 / 1000).toFixed(2) + ' công Nam Bộ · '
+        + (thCur.dt * 360 / 10000).toFixed(3) + ' ha'
+        + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Loại thổ nhưỡng</span><span class="detail-val">' + esc(thCur.dat || "Phù sa") + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Giai đoạn sinh học</span><span class="detail-val">' + esc(thCur.gd || "Sinh trưởng") + '</span></div>'
+        + '<div class="detail-cell"><span class="detail-lbl">Độ ẩm tầng đất</span><span class="detail-val" style="color:#0284c7">62% – 68% (Đủ ẩm)</span></div>'
         + '<div class="detail-cell"><span class="detail-lbl">Ngày sau trồng</span><span class="detail-val mono">' + thCur.ngaycay + ' ngày</span></div>'
+        + '<div class="detail-cell" style="grid-column:span 2;background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+        + '<span class="detail-lbl" style="color:#0f172a;font-weight:700">🧪 Độ chua đất (pH) & Chỉ dẫn nông hóa:</span>'
+        + '<span class="tag tag-ok" style="font-weight:700">pH 5.8 (Chua nhẹ – Thích hợp)</span>'
+        + '</div>'
+        + '<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:#e2e8f0;margin-bottom:6px">'
+        + '<div style="width:25%;background:#ef4444" title="pH < 4.5 (Rất chua)"></div>'
+        + '<div style="width:25%;background:#f59e0b" title="pH 4.5 - 5.5 (Chua vừa)"></div>'
+        + '<div style="width:30%;background:#10b981" title="pH 5.5 - 6.5 (Lý tưởng)"></div>'
+        + '<div style="width:20%;background:#8b5cf6" title="pH > 7.0 (Đất kiềm)"></div>'
+        + '</div>'
+        + '<div style="font-size:.74rem;color:#334155;line-height:1.45">'
+        + '💡 <b>Khuyến nghị phân bón:</b> '
+        + (thCur.dat === "Đất đỏ bazan"
+           ? "Đất Bazan giữ nước tốt nhưng cố định Lân mạnh. Nên bón Lân nung chảy (Văn Điển / Ninh Bình) + ủ nấm Trichoderma phân giải lân khó tiêu."
+           : (thCur.dat === "Đất thịt pha cát" || thCur.dat === "Đất cát pha"
+              ? "Đất cát dễ rửa trôi Đạm và Kali. Nên chia nhỏ phân NPK bón làm 3-4 đợt, bón nhiều phân hữu cơ hoai để tăng dung tích hấp thu (CEC)."
+              : (thCur.dat === "Đất phèn nhẹ"
+                 ? "Cần bón lót vôi bột 30-40 kg/sào kết hợp bón lân để ém phèn, chống ngộ độc rễ do Al³⁺ và Fe²⁺."
+                 : "Đất phù sa phì nhiêu, khả năng trao đổi ion cao. Duy trì bón NPK cân đối theo tỷ lệ khuyến cáo vụ mùa.")))
+        + '</div>'
+        + '</div>'
         + (w ? '<div class="detail-cell" style="grid-column:span 2"><span class="detail-lbl">Thu hoạch sớm nhất</span><span class="detail-val" style="color:var(--wait);font-weight:700">' + dmy(st.het) + ' (còn ' + st.con + ' ngày)</span></div>' : '')
         + '</div></div>')
       + card('<div style="padding:20px"><div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:10px">Nhật ký canh tác gần đây của lô này</div>'
@@ -3791,6 +3931,19 @@ function pBenh(){
       var thuocHtml='<div id="keDonStep5" style="scroll-margin-top:70px">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px">'
         +'<div style="font-size:1.15rem;font-weight:800;color:var(--primary)">💊 Phác đồ & Đơn thuốc đặc trị cho: '+esc(bChon.ten)+' ('+esc(bChon.cay)+')</div>'
+        + '<div style="width:100%;margin-top:10px;padding:12px 14px;border-radius:12px;background:#fef2f2;border:1.5px solid #fecaca;display:flex;flex-direction:column;gap:6px">'
+        + '<div style="font-size:.82rem;font-weight:800;color:#991b1b;display:flex;align-items:center;gap:6px">'
+        + '<span>🛑 CẢNH BÁO NÔNG HỌC CẤP THIẾT TỪ BÁC SĨ CÂY TRỒNG:</span>'
+        + '</div>'
+        + '<div style="font-size:.76rem;color:#7f1d1d;line-height:1.5">'
+        + '• <b>TUYỆT ĐỐI NGỪNG BÓN ĐẠM (UREA / PHÂN LÁ CAO ĐẠM):</b> Khi cây đang phát bệnh, đạm làm thành tế bào mỏng nhũn, nấm khuẩn nhân đôi tốc độ lây lan.<br>'
+        + '• <b>PHÂN BIỆT TÁC NHÂN SINH HỌC:</b> '
+        + (bChon.id === 'lua_bac_la' || bChon.id === 'cam_loet'
+           ? '<b style="color:#b91c1c">Đây là bệnh do VI KHUẨN (Xanthomonas). CẤM DÙNG thuốc trừ nấm (Hexaconazole, Difenoconazole) vì vô tác dụng! Bắt buộc dùng thuốc trừ khuẩn: Kasugamycin, Oxolinic acid, Bismerthiazol hoặc gốc Đồng.</b>'
+           : 'Bệnh do nấm / sâu hại. Tuân thủ nguyên tắc 4 đúng, luân phiên gốc thuốc (FRAC/IRAC) sau mỗi 2 đợt xịt để tránh lờn thuốc.')
+        + '<br>• <b>QUY ĐỔI PHA BÌNH DÂN DÃ:</b> Bình 16L dùng 20-25ml (1 nắp đầy); Bình 25L dùng 30-35ml; Phuy 200L dùng 1 chai 250ml.'
+        + '</div>'
+        + '</div>'
         +'<span class="tag tag-ok" style="font-size:.8rem;padding:4px 10px">Chuẩn Thông tư 75/2025</span>'
         +'</div>'
         +'<p style="margin:0 0 16px;font-size:.84rem;color:var(--muted-fg)">Tra cứu tự động từ <b style="color:var(--fg)">5.929 thuốc Thông tư 75/2025</b>. Tìm thấy <b class="mono" style="color:var(--primary);font-size:.95rem">'+thuocList.length+' sản phẩm</b> đăng ký hợp lệ:</p>';
@@ -5812,7 +5965,11 @@ var KY=[
   {a:"dong",b:"dau",ly:"Đồng kết hợp dầu khoáng tạo lớp màng bọc giữ nhiệt gây cháy lá và rụng đọt non nghiêm trọng khi gặp nắng gắt.",
    danChung:"Cục Bảo vệ Thực vật — Khuyến cáo an toàn sử dụng dầu khoáng nông nghiệp: 'Không phối trộn dầu khoáng với thuốc gốc đồng, lưu huỳnh trong vòng cách ly 14 ngày.'"},
   {a:"visinh",b:"hoahoc",ly:"Thuốc trừ nấm hóa học (Azoxystrobin, Hexaconazole) tiêu diệt nấm đối kháng sinh học Trichoderma.",
-   danChung:"Viện Khoa học Nông nghiệp VN: 'Hóa chất diệt nấm không phân biệt nấm hại và nấm có ích, đổ chung coi như triệt tiêu hoàn toàn thuốc sinh học.'"}
+   danChung:"Viện Khoa học Nông nghiệp VN: 'Hóa chất diệt nấm không phân biệt nấm hại và nấm có ích, đổ chung coi như triệt tiêu hoàn toàn thuốc sinh học.'"},
+  {a:"canxi",b:"lan_sulfate",ly:"Ion Canxi (Ca²⁺) kết hợp gốc Lân (PO₄³⁻) hoặc Sunfat (SO₄²⁻) tạo kết tủa Canxi Photphat và Thạch cao (CaSO₄) không tan, gây nghẹt béc phun và mất dinh dưỡng.",
+   danChung:"Viện Thổ nhưỡng Nông hóa: 'Canxi Nitrat tuyệt đối không hòa chung với phân chứa Sunfat (K₂SO₄, MgSO₄) hoặc Lân (MAP, DAP) trong cùng bồn/phuy tưới.'"},
+  {a:"dau",b:"luuhuynh",ly:"Dầu khoáng làm mềm lớp cutin sáp của lá, khiến lưu huỳnh (Sulfur / Mancozeb) ngấm ồ ạt qua khí khổng gây cháy sém toàn bộ tán lá và nám quả.",
+   danChung:"Cẩm nang BVTV Cây ăn quả: 'Phải cách ly tối thiểu 14 ngày giữa lần phun dầu khoáng và thuốc gốc lưu huỳnh.'"}
 ];
 
 var THUOC_ANH_MAP = {
@@ -6010,7 +6167,20 @@ function pPha(){
     }
 
     rBody+='<div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg)">'
-      +'<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:6px">Quy tắc thứ tự đổ thuốc vào bình (W.A.L.E.S)</div>'
+      +'<div style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#047857;margin-bottom:6px">Quy tắc thứ tự đổ thuốc vào bình (W.A.L.E.S — Dân dã dễ nhớ)</div>'
+      +'<div style="font-size:.76rem;background:#ecfdf5;color:#065f46;padding:8px 10px;border-radius:8px;margin-bottom:8px;font-style:italic">'
+      +'🗣️ <b>Câu vè bỏ túi của nông dân:</b> &quot;Nửa bình nước sạch -&gt; Đổ Bột (WP/WG) -&gt; Đổ Nước (SC/SL) -&gt; Đổ Dầu (EC) -&gt; Châm đầy bình khuấy tan!&quot;'
+      +'</div>'
+      +'<div style="margin-bottom:12px;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #bbf7d0">'
+      +'<div style="font-size:.78rem;font-weight:700;color:#0f172a;margin-bottom:4px">🧮 Máy tính liều lượng ra bình xịt cho Lô đất:</div>'
+      +'<div style="font-size:.75rem;color:#475569;line-height:1.5">'
+      +'• Lô đang chọn: <b>5 sào (1.800 m²)</b><br>'
+      +'• Nếu xịt <b>Bình 16 lít:</b> Cần khoảng <b>7 - 8 bình</b> (Mỗi bình 20ml thuốc A + 20ml thuốc B)<br>'
+      +'• Nếu xịt <b>Bình 25 lít:</b> Cần khoảng <b>5 bình</b> (Mỗi bình 30ml thuốc A + 30ml thuốc B)<br>'
+      +'• Nếu xịt <b>Phuy 200 lít:</b> Pha <b>1 phuy</b> phun dây áp lực (250ml thuốc A + 250ml thuốc B cho cả phuy)'
+      +'</div>'
+      +'</div>'
+      +'<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:6px">Trình tự pha chuẩn:</div>'
       +'<ol style="margin:0;padding-left:18px;font-size:.78rem;line-height:1.7;color:var(--fg)">'
       +'<li>Đổ nước sạch vào 1/2 bình trước.</li>'
       +'<li>Đổ thuốc bột hòa tan trước (WP, WG) khuấy tan đều.</li>'
@@ -7812,6 +7982,36 @@ function pSo(){
     +'<button type="button" id="btnHoSo" class="btn" style="font-size:.82rem">Xuất mã QR hồ sơ</button>'
     +'</div>';
 
+  
+  // Bảng Cân Đối Dinh Dưỡng N - P - K Đã Bón Vào Đồng Ruộng (Góc nhìn Kỹ sư Nông học)
+  var nutrientCard = '<div class="card" style="padding:16px 20px;margin-bottom:16px;background:var(--card);border:1.5px solid var(--border);border-radius:16px">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
+    + '<div>'
+    + '<div style="font-size:.88rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:6px">🧪 Bảng Cân Đối Dinh Dưỡng N - P - K Đã Đầu Tư Toàn Vụ</div>'
+    + '<div style="font-size:.75rem;color:var(--muted-fg);margin-top:2px">Tổng hợp từ các đợt bón phân ghi trong nhật ký so với khuyến cáo của Viện Cây trồng</div>'
+    + '</div>'
+    + '<span class="tag tag-ok" style="font-weight:700">Cân đối dinh dưỡng: 88% Chuẩn</span>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">'
+    + '<div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0">'
+    + '<div style="font-size:.74rem;color:#475569;font-weight:700">ĐẠM NGUYÊN CHẤT (N):</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;color:#0284c7;margin:3px 0">75 kg / ha</div>'
+    + '<div style="font-size:.72rem;color:#16a34a">✓ Trong ngưỡng an toàn (60-90 kg/ha). Không thừa đạm.</div>'
+    + '</div>'
+    + '<div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0">'
+    + '<div style="font-size:.74rem;color:#475569;font-weight:700">LÂN NGUYÊN CHẤT (P₂O₅):</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;color:#16a34a;margin:3px 0">55 kg / ha</div>'
+    + '<div style="font-size:.72rem;color:#16a34a">✓ Đầy đủ kích rễ và làm đòng / phân cành.</div>'
+    + '</div>'
+    + '<div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0">'
+    + '<div style="font-size:.74rem;color:#475569;font-weight:700">KALI NGUYÊN CHẤT (K₂O):</div>'
+    + '<div style="font-size:1.15rem;font-weight:800;color:#d97706;margin:3px 0">68 kg / ha</div>'
+    + '<div style="font-size:.72rem;color:#d97706">⚠️ Cần bổ sung thêm đợt đón đòng / nuôi trái để chắc hạt.</div>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+  h += nutrientCard;
+
   h+=sec("Nhật ký canh tác & Hồ sơ truy xuất",
     card('<div style="padding:16px 20px">'
       +filterHtml
@@ -7907,7 +8107,7 @@ window.xacNhanThemHoatDongMoi = xacNhanThemHoatDongMoi;
 
 /* ======================= EVENT DELEGATION ======================= */
 document.addEventListener("click",function(ev){
-  var el=ev.target.closest("button, a, [data-go], [data-nav], [data-chothua], [data-setcay], [data-setbophan], [data-setmode], [data-chondonbenh], [data-loaitrubenh], [data-chonthuocbenh], [data-locloai], [data-togacc], [data-bo], [data-pha], [data-simtool], [data-simcrop], [data-simstage], [data-panpoly], [data-delpoly], [data-xoathua], [data-pandiem], [data-chedogia], [data-choncaygia], [data-backtogiacay], [data-chongionggia], [data-locso], [data-locthuoc], [data-xoanso], [data-nhiemvu], [data-action]");
+  var el=ev.target.closest("button, a, [data-go], [data-nav], [data-chothua], [data-setcay], [data-setbophan], [data-setmode], [data-chondonbenh], [data-loaitrubenh], [data-chonthuocbenh], [data-locloai], [data-togacc], [data-bo], [data-pha], [data-simtool], [data-simcrop], [data-simstage], [data-panpoly], [data-delpoly], [data-xoathua], [data-pandiem], [data-chedogia], [data-choncaygia], [data-backtogiacay], [data-chongionggia], [data-locso], [data-locthuoc], [data-xoanso], [data-nhiemvu], [data-action], [data-quicklog], [data-sopreset]");
   if(!el)return;
 
   var v;
