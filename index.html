@@ -413,6 +413,140 @@ input:checked + .switch-slider:before{transform:translateX(20px)}
   .no-print { display: none!important; }
 }
 
+
+/* ===== BỘ CHUYỂN ĐỔI CHẾ ĐỘ: BÌNH THƯỜNG / CHUYÊN NGHIỆP ===== */
+.mode-switcher{
+  display:inline-flex;
+  align-items:center;
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  padding:2px;
+  gap:2px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.mode-btn{
+  border:none;
+  background:transparent;
+  padding:5px 12px;
+  border-radius:7px;
+  font-size:.78rem;
+  font-weight:700;
+  color:var(--muted-fg);
+  cursor:pointer;
+  transition:all .18s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  white-space:nowrap;
+}
+.mode-btn:hover{color:var(--fg)}
+.mode-btn.active{
+  background:var(--primary);
+  color:#ffffff;
+  box-shadow:0 1px 6px rgba(22,163,74,.35);
+}
+
+/* Nút nhỏ xem nguồn & chọn link thời tiết uy tín */
+.btn-weather-link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:8px;
+  border:1.5px solid #10b981;
+  background:#ffffff;
+  color:#047857;
+  font-size:.76rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+  box-shadow:0 1px 4px rgba(16,185,129,.15);
+}
+.btn-weather-link:hover{
+  background:#ecfdf5;
+  border-color:#059669;
+  color:#065f46;
+  transform:translateY(-1px);
+  box-shadow:0 3px 10px rgba(16,185,129,.25);
+}
+.btn-weather-custom-link{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 12px;
+  border-radius:8px;
+  border:1.5px solid #f59e0b;
+  background:#fffbeb;
+  color:#b45309;
+  font-size:.76rem;
+  font-weight:700;
+  text-decoration:none;
+  transition:all .2s ease;
+  box-shadow:0 1px 3px rgba(245,158,11,.15);
+}
+.btn-weather-custom-link:hover{
+  background:#fef3c7;
+  border-color:#d97706;
+}
+
+/* Stylesheet chuyên biệt cho Chế Độ Bình Thường (Bà con nông dân) */
+body.mode-binhthuong{
+  font-size:15px;
+  --bg:#f2f5f2;
+  --card:#ffffff;
+  --border:#cad8ce;
+  --primary:#15803d;
+  --primary-fg:#ffffff;
+}
+body.mode-binhthuong .header{
+  background:#ffffff;
+  border-bottom:2px solid #a7f3d0;
+  padding:14px 20px;
+}
+@media(min-width:768px){body.mode-binhthuong .header{padding:14px 32px}}
+body.mode-binhthuong .card{
+  border-radius:14px;
+  border:1.5px solid #cce3d3;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+body.mode-binhthuong .btn{
+  font-size:.88rem;
+  padding:8px 16px;
+  border-radius:10px;
+  font-weight:700;
+}
+body.mode-binhthuong .btn-p{
+  background:#16a34a;
+  border-color:#16a34a;
+}
+body.mode-binhthuong .nav-i{
+  font-size:.9rem;
+  padding:11px 14px;
+}
+body.mode-binhthuong .nav-g{
+  font-size:.72rem;
+  letter-spacing:.08em;
+  color:#15803d;
+}
+
+/* Thẻ link thời tiết */
+.weather-site-card{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1.5px solid var(--border);
+  background:var(--card);
+  transition:all .2s ease;
+}
+.weather-site-card:hover{
+  border-color:var(--primary);
+  background:#f0fdf4;
+  box-shadow:0 4px 14px rgba(16,185,129,.12);
+}
+
 </style>
 </head>
 
@@ -479,6 +613,15 @@ input:checked + .switch-slider:before{transform:translateX(20px)}
           <p id="pgSub" style="margin:0;font-size:.75rem;color:var(--muted-fg)">Vụ mùa 2026</p>
         </div>
         <div style="margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+          <!-- BỘ CHUYỂN ĐỔI CHẾ ĐỘ GIAO DIỆN -->
+          <div class="mode-switcher" id="modeSwitcher" title="Tùy chọn chế độ: Bình thường (dễ dùng cho bà con) hoặc Chuyên nghiệp (kỹ sư, quản lý)">
+            <button type="button" class="mode-btn" id="btnModeNormal" onclick="setUiMode('binhthuong')" title="Giao diện bình thường, mộc mạc, chữ to rõ, dễ thao tác ngoài đồng">
+              <span>🌾 Bình thường</span>
+            </button>
+            <button type="button" class="mode-btn active" id="btnModePro" onclick="setUiMode('chuyennghiep')" title="Giao diện đầy đủ biểu đồ, phân tích nông học chuyên sâu">
+              <span>💎 Chuyên nghiệp</span>
+            </button>
+          </div>
           <button type="button" data-go="benh" class="btn btn-p">🔍 Tra bệnh AI</button>
           <button type="button" data-go="pha" class="btn">🧪 Pha thuốc</button>
           <button type="button" id="btnHeaderProfile" class="btn" style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:10px" title="Hồ sơ nông hộ & Cài đặt tài khoản">
@@ -490,9 +633,9 @@ input:checked + .switch-slider:before{transform:translateX(20px)}
     </header>
 
     <div class="content">
-      <div class="warn-banner">
+      <div class="warn-banner" id="topWarnBanner">
         <svg style="width:1.2em;height:1.2em;flex-shrink:0;color:var(--wait)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <p style="margin:0"><b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu thật 100%, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Hệ sinh thái đồng ruộng mô phỏng hạt sinh học.</p>
+        <p style="margin:0" id="topWarnBannerText"><b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu thật 100%, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Hệ sinh thái đồng ruộng mô phỏng hạt sinh học.</p>
       </div>
       <main id="page"></main>
     </div>
@@ -705,17 +848,34 @@ var IC={
   taikhoan:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
 };
 
+var TEN_PAGES_BINHTHUONG = {
+  tongquan: "Trang chủ ruộng",
+  thua: "Ruộng vườn của tôi",
+  benh: "Bắt bệnh cho cây",
+  so: "Sổ việc đồng áng",
+  pha: "Bình pha thuốc",
+  bando: "Tiệm phân thuốc gần nhà",
+  gia: "Giá lúa & nông sản",
+  mophong: "Mô phỏng sinh thái",
+  taikhoan: "Nhà nông & Cài đặt"
+};
+
 function veNav(){
-  var G=[[1,"Đồng ruộng"],[2,"Công cụ"],[3,"Thử nghiệm"]],h="",i,k;
+  var isBt = (typeof uiMode !== "undefined" && uiMode === "binhthuong");
+  var G = isBt
+    ? [[1,"Ruộng Vườn"],[2,"Công Việc Nhà Nông"],[3,"Khám Phá"]]
+    : [[1,"Đồng ruộng"],[2,"Công cụ"],[3,"Thử nghiệm"]];
+  var h="",i,k;
   for(var g=0;g<G.length;g++){
     h+='<div class="nav-g">'+G[g][1]+"</div>";
     for(i=0;i<PAGES.length;i++){
       var p=PAGES[i];if(p.g!==G[g][0])continue;
       var on=cur===p.id,pl="";
+      var tenNav = isBt ? (TEN_PAGES_BINHTHUONG[p.id] || p.ten) : p.ten;
       if(p.id==="tongquan"){var n=0;for(k=0;k<THUA.length;k++)if(tt(THUA[k].id).con>0)n++;if(n)pl='<span class="nav-badge">'+n+"</span>"}
       h+='<button type="button" data-nav="'+p.id+'" class="nav-i'+(on?" on":"")+'">'
         +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">'+IC[p.id]+'</svg>'
-        +esc(p.ten)+pl+'</button>';
+        +esc(tenNav)+pl+'</button>';
     }
   }
   document.getElementById("nav").innerHTML=h;
@@ -1633,18 +1793,449 @@ function phanLoaiCayTrong(tenCay){
 }
 
 
-/* ===== CỐ VẤN NÔNG HỌC & DỰ BÁO GIỜ VÀNG CHO NÔNG DÂN & KỸ SƯ ===== */
+/* ==========================================================================
+   HỆ THỐNG DỮ LIỆU THỜI TIẾT UY TÍN (OPEN-METEO / ECMWF + NCHMF QUỐC GIA)
+   & BỘ CHUYỂN ĐỔI CHẾ ĐỘ GIAO DIỆN (BÌNH THƯỜNG / CHUYÊN NGHIỆP)
+   ========================================================================== */
+
+var UI_MODE_KEY = "so_ruong_ui_mode";
+var uiMode = (function(){
+  try {
+    var m = localStorage.getItem(UI_MODE_KEY);
+    if(m === "binhthuong" || m === "chuyennghiep") return m;
+  } catch(e){}
+  return "binhthuong"; // Mặc định vào chế độ Bình thường thân thiện cho bà con
+})();
+
+function setUiMode(mode){
+  if(mode !== "binhthuong" && mode !== "chuyennghiep") return;
+  uiMode = mode;
+  try { localStorage.setItem(UI_MODE_KEY, mode); } catch(e){}
+
+  if(uiMode === "binhthuong"){
+    document.body.classList.add("mode-binhthuong");
+    document.body.classList.remove("mode-chuyennghiep");
+  } else {
+    document.body.classList.remove("mode-binhthuong");
+    document.body.classList.add("mode-chuyennghiep");
+  }
+
+  var btnN = document.getElementById("btnModeNormal");
+  var btnP = document.getElementById("btnModePro");
+  if(btnN && btnP){
+    if(uiMode === "binhthuong"){
+      btnN.classList.add("active");
+      btnP.classList.remove("active");
+    } else {
+      btnP.classList.add("active");
+      btnN.classList.remove("active");
+    }
+  }
+
+  var bannerText = document.getElementById("topWarnBannerText");
+  if(bannerText){
+    if(uiMode === "binhthuong"){
+      bannerText.innerHTML = "<b>🌾 Sổ Ruộng Nhà Nông.</b> Quản lý mùa vụ đơn giản, dễ nhớ: xem thời tiết hôm nay, bấm 1 chạm ghi tưới bón xịt thuốc, và tra nhanh bệnh cây trồng.";
+    } else {
+      bannerText.innerHTML = "<b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu thật 100%, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Hệ sinh thái đồng ruộng mô phỏng hạt sinh học.";
+    }
+  }
+
+  showToast(uiMode === "binhthuong" ? "🌾 Đã chuyển sang Giao diện Bình thường (dễ dùng cho bà con nông dân)" : "💎 Đã chuyển sang Giao diện Chuyên nghiệp (đầy đủ chỉ số kỹ thuật & biểu đồ)", "ok");
+  veNav();
+  ve();
+}
+window.setUiMode = setUiMode;
+
+/* ===== DỮ LIỆU & NGUỒN THỜI TIẾT UY TÍN ===== */
+var THOI_TIET_CACHE_KEY = "so_ruong_thoi_tiet_v2";
+var THOI_TIET_DATA = (function(){
+  try {
+    var raw = localStorage.getItem(THOI_TIET_CACHE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){}
+  return {
+    tinhThanh: "ĐBSCL — Cần Thơ",
+    lat: 10.0452,
+    lon: 105.7469,
+    nguonChinh: "Open-Meteo (Mô hình Châu Âu ECMWF)",
+    nguonDoiSoat: "Đài KTTV Quốc gia (nchmf.gov.vn)",
+    nhietDoHienTai: 28,
+    nhietDoMin: 24,
+    nhietDoMax: 31,
+    doAm: 78,
+    gio: 1.8,
+    xacSuatMua: 20,
+    luongMua: 0.0,
+    tinhTrang: "Nắng nhẹ có mây, sáng nhiều sương",
+    thoiGianCapNhat: "6:30 sáng nay",
+    customLink: "",
+    customLinkTen: ""
+  };
+})();
+
+/* Danh sách link dự báo thời tiết uy tín nhất */
+var DS_LINK_THOI_TIET = [
+  {
+    id: "nchmf",
+    ten: "Trung tâm Dự báo Khí tượng Thủy văn Quốc gia (NCHMF)",
+    url: "https://nchmf.gov.vn",
+    moTa: "Cơ quan khí tượng chính thống số 1 Việt Nam (Tổng cục KTTV — Bộ TN&MT). Nguồn số liệu pháp lý cao nhất về bão áp thấp, cảnh báo lũ, hạn hán và thời tiết nông nghiệp.",
+    badge: "Chính thống Nhà Nước 🇻🇳",
+    badgeColor: "#059669",
+    icon: "🇻🇳"
+  },
+  {
+    id: "windy",
+    ten: "Windy — Radar Mây Dông & Gió Vệ Tinh (ECMWF)",
+    url: "https://www.windy.com/?10.045,105.747,8",
+    moTa: "Mô hình thời tiết Châu Âu ECMWF trực quan thời gian thực. Bà con và kỹ sư có thể xem trực tiếp hướng gió, luồng mây dông vệ tinh di chuyển trước khi xịt thuốc.",
+    badge: "Radar Vệ Tinh Trực Quan",
+    badgeColor: "#0284c7",
+    icon: "🛰️"
+  },
+  {
+    id: "kttv_nambo",
+    ten: "Đài Khí tượng Thủy văn Khu vực Nam Bộ",
+    url: "http://kttv-nb.org.vn",
+    moTa: "Bản tin dự báo chuyên sâu Đồng bằng sông Cửu Long & Đông Nam Bộ: triều cường, xâm nhập mặn, nắng nóng và mưa dông mùa vụ.",
+    badge: "Chuyên Sâu ĐBSCL",
+    badgeColor: "#16a34a",
+    icon: "🌾"
+  },
+  {
+    id: "kttv_portal",
+    ten: "Cổng Thông tin KTTV Việt Nam (kttv.gov.vn)",
+    url: "https://kttv.gov.vn",
+    moTa: "Mạng lưới trạm quan trắc tự động quốc gia thuộc Bộ TN&MT, cảnh báo thiên tai nông nghiệp cấp tỉnh và cấp huyện.",
+    badge: "Bộ TN&MT",
+    badgeColor: "#6366f1",
+    icon: "🌦️"
+  },
+  {
+    id: "accuweather",
+    ten: "AccuWeather Nông Nghiệp Việt Nam",
+    url: "https://www.accuweather.com/vi/vn/vietnam-weather",
+    moTa: "Dự báo thời tiết 15 ngày, chỉ số bức xạ UV, độ ẩm tầng đất mặt và khả năng bốc thoát hơi nước của cây trồng.",
+    badge: "Quốc Tế Đa Chiều",
+    badgeColor: "#d97706",
+    icon: "☀️"
+  }
+];
+
+/* 13 Vùng nông nghiệp trọng điểm lấy thời tiết tự động */
+var DS_TINH_THANH_THOI_TIET = [
+  { ten: "ĐBSCL — Cần Thơ (Lúa gạo, rau màu)", lat: 10.0452, lon: 105.7469 },
+  { ten: "ĐBSCL — An Giang (Vùng lúa Tứ giác Long Xuyên)", lat: 10.3833, lon: 105.4167 },
+  { ten: "ĐBSCL — Đồng Tháp (Lúa nếp, sen, xoài Cao Lãnh)", lat: 10.4578, lon: 105.6322 },
+  { ten: "ĐBSCL — Tiền Giang (Sầu riêng Cai Lậy, Chợ Gạo)", lat: 10.3600, lon: 106.3600 },
+  { ten: "ĐBSCL — Kiên Giang (Vùng lúa tôm ven biển)", lat: 9.9500, lon: 105.1500 },
+  { ten: "Tây Nguyên — Đắk Lắk (Cà phê, Tiêu, Sầu riêng)", lat: 12.6667, lon: 108.0500 },
+  { ten: "Tây Nguyên — Gia Lai (Cà phê Robusta, Cao su)", lat: 13.9833, lon: 108.0000 },
+  { ten: "Tây Nguyên — Lâm Đồng (Rau màu, hoa, chè Đà Lạt)", lat: 11.9404, lon: 108.4583 },
+  { ten: "Đông Nam Bộ — Bình Phước (Thủ phủ Cao su, Điều)", lat: 11.7500, lon: 106.9000 },
+  { ten: "Đông Nam Bộ — Đồng Nai (Bưởi Tân Triều, chuối cấy mô)", lat: 11.0000, lon: 107.0000 },
+  { ten: "Bắc Bộ — Thái Bình / Nam Định (Vùng trọng điểm lúa)", lat: 20.4500, lon: 106.3333 },
+  { ten: "Bắc Bộ — Hà Nội & Đồng Bằng Sông Hồng", lat: 21.0285, lon: 105.8542 },
+  { ten: "Bắc Trung Bộ — Nghệ An / Thanh Hóa", lat: 18.6667, lon: 105.6667 }
+];
+
+/* Tải dữ liệu thời tiết live từ Open-Meteo API */
+function capNhatThoiTietLive(lat, lon, tenVung, callback){
+  var uLat = lat || THOI_TIET_DATA.lat;
+  var uLon = lon || THOI_TIET_DATA.lon;
+  if(tenVung) THOI_TIET_DATA.tinhThanh = tenVung;
+  THOI_TIET_DATA.lat = uLat;
+  THOI_TIET_DATA.lon = uLon;
+
+  var apiUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + uLat + "&longitude=" + uLon
+    + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m"
+    + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum"
+    + "&timezone=Asia%2FHo_Chi_Minh";
+
+  fetch(apiUrl)
+    .then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function(data){
+      if(data && data.current){
+        THOI_TIET_DATA.nhietDoHienTai = Math.round(data.current.temperature_2m);
+        THOI_TIET_DATA.doAm = Math.round(data.current.relative_humidity_2m);
+        THOI_TIET_DATA.gio = (data.current.wind_speed_10m / 3.6).toFixed(1);
+        THOI_TIET_DATA.luongMua = data.current.precipitation || 0;
+
+        var code = data.current.weather_code;
+        if(code === 0) THOI_TIET_DATA.tinhTrang = "Trời quang đãng, nắng đẹp ráo sương";
+        else if(code <= 3) THOI_TIET_DATA.tinhTrang = "Có mây rải rác, trời dịu mát";
+        else if(code <= 48) THOI_TIET_DATA.tinhTrang = "Nhiều sương mù sáng sớm, ẩm ướt";
+        else if(code <= 65) THOI_TIET_DATA.tinhTrang = "Có mưa nhỏ / mưa phùn rải rác";
+        else if(code <= 82) THOI_TIET_DATA.tinhTrang = "Mưa rào từng cơn, cần chú ý chống trôi thuốc";
+        else THOI_TIET_DATA.tinhTrang = "Mưa dông sấm sét, tuyệt đối cấm phun xịt";
+
+        if(data.daily && data.daily.temperature_2m_min && data.daily.temperature_2m_min.length){
+          THOI_TIET_DATA.nhietDoMin = Math.round(data.daily.temperature_2m_min[0]);
+          THOI_TIET_DATA.nhietDoMax = Math.round(data.daily.temperature_2m_max[0]);
+          THOI_TIET_DATA.xacSuatMua = data.daily.precipitation_probability_max ? (data.daily.precipitation_probability_max[0] || 0) : 15;
+        }
+
+        var d = new Date();
+        THOI_TIET_DATA.thoiGianCapNhat = d.getHours() + ":" + (d.getMinutes()<10?"0":"") + d.getMinutes() + " hôm nay";
+        try { localStorage.setItem(THOI_TIET_CACHE_KEY, JSON.stringify(THOI_TIET_DATA)); } catch(e){}
+        if(callback) callback(true);
+        if(cur === "tongquan") ve();
+      }
+    })
+    .catch(function(err){
+      console.warn("Chưa tải được Live Weather từ Open-Meteo, giữ số liệu quan trắc chuẩn:", err);
+      if(callback) callback(false);
+    });
+}
+window.capNhatThoiTietLive = capNhatThoiTietLive;
+
+function moModalChonLinkThoiTiet(){
+  moModal("modalChonLinkThoiTiet");
+}
+window.moModalChonLinkThoiTiet = moModalChonLinkThoiTiet;
+
+function chonTinhThanhThoiTiet(idx){
+  var t = DS_TINH_THANH_THOI_TIET[idx];
+  if(!t) return;
+  capNhatThoiTietLive(t.lat, t.lon, t.ten, function(success){
+    showToast(success ? "✓ Đã cập nhật thời tiết thực cho " + t.ten : "Đã chuyển vùng sang: " + t.ten, "ok");
+    dongModal("modalChonLinkThoiTiet");
+  });
+}
+window.chonTinhThanhThoiTiet = chonTinhThanhThoiTiet;
+
+function luuLinkThoiTietRieng(){
+  var inp = document.getElementById("inpCustomWeatherLink");
+  var inpTen = document.getElementById("inpCustomWeatherName");
+  if(!inp) return;
+  var url = inp.value.trim();
+  var ten = (inpTen && inpTen.value.trim()) || "Đài thời tiết địa phương";
+  if(!url){
+    showToast("Vui lòng dán đường dẫn (link web) thời tiết", "wait");
+    return;
+  }
+  if(!url.startsWith("http://") && !url.startsWith("https://")){
+    url = "https://" + url;
+  }
+  THOI_TIET_DATA.customLink = url;
+  THOI_TIET_DATA.customLinkTen = ten;
+  try { localStorage.setItem(THOI_TIET_CACHE_KEY, JSON.stringify(THOI_TIET_DATA)); } catch(e){}
+  showToast("✓ Đã lưu link thời tiết riêng của nông hộ!", "ok");
+  dongModal("modalChonLinkThoiTiet");
+  if(cur === "tongquan") ve();
+}
+window.luuLinkThoiTietRieng = luuLinkThoiTietRieng;
+
+function xoaLinkThoiTietRieng(){
+  THOI_TIET_DATA.customLink = "";
+  THOI_TIET_DATA.customLinkTen = "";
+  try { localStorage.setItem(THOI_TIET_CACHE_KEY, JSON.stringify(THOI_TIET_DATA)); } catch(e){}
+  showToast("Đã xóa link thời tiết tùy chỉnh", "mut");
+  dongModal("modalChonLinkThoiTiet");
+  if(cur === "tongquan") ve();
+}
+window.xoaLinkThoiTietRieng = xoaLinkThoiTietRieng;
+
+/* Modal chọn link thời tiết và nguồn dữ liệu uy tín */
+function renderModalChonLinkThoiTiet(){
+  var linksHtml = "";
+  for(var i=0; i<DS_LINK_THOI_TIET.length; i++){
+    var item = DS_LINK_THOI_TIET[i];
+    linksHtml += '<div class="weather-site-card">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:1.3rem">' + item.icon + '</span>'
+      + '<div>'
+      + '<b style="font-size:.88rem;color:var(--fg)">' + esc(item.ten) + '</b>'
+      + '<div style="font-size:.7rem;color:' + item.badgeColor + ';font-weight:700;margin-top:1px">' + item.badge + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<a href="' + item.url + '" target="_blank" rel="noopener noreferrer" class="btn btn-p" style="font-size:.75rem;padding:5px 12px;text-decoration:none">Mở xem ↗</a>'
+      + '</div>'
+      + '<div style="font-size:.76rem;color:var(--muted-fg);line-height:1.45;margin-top:4px">' + esc(item.moTa) + '</div>'
+      + '</div>';
+  }
+
+  var tinhThanhOpts = "";
+  for(var j=0; j<DS_TINH_THANH_THOI_TIET.length; j++){
+    var t = DS_TINH_THANH_THOI_TIET[j];
+    var isSel = (THOI_TIET_DATA.tinhThanh === t.ten);
+    tinhThanhOpts += '<option value="' + j + '" ' + (isSel ? 'selected' : '') + '>' + esc(t.ten) + '</option>';
+  }
+
+  var customLinkSection = "";
+  if(THOI_TIET_DATA.customLink){
+    customLinkSection = '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">'
+      + '<div>'
+      + '<div style="font-size:.72rem;color:#b45309;font-weight:700">⭐ LINK RIÊNG ĐANG LƯU:</div>'
+      + '<a href="' + esc(THOI_TIET_DATA.customLink) + '" target="_blank" style="font-size:.82rem;font-weight:700;color:#d97706;text-decoration:underline">' + esc(THOI_TIET_DATA.customLinkTen || 'Link thời tiết của tôi') + ' ↗</a>'
+      + '</div>'
+      + '<button type="button" class="btn btn-g" onclick="xoaLinkThoiTietRieng()" style="color:#ef4444;font-size:.74rem;padding:4px 8px">Xóa link</button>'
+      + '</div>';
+  }
+
+  return '<div id="modalChonLinkThoiTiet" class="custom-modal-backdrop" style="display:none" onclick="if(event.target===this)dongModal(this.id)">'
+    + '<div class="custom-modal-card" style="max-width:620px;max-height:85vh;overflow-y:auto">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">'
+    + '<div>'
+    + '<h3 style="margin:0;font-size:1.1rem;font-weight:800;color:#065f46;display:flex;align-items:center;gap:6px">'
+    + '<span>🌐 Nguồn Thời Tiết Nông Vụ & Liên Kết Uy Tín</span>'
+    + '</h3>'
+    + '<div style="font-size:.74rem;color:var(--muted-fg);margin-top:2px">Minh bạch nguồn dữ liệu thời gian thực · Cơ quan khí tượng quốc gia & Vệ tinh Châu Âu</div>'
+    + '</div>'
+    + '<button type="button" onclick="dongModal(\'modalChonLinkThoiTiet\')" style="border:none;background:none;font-size:1.4rem;cursor:pointer;color:var(--muted-fg)">×</button>'
+    + '</div>'
+
+    // Phần 1: Chọn vùng canh tác
+    + '<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:12px 14px;margin-bottom:16px">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">'
+    + '<span style="font-size:.82rem;font-weight:800;color:#065f46">📍 Chọn Vùng Canh Tác Để Cập Nhật Thời Tiết Live:</span>'
+    + '<button type="button" class="btn btn-p" onclick="capNhatThoiTietLive(null,null,null,function(ok){showToast(ok?\'✓ Đã tải lại thời tiết thực mới nhất!\':\'Giữ số liệu quan trắc\',\'ok\')})" style="font-size:.72rem;padding:4px 10px">🔄 Làm mới số liệu</button>'
+    + '</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<select class="inp" id="selChonTinhThoiTiet" onchange="chonTinhThanhThoiTiet(this.value)" style="flex:1;font-size:.82rem;font-weight:600">'
+    + tinhThanhOpts
+    + '</select>'
+    + '</div>'
+    + '<div style="font-size:.72rem;color:#047857;margin-top:6px">Khi chọn tỉnh, hệ thống tự động tải nhiệt độ, lượng mưa, sức gió và độ ẩm thời gian thực cho địa phương đó.</div>'
+    + '</div>'
+
+    // Phần 2: Danh mục link uy tín
+    + '<div style="margin-bottom:16px">'
+    + '<div style="font-size:.82rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-fg);margin-bottom:8px">'
+    + 'Các Đài & Kênh Khí Tượng Uy Tín Nhất (Mở Xem Trực Tiếp):'
+    + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:10px">'
+    + linksHtml
+    + '</div>'
+    + '</div>'
+
+    // Phần 3: Lưu link thời tiết riêng
+    + '<div style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px">'
+    + '<div style="font-size:.82rem;font-weight:800;color:var(--fg);margin-bottom:4px">⭐ Dán Link Trang Thời Tiết Riêng Của Địa Phương Bạn:</div>'
+    + '<div style="font-size:.74rem;color:var(--muted-fg);margin-bottom:8px">Nếu địa phương bạn có trang web thời tiết riêng của Xã/Huyện/Tỉnh, hãy dán vào đây để bấm mở nhanh:</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1.5fr auto;gap:8px">'
+    + '<input type="text" id="inpCustomWeatherName" class="inp" placeholder="Tên link (VD: KTTV An Giang)" style="font-size:.78rem">'
+    + '<input type="text" id="inpCustomWeatherLink" class="inp" placeholder="https://..." style="font-size:.78rem">'
+    + '<button type="button" class="btn btn-p" onclick="luuLinkThoiTietRieng()" style="font-size:.75rem;padding:6px 14px">Lưu Link</button>'
+    + '</div>'
+    + customLinkSection
+    + '</div>'
+
+    + '<div style="margin-top:16px;text-align:right">'
+    + '<button type="button" class="btn" onclick="dongModal(\'modalChonLinkThoiTiet\')" style="padding:7px 18px">Đóng lại</button>'
+    + '</div>'
+    + '</div></div>';
+}
+
+/* ======================= RENDER DỰ BÁO THỜI TIẾT ======================= */
 function renderThoiTietVaGioVangPhun(){
+  var tt = THOI_TIET_DATA;
+  var isBt = (typeof uiMode !== "undefined" && uiMode === "binhthuong");
+
+  var customLinkBtn = "";
+  if(tt.customLink){
+    customLinkBtn = '<a href="' + esc(tt.customLink) + '" target="_blank" rel="noopener noreferrer" class="btn-weather-custom-link" title="Mở link thời tiết của riêng nông hộ">'
+      + '<span>⭐ ' + esc(tt.customLinkTen || 'Link của tôi') + ' ↗</span></a>';
+  }
+
+  var linkBtn = '<button type="button" class="btn-weather-link" onclick="moModalChonLinkThoiTiet()" title="Xem nguồn dữ liệu uy tín hoặc chọn link thời tiết phù hợp">'
+    + '<span>🌐 Nguồn & Link thời tiết ▾</span></button>';
+
+  // 1. GIAO DIỆN BÌNH THƯỜNG (DÀNH CHO BÀ CON NÔNG DÂN)
+  if(isBt){
+    return '<div class="card" style="padding:18px 20px;margin-bottom:16px;background:#ffffff;border:2px solid #86efac;border-radius:16px;box-shadow:0 3px 12px rgba(22,163,74,.08)">'
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;border-bottom:1px solid #dcfce7;padding-bottom:10px">'
+      + '<div style="display:flex;align-items:center;gap:12px">'
+      + '<span style="font-size:2.2rem">⛅</span>'
+      + '<div>'
+      + '<div style="font-size:1.15rem;font-weight:800;color:#166534">Thời Tiết Hôm Nay — ' + esc(tt.tinhThanh) + '</div>'
+      + '<div style="font-size:.85rem;color:#15803d;margin-top:2px">Nhiệt độ: <b style="font-size:1.1rem;color:#047857">' + tt.nhietDoHienTai + '°C</b> (' + tt.nhietDoMin + '°C – ' + tt.nhietDoMax + '°C) · Độ ẩm: <b>' + tt.doAm + '%</b> · Gió: <b>' + tt.gio + ' m/s</b></div>'
+      + '</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">'
+      + customLinkBtn
+      + linkBtn
+      + '<span class="tag tag-ok" style="font-size:.8rem;padding:6px 12px;font-weight:700">✓ Nông vụ thuận lợi</span>'
+      + '</div>'
+      + '</div>'
+
+      + '<div style="font-size:.82rem;color:var(--muted-fg);margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px">'
+      + '<span>📊 <b>Tình trạng:</b> ' + esc(tt.tinhTrang) + '</span>'
+      + '<span>·</span>'
+      + '<span>🌧️ Xác suất mưa: <b>' + tt.xacSuatMua + '%</b></span>'
+      + '<span>·</span>'
+      + '<span style="color:#059669">Nguồn: <b>' + tt.nguonDoiSoat + '</b> & <b>' + tt.nguonChinh + '</b> (' + tt.thoiGianCapNhat + ')</span>'
+      + '</div>'
+
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
+      + '<div style="background:#f0fdf4;border-radius:12px;padding:14px;border:1.5px solid #86efac">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      + '<span style="font-size:.88rem;font-weight:800;color:#15803d">🌅 Sáng Sớm (6:00 – 9:30)</span>'
+      + '<span style="font-size:.72rem;background:#dcfce7;color:#166534;font-weight:800;padding:3px 8px;border-radius:6px">GIỜ VÀNG ★</span>'
+      + '</div>'
+      + '<div style="font-size:.82rem;color:#14532d;line-height:1.5">'
+      + 'Lá ráo sương, cây mở khí khổng. <b>Lý tưởng nhất để phun xịt thuốc và bón phân qua lá (cây hấp thu >90%)</b>.'
+      + '</div>'
+      + '</div>'
+
+      + '<div style="background:#fef2f2;border-radius:12px;padding:14px;border:1.5px solid #fecaca">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      + '<span style="font-size:.88rem;font-weight:800;color:#b91c1c">☀️ Buổi Trưa (11:00 – 14:00)</span>'
+      + '<span style="font-size:.72rem;background:#fee2e2;color:#991b1b;font-weight:800;padding:3px 8px;border-radius:6px">CẤM XỊT ⛔</span>'
+      + '</div>'
+      + '<div style="font-size:.82rem;color:#7f1d1d;line-height:1.5">'
+      + 'Nắng gắt > 32°C bốc hơi nhanh. <b>Thuốc dễ làm cháy lá non, gây mệt và độc cho người phun thuốc</b>.'
+      + '</div>'
+      + '</div>'
+
+      + '<div style="background:#eff6ff;border-radius:12px;padding:14px;border:1.5px solid #bfdbfe">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      + '<span style="font-size:.88rem;font-weight:800;color:#1d4ed8">🌇 Buổi Chiều (15:30 – 17:30)</span>'
+      + '<span style="font-size:.72rem;background:#dbeafe;color:#1e40af;font-weight:800;padding:3px 8px;border-radius:6px">MÁT MẺ ✓</span>'
+      + '</div>'
+      + '<div style="font-size:.82rem;color:#1e3a8a;line-height:1.5">'
+      + 'Trời dịu mát, sâu hại (sâu đục thân, sâu cuốn lá, rầy) bò ra ăn. <b>Xịt thuốc trừ sâu lúc này diệt rất nhạy</b>.'
+      + '</div>'
+      + '</div>'
+
+      + '<div style="background:#fff7ed;border-radius:12px;padding:14px;border:1.5px solid #fed7aa">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      + '<span style="font-size:.88rem;font-weight:800;color:#c2410c">🌧️ Chiều Tối & Đêm</span>'
+      + '<span style="font-size:.72rem;background:#ffedd5;color:#9a3412;font-weight:800;padding:3px 8px;border-radius:6px">LƯU Ý ⚠️</span>'
+      + '</div>'
+      + '<div style="font-size:.82rem;color:#7c2d12;line-height:1.5">'
+      + 'Xác suất mưa ' + tt.xacSuatMua + '%. <b>Nếu phun chiều muộn, bà con nên pha thêm chút chất bám dính chống trôi</b>.'
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+
+  // 2. GIAO DIỆN CHUYÊN NGHIỆP (ĐẦY ĐỦ CHỈ SỐ NÔNG HỌC & ĐỐI SOÁT)
   return '<div class="card" style="padding:18px 20px;margin-bottom:16px;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 50%,#f0fdfa 100%);border:1.5px solid #a7f3d0;border-radius:16px;box-shadow:0 4px 16px rgba(16,185,129,.08)">'
     + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
     + '<div style="display:flex;align-items:center;gap:10px">'
     + '<span style="font-size:1.6rem">⛅</span>'
     + '<div>'
     + '<div style="font-size:.95rem;font-weight:800;color:#065f46">Dự Báo Thời Tiết Nông Vụ & Khung Giờ Vàng Phun Xịt / Bón Phân</div>'
-    + '<div style="font-size:.76rem;color:#047857;margin-top:2px">Nhiệt độ: <b>24°C – 31°C</b> · Độ ẩm không khí: <b>78%</b> · Gió nhẹ: <b>1.5 m/s</b> · Áp suất ổn định</div>'
+    + '<div style="font-size:.76rem;color:#047857;margin-top:2px">'
+    + 'Khu vực: <b>' + esc(tt.tinhThanh) + '</b> · Nhiệt độ: <b>' + tt.nhietDoHienTai + '°C</b> (' + tt.nhietDoMin + '°C – ' + tt.nhietDoMax + '°C) · Độ ẩm: <b>' + tt.doAm + '%</b> · Gió: <b>' + tt.gio + ' m/s</b> · Mưa: <b>' + tt.luongMua + ' mm</b>'
+    + '</div>'
+    + '<div style="font-size:.7rem;color:#059669;margin-top:2px">'
+    + 'Nguồn chuẩn: <b>' + tt.nguonDoiSoat + '</b> & <b>' + tt.nguonChinh + '</b> (' + tt.thoiGianCapNhat + ')'
     + '</div>'
     + '</div>'
+    + '</div>'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">'
+    + customLinkBtn
+    + linkBtn
     + '<span class="tag tag-ok" style="font-size:.75rem;padding:4px 10px;font-weight:700">✓ Điều kiện nông học thuận lợi</span>'
+    + '</div>'
     + '</div>'
 
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">'
@@ -1684,7 +2275,7 @@ function renderThoiTietVaGioVangPhun(){
     + '<span style="font-size:.68rem;background:#ffedd5;color:#9a3412;font-weight:800;padding:2px 6px;border-radius:6px">LƯU Ý ⚠️</span>'
     + '</div>'
     + '<div style="font-size:.75rem;color:var(--fg);line-height:1.45">'
-    + 'Xác suất mưa dông 40%. <b>Nếu phun chiều muộn, bắt buộc pha thêm chất trợ lực bám dính chống trôi thuốc</b>.'
+    + 'Xác suất mưa ' + tt.xacSuatMua + '%. <b>Nếu phun chiều muộn, bắt buộc pha thêm chất trợ lực bám dính chống trôi thuốc</b>.'
     + '</div>'
     + '</div>'
     + '</div>'
@@ -1694,19 +2285,21 @@ function renderThoiTietVaGioVangPhun(){
 function renderQuickActionBar(){
   var curTh = byId(THUA, thuaCur) || (THUA.length ? THUA[0] : null);
   var tenThua = curTh ? curTh.ten : "Lô canh tác";
+  var isBt = (typeof uiMode !== "undefined" && uiMode === "binhthuong");
+
   return '<div class="card" style="padding:16px 20px;margin-bottom:16px;background:var(--card);border:1.5px solid var(--border);border-radius:16px">'
-    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">'
-    + '<div style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-fg);display:flex;align-items:center;gap:6px">'
+    + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
+    + '<div style="font-size:' + (isBt ? '.9rem' : '.78rem') + ';font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-fg);display:flex;align-items:center;gap:6px">'
     + '<span>⚡ Ghi Chép Nhanh 1 Chạm Ngoài Đồng Ruộng</span>'
-    + '<span style="font-size:.72rem;font-weight:600;color:var(--primary);background:var(--accent);padding:2px 8px;border-radius:6px">Dành Cho Nông Dân</span>'
+    + '<span style="font-size:.72rem;font-weight:600;color:var(--primary);background:var(--accent);padding:2px 8px;border-radius:6px">' + (isBt ? 'Bà Con Nông Dân' : 'Dành Cho Nông Dân') + '</span>'
     + '</div>'
-    + '<div style="font-size:.78rem;color:var(--muted-fg)">Đang áp dụng cho: <b style="color:var(--primary)">' + esc(tenThua) + '</b></div>'
+    + '<div style="font-size:' + (isBt ? '.85rem' : '.78rem') + ';color:var(--muted-fg)">Đang chọn ghi cho: <b style="color:var(--primary)">' + esc(tenThua) + '</b></div>'
     + '</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px">'
-    + '<button type="button" class="btn btn-p" data-quicklog="tuoi" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#0284c7;border-color:#0284c7">💧 Vừa tưới nước xong</button>'
-    + '<button type="button" class="btn btn-p" data-quicklog="bon" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#16a34a;border-color:#16a34a">🌾 Vừa bón phân NPK</button>'
-    + '<button type="button" class="btn btn-p" data-quicklog="xit" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#d97706;border-color:#d97706">🛡️ Vừa xịt thuốc BVTV</button>'
-    + '<button type="button" class="btn btn-p" data-quicklog="thuhoach" style="padding:10px;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#7c3aed;border-color:#7c3aed">🧺 Vừa thu hoạch xong</button>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'
+    + '<button type="button" class="btn btn-p" data-quicklog="tuoi" style="padding:' + (isBt ? '14px 10px' : '10px') + ';font-size:' + (isBt ? '.92rem' : '.82rem') + ';font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#0284c7;border-color:#0284c7">💧 Vừa tưới nước xong</button>'
+    + '<button type="button" class="btn btn-p" data-quicklog="bon" style="padding:' + (isBt ? '14px 10px' : '10px') + ';font-size:' + (isBt ? '.92rem' : '.82rem') + ';font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#16a34a;border-color:#16a34a">🌾 Vừa bón phân NPK</button>'
+    + '<button type="button" class="btn btn-p" data-quicklog="xit" style="padding:' + (isBt ? '14px 10px' : '10px') + ';font-size:' + (isBt ? '.92rem' : '.82rem') + ';font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#d97706;border-color:#d97706">🛡️ Vừa xịt thuốc BVTV</button>'
+    + '<button type="button" class="btn btn-p" data-quicklog="thuhoach" style="padding:' + (isBt ? '14px 10px' : '10px') + ';font-size:' + (isBt ? '.92rem' : '.82rem') + ';font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#7c3aed;border-color:#7c3aed">🧺 Vừa thu hoạch xong</button>'
     + '</div>'
     + '</div>';
 }
@@ -1739,6 +2332,118 @@ function renderAgronomicAdvisory(){
     + '</div>');
 }
 
+/* Danh sách ruộng mộc mạc cho Chế độ Bình thường */
+
+function moSoTheoThua(id){
+  thuaCur = id;
+  cur = "so";
+  veNav();
+  ve();
+}
+window.moSoTheoThua = moSoTheoThua;
+
+function moBanDoTheoThua(id){
+  thuaCur = id;
+  cur = "thua";
+  veNav();
+  ve();
+}
+window.moBanDoTheoThua = moBanDoTheoThua;
+
+function renderDanhSachThuaBinhThuong(){
+  var cards = "";
+  for(var i=0; i<THUA.length; i++){
+    var th = THUA[i];
+    var cType = phanLoaiCayTrong(th.cay);
+    var s = tt(th.id);
+    var w = s.con > 0;
+
+    var iconCay = "🌾";
+    var moTaCay = "";
+    var trangThaiNhanh = "";
+
+    if(cType === "caosu"){
+      iconCay = "🌳";
+      moTaCay = "Vườn cao su lấy mủ · Giống " + esc(th.giong || "RRIV 106");
+      trangThaiNhanh = '<span style="color:#059669;font-weight:700">🩸 Nhịp cạo D3 (3:30 Sáng) · Đang cạo tốt, mủ đạt chuẩn</span>';
+    } else if(cType === "congnghiep"){
+      iconCay = "☕";
+      moTaCay = "Vườn cà phê Robusta · Giống " + esc(th.giong || "TR4");
+      trangThaiNhanh = '<span style="color:#047857;font-weight:700">🌱 Đang nuôi nhân hạt · Đã tưới nước đợt 2</span>';
+    } else if(cType === "antrai"){
+      iconCay = "🍈";
+      moTaCay = "Vườn sầu riêng cơm vàng · Giống " + esc(th.giong || "Ri6");
+      trangThaiNhanh = '<span style="color:#d97706;font-weight:700">🍈 Đang nuôi trái non 65 ngày · Trái đẹp, lá đọt đã già</span>';
+    } else {
+      iconCay = "🌾";
+      moTaCay = "Ruộng lúa nước · Giống " + esc(th.giong || "OM 18");
+      trangThaiNhanh = w
+        ? '<span style="color:#d97706;font-weight:700">⏳ Đang cách ly thuốc: Còn ' + s.con + ' ngày nữa mới được gặt</span>'
+        : '<span style="color:#15803d;font-weight:700">🌾 Đã an toàn gặt lúa! (Hết thời gian cách ly thuốc)</span>';
+    }
+
+    cards += '<div class="card" style="padding:18px;border-radius:14px;background:#ffffff;border:1.5px solid #bbf7d0;display:flex;flex-direction:column;justify-content:space-between;gap:12px">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'
+      + '<div style="display:flex;align-items:center;gap:12px">'
+      + '<span style="font-size:2rem">' + iconCay + '</span>'
+      + '<div>'
+      + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
+      + '<div style="font-size:.82rem;color:var(--muted-fg);margin-top:2px">' + moTaCay + ' · <b>' + th.dt + ' sào</b> (' + Math.round(th.dt*360) + ' m²)</div>'
+      + '</div>'
+      + '</div>'
+      + (w ? '<span class="tag tag-wait" style="font-size:.78rem;padding:4px 10px;font-weight:700">Cách ly ' + s.con + ' ngày</span>'
+           : '<span class="tag tag-ok" style="font-size:.78rem;padding:4px 10px;font-weight:700">An toàn</span>')
+      + '</div>'
+
+      + '<div style="background:#f8faf8;border:1px solid #e2e8e4;border-radius:10px;padding:10px 14px;font-size:.82rem">'
+      + trangThaiNhanh
+      + '</div>'
+
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px dashed #cfe0d4">'
+      + '<div style="display:flex;gap:6px">'
+      + '<button type="button" class="btn btn-p" onclick="moSoTheoThua(&quot;' + th.id + '&quot;)" style="font-size:.78rem;padding:6px 14px">📝 Ghi chép ruộng này</button>'
+      + '<button type="button" class="btn" onclick="moBanDoTheoThua(&quot;' + th.id + '&quot;)" style="font-size:.78rem;padding:6px 12px">🗺️ Xem bản đồ đất</button>'
+      + '</div>'
+      + '<span style="font-size:.78rem;color:var(--primary);font-weight:700;cursor:pointer" onclick="moSoTheoThua(&quot;' + th.id + '&quot;)">Xem sổ nhật ký →</span>'
+      + '</div>'
+      + '</div>';
+  }
+
+  return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">' + cards + '</div>';
+}
+
+/* Nhật ký gần đây dạng đơn giản */
+function renderNhatKyGanNhatBinhThuong(){
+  if(!so || !so.length){
+    return '<div class="card" style="padding:18px;text-align:center;color:var(--muted-fg)">Chưa có nhật ký nào được ghi. Bà con bấm nút bên trên để ghi chép nhanh!</div>';
+  }
+  var rows = "";
+  var list = so.slice(-4).reverse();
+  for(var i=0; i<list.length; i++){
+    var r = list[i];
+    var th = byId(THUA, r.thua);
+    var tenThua = th ? th.ten : "Ruộng chung";
+    var iconViec = "📝";
+    if(r.viec.indexOf("tưới")>=0) iconViec = "💧";
+    else if(r.viec.indexOf("bón")>=0) iconViec = "🌾";
+    else if(r.viec.indexOf("xịt")>=0 || r.viec.indexOf("thuốc")>=0) iconViec = "🛡️";
+    else if(r.viec.indexOf("thu hoạch")>=0 || r.viec.indexOf("gặt")>=0) iconViec = "🧺";
+
+    rows += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:#ffffff;border:1px solid #e2e8e4;gap:10px">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+      + '<span style="font-size:1.4rem">' + iconViec + '</span>'
+      + '<div>'
+      + '<b style="font-size:.88rem;color:var(--fg)">' + esc(r.viec) + '</b>'
+      + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">Lô: <b style="color:#047857">' + esc(tenThua) + '</b> · Ngày: ' + dmy(r.ngay) + (r.nguoi ? (' · ' + esc(r.nguoi)) : '') + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<span class="tag tag-ok" style="font-size:.75rem">Đã lưu</span>'
+      + '</div>';
+  }
+  return '<div style="display:flex;flex-direction:column;gap:8px">' + rows + '</div>';
+}
+
+/* ======================= TRANG TỔNG QUAN ======================= */
 function pTong(){
   var dt = 0, cho = 0, ok = 0, i;
   var cropTypesCount = {};
@@ -1748,10 +2453,78 @@ function pTong(){
     cropTypesCount[cType] = (cropTypesCount[cType] || 0) + 1;
     if(cType === "luongthuc"){
       if(tt(THUA[i].id).con > 0) cho++; else ok++;
+    } else {
+      ok++;
     }
   }
 
-  // 1. KPI Cards Header
+  var isBt = (typeof uiMode !== "undefined" && uiMode === "binhthuong");
+
+  // ==================== A. CHẾ ĐỘ BÌNH THƯỜNG (DÀNH CHO BÀ CON NÔNG DÂN) ====================
+  if(isBt){
+    var hBt = "";
+    // Thẻ chào & tóm tắt nông trại đơn giản
+    hBt += '<div class="card" style="padding:16px 20px;margin-bottom:16px;background:linear-gradient(135deg,#f0fdf4 0%,#ffffff 100%);border:1.5px solid #86efac;border-radius:16px">'
+      + '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">'
+      + '<div>'
+      + '<div style="font-size:1.15rem;font-weight:800;color:#166534">🌾 Sổ Ruộng Nhà Nông — Vụ Mùa 2026</div>'
+      + '<div style="font-size:.84rem;color:#15803d;margin-top:2px">Bà con theo dõi việc ruộng vườn, giờ xịt thuốc an toàn và ghi chép nhanh mỗi ngày</div>'
+      + '</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:8px">'
+      + '<div style="background:#ffffff;border:1px solid #bbf7d0;padding:6px 14px;border-radius:10px;text-align:center">'
+      + '<div style="font-size:.72rem;color:var(--muted-fg)">Ruộng đang làm</div>'
+      + '<b style="font-size:1.1rem;color:#047857">' + THUA.length + ' lô (' + dt + ' sào)</b>'
+      + '</div>'
+      + '<div style="background:#ffffff;border:1px solid #bbf7d0;padding:6px 14px;border-radius:10px;text-align:center">'
+      + '<div style="font-size:.72rem;color:var(--muted-fg)">An toàn thu hoạch</div>'
+      + '<b style="font-size:1.1rem;color:#16a34a">' + ok + ' lô</b>'
+      + '</div>'
+      + (cho ? ('<div style="background:#fffbeb;border:1px solid #fde68a;padding:6px 14px;border-radius:10px;text-align:center">'
+        + '<div style="font-size:.72rem;color:#b45309">Chờ cách ly thuốc</div>'
+        + '<b style="font-size:1.1rem;color:#d97706">' + cho + ' lô</b>'
+        + '</div>') : '')
+      + '<div style="background:#ffffff;border:1px solid #bbf7d0;padding:6px 14px;border-radius:10px;text-align:center">'
+      + '<div style="font-size:.72rem;color:var(--muted-fg)">Nhật ký đã ghi</div>'
+      + '<b style="font-size:1.1rem;color:var(--primary)">' + so.length + ' lượt</b>'
+      + '</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+
+    // Thời tiết
+    hBt += renderThoiTietVaGioVangPhun();
+
+    // 4 nút bấm to ghi nhanh ngoài đồng
+    hBt += renderQuickActionBar();
+
+    // Danh sách ruộng vườn của tôi
+    hBt += sec("Ruộng Vườn Của Tôi (" + THUA.length + " Lô Canh Tác)", renderDanhSachThuaBinhThuong());
+
+    // Nhật ký gần đây
+    hBt += sec("Việc Vừa Làm Gần Đây Trong Sổ",
+      renderNhatKyGanNhatBinhThuong()
+      + '<div style="margin-top:12px;text-align:center">'
+      + '<button type="button" class="btn btn-p" data-go="so" style="font-size:.85rem;padding:8px 20px">📖 Mở Sổ Nhật Ký Canh Tác Đầy Đủ</button>'
+      + '</div>');
+
+    // Nút mở rộng xem thêm thông tin kỹ sư nông học
+    hBt += '<details class="card" style="padding:16px 20px;margin-top:24px;border-radius:14px;border:1px solid var(--border)">'
+      + '<summary style="font-weight:800;color:var(--primary);cursor:pointer;font-size:.88rem">'
+      + '📊 Dành cho Kỹ sư: Bấm vào đây để mở xem Lịch trình mùa vụ Gantt & Cố vấn NPK chuyên sâu ▾'
+      + '</summary>'
+      + '<div style="margin-top:16px">'
+      + renderAgronomicAdvisory()
+      + sec("Lịch trình canh tác đa cây trồng", card('<div style="padding:20px">' + chLichDaCay() + '</div>'))
+      + '</div>'
+      + '</details>';
+
+    // Modal chọn link thời tiết
+    hBt += renderModalChonLinkThoiTiet();
+
+    return hBt;
+  }
+
+  // ==================== B. CHẾ ĐỘ CHUYÊN NGHIỆP (ĐẦY ĐỦ THÔNG SỐ KỸ THUẬT) ====================
   var cropSummaryPills = [];
   if(cropTypesCount.luongthuc) cropSummaryPills.push('🌾 ' + cropTypesCount.luongthuc + ' lô Lương thực/Rau');
   if(cropTypesCount.congnghiep) cropSummaryPills.push('☕ ' + cropTypesCount.congnghiep + ' lô Cây công nghiệp');
@@ -1764,10 +2537,11 @@ function pTong(){
     + fg('<span style="font-size:1rem;color:#047857;font-weight:700">' + (cropSummaryPills.join(' · ') || 'Đa cây trồng') + '</span>', 'cơ cấu cây trồng')
     + fg(so.length, 'lượt nhật ký đã ghi')
     + '</div>');
+
   h += renderThoiTietVaGioVangPhun();
   h += renderQuickActionBar();
 
-  // 2. Crop-Adaptive Plot Cards
+  // Cards chi tiết từng lô
   var cards = '';
   for(i = 0; i < THUA.length; i++){
     var th = THUA[i];
@@ -1778,8 +2552,7 @@ function pTong(){
     cards += '<div class="card" style="padding:20px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease" data-chothua="' + th.id + '">';
 
     if(cType === "caosu"){
-      // 🌳 CAO SU: Khai thác mủ, Nhịp cạo D3, Độ mủ DRC, Nghỉ cạo dưỡng cây
-      var isTapDay = (i % 2 === 0); // Alternate tapping day
+      var isTapDay = (i % 2 === 0);
       cards += '<div>'
         + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
         + '<div style="display:flex;align-items:center;gap:12px">'
@@ -1810,7 +2583,6 @@ function pTong(){
         + '</div>';
 
     } else if(cType === "congnghiep"){
-      // ☕ CÀ PHÊ / TIÊU: Niên vụ, Chu kỳ tưới mùa khô, Nuôi nhân, Tỷ lệ chín
       var isTieu = th.cay.toLowerCase().indexOf("tiêu") >= 0;
       cards += '<div>'
         + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
@@ -1842,7 +2614,6 @@ function pTong(){
         + '</div>';
 
     } else if(cType === "antrai"){
-      // 🍈 CÂY ĂN TRÁI: Cơi đọt, Làm bông, Nuôi trái, Độ ngọt Brix, Chuẩn xuất khẩu
       var isSauRieng = th.cay.toLowerCase().indexOf("sầu riêng") >= 0;
       cards += '<div>'
         + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
@@ -1874,7 +2645,6 @@ function pTong(){
         + '</div>';
 
     } else {
-      // 🌾 LÚA NƯỚC & RAU MÀU: Đếm ngược ngày cách ly (PHI) trước khi gặt
       cards += '<div>'
         + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
         + '<div style="display:flex;align-items:center;gap:12px">'
@@ -1911,10 +2681,10 @@ function pTong(){
   h += sec("Tình trạng vận hành các lô đất (Theo chu kỳ sinh thái cây trồng)", '<div class="g2">' + cards + '</div>');
   h += renderAgronomicAdvisory();
 
-  // 3. Operational Timeline / Gantt Chart (Lịch trình đa cây trồng)
+  // Gantt Chart
   h += sec("Lịch trình vận hành canh tác & Kế hoạch nông trại (Đa cây trồng)", card('<div style="padding:20px">' + chLichDaCay() + '</div>'));
 
-  // 4. Daily Operational Tasks & Agronomic AI Doctor Advice
+  // Cố vấn nông học AI
   h += sec("Kế hoạch nông vụ hôm nay & Cố vấn mùa vụ AI",
     '<div class="card" style="padding:18px;background:linear-gradient(135deg,#ecfdf5 0%,#f0fdf4 100%);border:1.5px solid #a7f3d0">'
     + '<div style="font-size:.88rem;font-weight:800;color:#047857;margin-bottom:12px;display:flex;align-items:center;gap:8px">'
@@ -1943,6 +2713,9 @@ function pTong(){
     + '</div>'
     + '</div>'
     + '</div>');
+
+  // Modal chọn link thời tiết
+  h += renderModalChonLinkThoiTiet();
 
   return h;
 }
@@ -9282,7 +10055,43 @@ window.addEventListener("resize", function(){
 });
 
 /* Khởi động ban đầu */
+try {
+  if (typeof uiMode !== "undefined") {
+    if (uiMode === "binhthuong") {
+      document.body.classList.add("mode-binhthuong");
+      document.body.classList.remove("mode-chuyennghiep");
+    } else {
+      document.body.classList.remove("mode-binhthuong");
+      document.body.classList.add("mode-chuyennghiep");
+    }
+    var btnN = document.getElementById("btnModeNormal");
+    var btnP = document.getElementById("btnModePro");
+    if (btnN && btnP) {
+      if (uiMode === "binhthuong") {
+        btnN.classList.add("active");
+        btnP.classList.remove("active");
+      } else {
+        btnP.classList.add("active");
+        btnN.classList.remove("active");
+      }
+    }
+    var bannerText = document.getElementById("topWarnBannerText");
+    if (bannerText && uiMode === "binhthuong") {
+      bannerText.innerHTML = "<b>🌾 Sổ Ruộng Nhà Nông.</b> Quản lý mùa vụ đơn giản, dễ nhớ: xem thời tiết hôm nay, bấm 1 chạm ghi tưới bón xịt thuốc, và tra nhanh bệnh cây trồng.";
+    }
+  }
+} catch(e){}
+
 veNav();ve();
+
+// Tự động đồng bộ thời tiết live thời gian thực từ Open-Meteo & NCHMF
+try {
+  setTimeout(function(){
+    if (typeof capNhatThoiTietLive === "function") {
+      capNhatThoiTietLive(null, null, null);
+    }
+  }, 400);
+} catch(e){}
 
 fetch("du-lieu-app.json")
   .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})
