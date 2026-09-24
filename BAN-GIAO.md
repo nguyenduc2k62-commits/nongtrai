@@ -353,6 +353,26 @@ Bốn lô mẫu: lúa, cà phê, cao su, sầu riêng Ri6. Hai chế độ giao 
 
 Lưu dữ liệu: `localStorage`. Chưa có tài khoản, chưa có máy chủ.
 
+### Người dùng mới & Tra bệnh (thêm 24/09/2026, tối)
+
+**Chưa có tài khoản.** Sổ nằm trong `localStorage` của máy. Khoá
+`so_ruong_nguon_du_lieu`: `"mau"` (đang xem nông trại mẫu → dải xanh + nút
+"Bắt đầu sổ của tôi") hoặc `"cua_toi"`. Lần đầu mở → màn chào `moManChao(1)`.
+Nút "Đăng xuất" cũ giờ là "Bắt đầu lại" (mở màn chào, nhắc tải file sao lưu).
+Xoá hết lô không còn bị nạp lại 4 lô mẫu.
+
+**Tra bệnh không phán bệnh.** `chayChuanDoanAI()` chỉ xếp bệnh mẫu **cùng cây**
+theo bằng chứng thật: chữ trong tên ảnh / ô tìm kiếm, bộ phận (tên ảnh nói "rễ"
+thì tin hơn mặc định "Lá"). Không còn "% tương đồng", không ép "bệnh chính"
+theo tên cây. Tên ảnh nhắc tới dịch hại có trong danh mục Thông tư mà không có
+ảnh mẫu (vd "nấm hồng") → hiện số thuốc đăng ký cho cặp cây–dịch hại đó.
+Kê đơn **không lấy thuốc đăng ký cho cây khác** khi cây không có thuốc đăng ký.
+
+**Chụp màn hình điện thoại:** Chrome headless không cho cửa sổ hẹp hơn 500px
+(`--window-size=390,…` thật ra ra 500). Muốn đo 390px phải nhúng app vào
+`<iframe style="width:390px">`. Đo đúng 24/09: tràn ngang ở Lô đất (~800px),
+Nhật ký (~900px), Mô phỏng (551px), Tổng quan chế độ Chuyên nghiệp (540px).
+
 ### Cách ly theo loại cây (thêm 24/09/2026)
 
 Mọi chỗ hiện cách ly gọi **một hàm `danhGiaCachLy(th)`** — đừng tự tính lại

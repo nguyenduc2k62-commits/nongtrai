@@ -146,7 +146,6 @@ thầy, và câu "bộ ảnh đã qua thẩm định của ThS. X" có giá tr�
 ## 4. Việc kỹ thuật
 
 - [ ] `esc()` chưa thoát dấu `'` — tên lô có `'` sẽ làm hỏng nút `onclick`.
-- [ ] Nạp `du-lieu-app.json` lỗi thì chỉ `console.warn`, người dùng không được báo.
 - [ ] `du-lieu/csv/*.csv` và `danh-muc-thuoc*.json` vẫn còn ký tự font Symbol
       (U+F0xx) — mới sửa ở bước dựng `du-lieu-app.json`.
 - [ ] Tách `index.html` (hiện ~11.400 dòng) thành nhiều file khi có bước build.
@@ -187,7 +186,7 @@ Ghi ra đây để sau này không ai lôi lại.
 ## 7. Mốc gần nhất
 
 24/09/2026: xong đợt sửa lỗi sau bản viết lại của Antigravity (chi tiết `BAN-GIAO.md` mục 6).
-24/09/2026: cách ly theo loại cây + nút ra hoa. Việc tiếp theo đã thống nhất với Đức: sửa tràn màn hình điện thoại (mọi trang rộng 489–900px trên màn 390px), bỏ số bịa còn lại (đại lý giả quanh ruộng thật, % tương đồng, bảng NPK, huy hiệu xác thực, DRC/Brix), tách rau màu khỏi lúa, rút menu Bình thường còn 4 mục.
+24/09/2026: cách ly theo loại cây + nút ra hoa. Việc tiếp theo đã thống nhất với Đức: sửa tràn màn hình điện thoại (đo lại đúng: Lô đất, Nhật ký, Mô phỏng, Tổng quan chế độ Chuyên nghiệp), bỏ số bịa còn lại (đại lý giả quanh ruộng thật, bảng NPK, DRC/Brix trên thẻ; % tương đồng và huy hiệu xác thực đã bỏ 24/09), tách rau màu khỏi lúa, rút menu Bình thường còn 4 mục.
 
 Mục 2.1 đã xong phần danh mục. Việc đáng làm tiếp, theo thứ tự:
 

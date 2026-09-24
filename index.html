@@ -637,6 +637,7 @@ body.mode-binhthuong .nav-g{
         <svg style="width:1.2em;height:1.2em;flex-shrink:0;color:var(--wait)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
         <p style="margin:0" id="topWarnBannerText"><b>Thời gian cách ly (PHI) không có sẵn trong app</b> — đọc trên nhãn từng thuốc rồi tự nhập. Gợi ý bệnh, pha thuốc và giá chỉ để tham khảo; thuốc cấm và tên thuốc lấy từ Thông tư 75/2025 &amp; 28/2026.</p>
       </div>
+      <div id="daiMau"></div>
       <main id="page"></main>
     </div>
   </div>
@@ -648,7 +649,7 @@ body.mode-binhthuong .nav-g{
 
 /* ======================= DỮ LIỆU CƠ BẢN ======================= */
 var THUA_KEY="so-ruong-thua";
-var THUA=(function(){try{var r=localStorage.getItem(THUA_KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v)&&v.length)return v}}catch(e){}
+var THUA=(function(){try{var r=localStorage.getItem(THUA_KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v))return v}}catch(e){}
   return [
     {id:"thua1", ten:"Lô 1 — Vùng Lúa Nước", cay:"lúa", giong:"OM 18", dt:5, dat:"Phù sa", gd:"Đẻ nhánh", ngaycay:28},
     {id:"thua2", ten:"Lô 2 — Vườn Cà Phê", cay:"cà phê", giong:"Robusta TR4", dt:8, dat:"Đất đỏ bazan", gd:"Nuôi quả", ngaycay:140},
@@ -1263,14 +1264,13 @@ function pTaiKhoan(){
     + '<div style="width:72px;height:72px;border-radius:50%;background:#ffffff;color:#047857;display:grid;place-items:center;font-size:2rem;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,.25);border:3px solid #6ee7b7;flex-shrink:0" id="profBannerAvatar">' + esc(p.avatar||"ND") + '</div>'
     + '<div>'
     + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
-    + '<h2 style="margin:0;font-size:1.4rem;font-weight:800;color:#ffffff">' + esc(p.hoTen||"Nguyễn Văn Nông") + '</h2>'
+    + '<h2 style="margin:0;font-size:1.4rem;font-weight:800;color:#ffffff">' + esc(p.hoTen||"Chủ hộ") + '</h2>'
     + '<span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.3)">' + esc(p.vaiTro||"Chủ trang trại") + '</span>'
-    + '<span style="background:#10b981;color:#ffffff;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.2)">✓ XÁC THỰC CSDL QUỐC GIA</span>'
     + '</div>'
     + '<div style="margin-top:4px;font-size:.85rem;color:#d1fae5;display:flex;flex-wrap:wrap;gap:14px">'
-    + '<span>🏡 ' + esc(p.tenTrangTrai||"Nông Trại Hữu Cơ Xanh") + '</span>'
-    + '<span>📍 ' + esc(p.diaChi||"Đắk Nông") + '</span>'
-    + '<span>📜 MSVT: <b>' + esc(p.msvt||"VN-ĐNO-0482-2026") + '</b></span>'
+    + (p.tenTrangTrai ? '<span>🏡 ' + esc(p.tenTrangTrai) + '</span>' : '')
+    + (p.diaChi ? '<span>📍 ' + esc(p.diaChi) + '</span>' : '')
+    + '<span>📜 MSVT: <b>' + (p.msvt ? esc(p.msvt) : 'chưa có') + '</b></span>'
     + '</div>'
     + '</div>'
     + '</div>'
@@ -1707,10 +1707,10 @@ function renderTabBaoMat(p){
     // Đăng xuất / chuyển tài khoản
     + '<div class="card" style="padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">'
     + '<div>'
-    + '<b style="color:var(--fg)">Chuyển đổi tài khoản nông hộ hoặc đăng xuất</b>'
-    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">Đổi sang tài khoản của kỹ sư nông nghiệp hoặc nông hộ thành viên khác trong hợp tác xã.</div>'
+    + '<b style="color:var(--fg)">Bắt đầu lại trên máy này</b>'
+    + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">App chưa có tài khoản: sổ nằm trên chính điện thoại / máy này. Bắt đầu lại sẽ xoá sổ hiện tại — hãy tải file sao lưu trước.</div>'
     + '</div>'
-    + '<button type="button" class="btn" id="btnDangXuatTaiKhoan" style="border-color:#ef4444;color:#ef4444;font-weight:700">🚪 Đăng Xuất / Đổi Tài Khoản</button>'
+    + '<button type="button" class="btn" id="btnDangXuatTaiKhoan" style="border-color:#ef4444;color:#ef4444;font-weight:700">🔄 Bắt đầu lại</button>'
     + '</div>'
     + '</div>';
 }
@@ -3076,6 +3076,14 @@ window.dongBoDienTichThua = dongBoDienTichThua;
 // Bản đồ chỉ di chuyển được khi khung của nó còn trên trang và có kích thước.
 // Trang vẽ lại (đổi tab, bấm thẻ lô) sẽ gỡ khung cũ nhưng mapInst vẫn trỏ tới
 // bản đồ cũ; gọi flyTo lúc đó làm Leaflet ném "Invalid LatLng (NaN, NaN)".
+// Gỡ bản đồ giữa lúc đang zoom thì Leaflet ném lỗi "_leaflet_pos" ở khung hình sau.
+// Cho hiệu ứng kết thúc ngay rồi mới gỡ.
+function goBanDoAnToan(m){
+  try{ if(m._animatingZoom && m._onZoomTransitionEnd) m._onZoomTransitionEnd(); }catch(e){}
+  try{ m.stop(); }catch(e){}
+  try{ m.off(); m.remove(); }catch(e){}
+}
+
 function banDoDungDuoc(m){
   if(!m) return false;
   try{
@@ -4375,7 +4383,7 @@ window.thucHienXoaThua = thucHienXoaThua;
 function initMap(){
   var el = document.getElementById('leafMap');
   if(!el) return;
-  if(mapInst){ try{ mapInst.remove(); }catch(e){} mapInst = null; }
+  if(mapInst){ goBanDoAnToan(mapInst); mapInst = null; }
 
   var center = getFarmCenter();
   var defLat = center.lat, defLng = center.lng, defZoom = 16;
@@ -4892,86 +4900,96 @@ function veAnhMauBenh(b,w,h){
     + '<img src="'+realSrc+'" alt="'+esc(b.ten)+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'
     + '<div style="display:none;width:100%;height:100%">'+fallbackSvg+'</div>'
     + '<div class="benh-photo-badge">'
-    + '  <span style="font-size:9px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)">📷 ẢNH THẬT BVTV</span>'
-    + '  <span style="font-size:8px;font-weight:700;color:#86efac;background:rgba(0,0,0,.6);padding:1px 4px;border-radius:4px">100% Chuẩn</span>'
+    + '  <span style="font-size:9px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)">📷 ẢNH MẪU</span>'
     + '</div>'
     + '</div>';
   return html;
 }
 
+// Xếp bệnh mẫu theo BẰNG CHỨNG CÓ THẬT: chữ trong tên file / ô tìm kiếm, và bộ
+// phận cây người dùng chọn. Không có "% tương đồng" — app chưa nhìn được ảnh.
+// Trước 24/09/2026: tên file có chữ "cà phê" là bị ép "Rỉ sắt 98%", còn lại xếp
+// theo thứ tự trong mảng cộng số ngẫu nhiên, lẫn cả bệnh của cây khác.
+var TU_BO_QUA_TB = ["benh","tren","cay","anh","hinh","img","jpg","jpeg","png","webp","cua","va","bi","o","image","photo","dsc","screenshot","file","mau"];
+var BO_PHAN_THEO_TU = [
+  {bp:"re", tu:["re","goc"]}, {bp:"than", tu:["than","canh","vo"]},
+  {bp:"qua", tu:["qua","trai"]}, {bp:"hoa", tu:["hoa","bong","hat"]}, {bp:"la", tu:["la"]}
+];
+var TEN_BO_PHAN_TB = {la:"Lá", than:"Thân / cành", re:"Rễ", qua:"Quả / trái", hoa:"Hoa / bông"};
+
+function boDauTB(s){
+  return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").trim();
+}
+
+function tuKhoaTraBenh(){
+  var goc = benhState.searchQuery || benhState.capturedName || "";
+  var s = boDauTB(goc).replace(/\.[a-z0-9]{2,5}$/, "").replace(/[^a-z0-9]+/g, " ");
+  var cay = boDauTB(benhState.cay || "");
+  if(cay) s = (" " + s + " ").split(" " + cay + " ").join(" ");
+  var tu = s.split(/\s+/).filter(function(w){ return w && TU_BO_QUA_TB.indexOf(w) < 0 && !/^\d+$/.test(w); });
+  return {chuoi: " " + tu.join(" ") + " ", tu: tu};
+}
+
 function chayChuanDoanAI(forceBenhId){
-  var ds = [];
-  var cLower = (benhState.cay || 'lúa').toLowerCase().trim();
-  var qRaw = (benhState.searchQuery || '').toLowerCase().trim();
-
-  function boDau(str){
-    return (str || '').toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd').replace(/Đ/g, 'd')
-      .trim();
+  var tk = tuKhoaTraBenh();
+  var cLowerClean = boDauTB(benhState.cay || "lúa");
+  var bpFile = null;
+  for(var q = 0; q < BO_PHAN_THEO_TU.length && !bpFile; q++){
+    for(var r = 0; r < BO_PHAN_THEO_TU[q].tu.length; r++){
+      if(tk.tu.indexOf(BO_PHAN_THEO_TU[q].tu[r]) >= 0){ bpFile = BO_PHAN_THEO_TU[q].bp; break; }
+    }
   }
-  var qClean = boDau(qRaw);
-
+  // Tên file nói rõ bộ phận ("thối rễ") thì tin tên file hơn lựa chọn mặc định "Lá"
+  var bp = bpFile || benhState.boPhan;
+  var ds = [];
   for(var i = 0; i < BENH_MAU.length; i++){
     var b = BENH_MAU[i];
     if(benhState.loaiTru && benhState.loaiTru[b.id]) continue;
-
-    var bCayClean = boDau(b.cay);
-    var cLowerClean = boDau(cLower);
+    var bCayClean = boDauTB(b.cay);
     var matchCay = (bCayClean.indexOf(cLowerClean) >= 0 || cLowerClean.indexOf(bCayClean) >= 0);
-    // Nhóm cây tương đồng sinh học
     if(!matchCay){
-      if((cLowerClean.indexOf("cam")>=0 || cLowerClean.indexOf("buoi")>=0 || cLowerClean.indexOf("chanh")>=0 || cLowerClean.indexOf("quyt")>=0) && (bCayClean.indexOf("cam")>=0 || bCayClean.indexOf("buoi")>=0)) matchCay = true;
-      if((cLowerClean.indexOf("ca chua")>=0 || cLowerClean.indexOf("ot")>=0) && (bCayClean.indexOf("ca chua")>=0 || bCayClean.indexOf("ot")>=0)) matchCay = true;
-      if((cLowerClean.indexOf("dua hau")>=0 || cLowerClean.indexOf("dua leo")>=0 || cLowerClean.indexOf("bau bi")>=0) && (bCayClean.indexOf("dua hau")>=0 || bCayClean.indexOf("dua leo")>=0)) matchCay = true;
+      if(/cam|buoi|chanh|quyt/.test(cLowerClean) && /cam|buoi|chanh|quyt/.test(bCayClean)) matchCay = true;
+      if(/ca chua|(^| )ot( |$)/.test(cLowerClean) && /ca chua|(^| )ot( |$)/.test(bCayClean)) matchCay = true;
+      if(/dua hau|dua leo|bau bi/.test(cLowerClean) && /dua hau|dua leo/.test(bCayClean)) matchCay = true;
     }
-    var matchBoPhan = (!benhState.boPhan || b.boPhan === benhState.boPhan);
-    var score = 50;
+    if(!matchCay) continue;                 // không gợi ý bệnh của cây khác
 
-    if(forceBenhId && b.id === forceBenhId){
-      score = 98;
-    } else if(qClean){
-      // Chế độ tìm kiếm triệu chứng hoặc tên bệnh
-      var bAllText = boDau(b.ten + ' ' + b.sci + ' ' + b.trieuChung + ' ' + b.dh + ' ' + b.mucDo + ' ' + b.phacDo + ' ' + b.cay);
-      var words = qClean.split(/\s+/).filter(Boolean);
-      var matchedWords = 0;
-      for(var w = 0; w < words.length; w++){
-        if(bAllText.indexOf(words[w]) >= 0) matchedWords++;
-      }
-
-      if(matchedWords === 0) continue; // Bỏ qua nếu không trùng khớp từ nào
-
-      var matchRatio = matchedWords / Math.max(words.length, 1);
-      score = Math.round(55 + matchRatio * 32);
-
-      // Ưu tiên cao nếu khớp trực tiếp tên bệnh hoặc tên sâu hại
-      if(boDau(b.ten).indexOf(qClean) >= 0 || boDau(b.dh).indexOf(qClean) >= 0){
-        score = Math.max(score, 95);
-      }
-      // Khớp triệu chứng cụ thể
-      if(boDau(b.trieuChung).indexOf(qClean) >= 0){
-        score = Math.max(score, 88);
-      }
-      // Cộng điểm nếu khớp cả cây trồng đang chọn
-      if(matchCay) score += 6;
-      if(matchBoPhan) score += 3;
-    } else if(matchCay && matchBoPhan){
-      score = 94 - ds.length * 8 + Math.floor(Math.random() * 3);
-    } else if(matchCay){
-      score = 76 - ds.length * 8;
-    } else if(matchBoPhan){
-      score = 58 - ds.length * 6;
-    } else {
-      score = 42;
+    var diem = 0, lyDo = [];
+    if(forceBenhId && b.id === forceBenhId){ diem += 1000; lyDo.push("Ảnh mẫu của chính bệnh này"); }
+    var dh = boDauTB(b.dh);
+    if(dh && tk.chuoi.indexOf(" " + dh + " ") >= 0){ diem += 60; lyDo.push("Tên có chữ “" + b.dh + "”"); }
+    var chu = " " + boDauTB(b.ten + " " + b.dh + " " + b.trieuChung).replace(/[^a-z0-9]+/g, " ") + " ";
+    var khop = [];
+    for(var w = 0; w < tk.tu.length; w++){
+      if(tk.tu[w].length >= 2 && chu.indexOf(" " + tk.tu[w] + " ") >= 0 && khop.indexOf(tk.tu[w]) < 0) khop.push(tk.tu[w]);
     }
+    if(khop.length){ diem += khop.length * 10; if(!lyDo.length) lyDo.push("Khớp " + khop.length + " chữ trong tên / mô tả"); }
+    if(bp && b.boPhan === bp){ diem += 20; lyDo.push("Đúng bộ phận: " + (TEN_BO_PHAN_TB[bp] || bp)); }
+    ds.push({benh: b, diem: diem, lyDo: lyDo, thuTu: i, khopTen: !!(khop.length || (forceBenhId && b.id === forceBenhId) || (dh && tk.chuoi.indexOf(" " + dh + " ") >= 0))});
+  }
+  ds.sort(function(a, c){ return (c.diem - a.diem) || (a.thuTu - c.thuTu); });
+  benhState.ketQuaAI = ds;
 
-    if(score >= 45){
-      ds.push({ benh: b, score: Math.min(score, 98) });
+  // Bệnh có trong DANH MỤC THUỐC (Thông tư) mà tên file nhắc tới — dù app chưa có ảnh mẫu
+  benhState.dhTheoTen = [];
+  if(tk.tu.length && D){
+    var ci = cayId(benhState.cay);
+    if(ci >= 0){
+      var dsDh = dichHaiCuaCay(ci);
+      for(var k = 0; k < dsDh.length; k++){
+        var t = boDauTB(dsDh[k].ten).replace(/[^a-z0-9]+/g, " ").trim();
+        if(t.length >= 4 && tk.chuoi.indexOf(" " + t + " ") >= 0) benhState.dhTheoTen.push(dsDh[k]);
+      }
+      benhState.dhTheoTen.sort(function(a, c){ return c.ten.length - a.ten.length; });
+      // Bỏ tên ngắn nằm gọn trong tên dài hơn đã khớp ("hồng" trong "nấm hồng")
+      benhState.dhTheoTen = benhState.dhTheoTen.filter(function(x, xi, arr){
+        var tx = boDauTB(x.ten);
+        for(var yi = 0; yi < xi; yi++) if(boDauTB(arr[yi].ten).indexOf(tx) >= 0) return false;
+        return true;
+      });
+      benhState.dhTheoTen = benhState.dhTheoTen.slice(0, 3);
     }
   }
-
-  ds.sort(function(a, b){ return b.score - a.score; });
-  benhState.ketQuaAI = ds;
 }
 
 function pBenh(){
@@ -5045,7 +5063,7 @@ function pBenh(){
   h += '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg)">Bước 3: Chọn phương thức tra cứu</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
   h += '<button type="button" class="btn ' + (benhState.mode === "upload" ? 'btn-p' : '') + '" data-setmode="upload">📁 Tải ảnh lên</button>';
-  h += '<button type="button" class="btn ' + (benhState.mode === "camera" ? 'btn-p' : '') + '" data-setmode="camera">📷 Bật Camera quét AI</button>';
+  h += '<button type="button" class="btn ' + (benhState.mode === "camera" ? 'btn-p' : '') + '" data-setmode="camera">📷 Chụp ảnh</button>';
   h += '<button type="button" class="btn ' + (benhState.mode === "thuong" ? 'btn-p' : '') + '" data-setmode="thuong">🔍 Tra danh mục thường</button>';
   h += '</div></div>';
 
@@ -5085,7 +5103,6 @@ function pBenh(){
             return '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.12);border:1.5px solid #10b981;border-radius:20px;padding:4px 14px;font-size:.76rem;color:#065f46">'
               + '<span>📄 <b>Tên file ảnh gợi ý:</b></span>'
               + '<span style="font-weight:700;color:#047857">' + aiDet.icon + ' Cây ' + esc(aiDet.tenCay) + '</span>'
-              + '<span style="color:#059669">· Triệu chứng: ' + esc(aiDet.tenBenh) + '</span>'
               + '</div>';
           })()
         + '</div>'
@@ -5120,9 +5137,9 @@ function pBenh(){
             return '';
           })()
         + '<button type="button" id="btnChuanDoanNgay" class="btn btn-p" style="font-size:1.02rem;font-weight:800;padding:12px 32px;border-radius:10px;box-shadow:0 4px 18px rgba(16,185,129,.35);display:inline-flex;align-items:center;gap:10px;cursor:pointer">'
-        + (benhState.isScanning ? '⏳ ĐANG PHÂN TÍCH AI...' : '🔍 PHÂN TÍCH AI & TRA CỨU LOẠI BỆNH NGAY')
+        + (benhState.isScanning ? '⏳ Đang lọc bệnh...' : '🔍 Tìm bệnh mẫu để so')
         + '</button>'
-        + '<div style="font-size:.76rem;color:var(--muted-fg)">Bấm nút trên để AI phân tích hình thái đốm bệnh và đối chiếu ảnh mẫu BVTV</div>'
+        + '<div style="font-size:.76rem;color:var(--muted-fg)">App lọc bệnh mẫu theo cây, bộ phận và tên ảnh — bạn tự so vết bệnh với ảnh mẫu</div>'
         + '</div>'
         + '</div>'
         + '<input type="file" id="fileUploadBenh" accept="image/*" style="display:none">'
@@ -5137,7 +5154,7 @@ function pBenh(){
         + '<p style="font-size:.72rem;color:var(--muted-fg);margin:8px 0 0">Hoặc kéo thả file ảnh trực tiếp vào ô này</p>'
         + '</div>'
         + '<div style="margin-top:12px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px">'
-        + '<span style="font-size:.78rem;color:var(--muted-fg);font-weight:700">🌟 Chọn nhanh ảnh mẫu thực tế để thử AI:</span>'
+        + '<span style="font-size:.78rem;color:var(--muted-fg);font-weight:700">🌟 Thử với ảnh mẫu có sẵn:</span>'
         + '<button type="button" class="btn btn-p" style="padding:6px 14px;font-size:.78rem;border-radius:8px" data-loadanhbenh="caphe_ri_sat">☕ Ảnh lá Cà phê (Rỉ sắt)</button>'
         + '<button type="button" class="btn" style="padding:6px 14px;font-size:.78rem;border-radius:8px" data-loadanhbenh="saurieng_chay_la">🍈 Ảnh lá Sầu riêng (Cháy lá)</button>'
         + '<button type="button" class="btn" style="padding:6px 14px;font-size:.78rem;border-radius:8px" data-loadanhbenh="lua_dao_on">🌾 Ảnh lá Lúa (Đạo ôn)</button>'
@@ -5194,11 +5211,10 @@ function pBenh(){
       + '<div style="margin-top:12px;background:#ffffff;border:1.5px solid #fecaca;border-radius:10px;padding:14px;font-size:.84rem;color:#374151;line-height:1.6">'
       + '<div style="font-weight:800;color:#991b1b;margin-bottom:6px">🔬 Đặc điểm để tự đối chiếu với ảnh của bạn:</div>'
       + '<div>• <b>Lá Cây ' + esc(misDet.tenCay) + ':</b> ' + esc(misDet.dacDiemLa) + '</div>'
-      + '<div style="margin-top:6px">• <b>Triệu chứng ' + esc(misDet.tenBenh) + ':</b> ' + esc(misDet.dauHieuBenh) + '</div>'
       + '</div>'
       + '<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">'
       + '<button type="button" id="btnChuyenDungCayAi" class="btn btn-p" style="background:#059669;border-color:#059669;font-weight:800;font-size:.92rem;padding:10px 24px;border-radius:10px;box-shadow:0 3px 12px rgba(5,150,105,.35);cursor:pointer">'
-      + '👉 Chuyển ngay sang Cây ' + esc(misDet.tenCay) + ' & Xem ' + esc(misDet.tenBenh)
+      + '👉 Chuyển ngay sang Cây ' + esc(misDet.tenCay) + ''
       + '</button>'
       + '<button type="button" id="btnGiuNguyenCay" class="btn" style="font-size:.82rem;color:var(--muted-fg);cursor:pointer">'
       + 'Giữ Cây ' + esc(userCropName) + ' (tôi chắc chắn)'
@@ -5214,19 +5230,32 @@ function pBenh(){
 
   if(!kq||!kq.length){
     kqHtml+='<div style="border:1px dashed var(--border);border-radius:12px;padding:24px;text-align:center;color:var(--muted-fg)">'
-      +'Không tìm thấy bệnh phù hợp với tiêu chí hiện tại. Bạn đã loại trừ các bệnh gợi ý. '
+      +(benhState.loaiTru && Object.keys(benhState.loaiTru).length
+        ? 'Bạn đã loại trừ hết các bệnh mẫu của cây này. '
+        : 'App chưa có ảnh mẫu bệnh nào cho <b>'+esc(benhState.cay||'')+'</b>. Hãy dùng <b>Tra danh mục thường</b> để tìm thuốc theo tên bệnh. ')
       +'<button type="button" id="btnResetLoaiTru" class="btn" style="margin-top:8px">Khôi phục gợi ý ban đầu</button></div>';
   }else{
-    // Side-by-side spotlight comparison if user uploaded an image
+    // Bệnh trong danh mục thuốc mà tên file nhắc tới
+    if(benhState.dhTheoTen && benhState.dhTheoTen.length){
+      var ciDm = cayId(benhState.cay);
+      for(var dmI = 0; dmI < benhState.dhTheoTen.length; dmI++){
+        var dmX = benhState.dhTheoTen[dmI], dsT = thuocCho(ciDm, dmX.id);
+        kqHtml += '<div style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;font-size:.84rem;line-height:1.5">'
+          + '📋 Tên ảnh nhắc tới <b>“' + esc(dmX.ten) + '”</b>. Danh mục Thông tư có <b>' + dsT.length + ' thuốc</b> đăng ký trừ “' + esc(dmX.ten) + '” trên ' + esc(benhState.cay) + ': '
+          + dsT.slice(0, 6).map(function(x){ return '<b>' + esc(x.t) + '</b>'; }).join(', ') + (dsT.length > 6 ? '…' : '')
+          + '<div style="font-size:.76rem;color:var(--muted-fg);margin-top:4px">Nếu đúng là bệnh này thì tra kỹ ở mục <b>Pha thuốc</b>. Liều và thời gian cách ly lấy trên nhãn.</div></div>';
+      }
+    }
     var topMatch = kq[0];
-    if(benhState.capturedImg && topMatch){
+    // Khung "so ảnh" lớn chỉ khi tên ảnh thật sự khớp một bệnh mẫu
+    if(benhState.capturedImg && topMatch && topMatch.khopTen){
       kqHtml+='<div style="background:var(--accent);border:2px solid var(--primary);border-radius:14px;padding:16px;margin-bottom:18px;box-shadow:0 4px 16px rgba(16,185,129,.12)">'
         +'<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">'
         +'<div style="display:flex;align-items:center;gap:8px">'
         +'<span style="font-size:1.1rem">🎯</span>'
-        +'<span style="font-size:.95rem;font-weight:800;color:var(--primary)">ĐỐI CHIẾU TRỰC TIẾP: ẢNH BẠN TẢI LÊN VS ẢNH MẪU THẬT BVTV</span>'
+        +'<span style="font-size:.95rem;font-weight:800;color:var(--primary)">SO ẢNH CỦA BẠN VỚI ẢNH MẪU</span>'
         +'</div>'
-        +'<span class="mono" style="font-size:.88rem;font-weight:800;color:#fff;background:var(--primary);padding:3px 10px;border-radius:10px">'+topMatch.score+'% TƯƠNG ĐỒNG NHẤT</span>'
+        +'<span style="font-size:.78rem;font-weight:700;color:var(--primary)">Xếp đầu vì: '+esc(topMatch.lyDo.join(' · '))+'</span>'
         +'</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:var(--card);padding:14px;border-radius:12px;border:1px solid var(--border)">'
         +'<div style="text-align:center">'
@@ -5237,7 +5266,7 @@ function pBenh(){
         +'</div></div>'
         +'<div style="font-size:1.6rem;color:var(--primary);font-weight:800">⇄</div>'
         +'<div style="text-align:center">'
-        +'<div style="font-size:.72rem;font-weight:700;color:var(--muted-fg);margin-bottom:4px">ẢNH MẪU BVTV CHUẨN</div>'
+        +'<div style="font-size:.72rem;font-weight:700;color:var(--muted-fg);margin-bottom:4px">ẢNH MẪU</div>'
         +veAnhMauBenh(topMatch.benh, 160, 115)
         +'</div>'
         +'<div style="flex:1;min-width:220px">'
@@ -5246,11 +5275,13 @@ function pBenh(){
         +'<div style="font-size:.82rem;line-height:1.45;color:var(--fg);background:var(--bg);padding:8px 10px;border-radius:8px">'
         +'<b>Dấu hiệu nhận biết:</b> '+esc(topMatch.benh.trieuChung)+'</div>'
         +'<div style="margin-top:10px">'
-        +'<button type="button" class="btn btn-p" data-chondonbenh="'+topMatch.benh.id+'" style="font-size:.85rem;padding:7px 16px">✅ Xác nhận đúng bệnh này — Kê đơn thuốc ngay</button>'
+        +'<button type="button" class="btn btn-p" data-chondonbenh="'+topMatch.benh.id+'" style="font-size:.85rem;padding:7px 16px">✅ Giống ảnh của tôi — Xem thuốc</button>'
         +'</div></div></div></div>';
     }
 
-    kqHtml+='<p style="margin:0 0 14px;font-size:.85rem;color:var(--muted-fg)">Hệ thống phát hiện <b class="mono" style="color:var(--fg)">'+kq.length+' loại bệnh</b> tương thích nhất. Hãy <b>so sánh trực tiếp vết bệnh của bạn với ảnh mẫu BVTV</b> bên dưới (bấm vào ảnh để phóng to chi tiết):</p>';
+    kqHtml+='<p style="margin:0 0 14px;font-size:.85rem;color:var(--muted-fg)">App có <b style="color:var(--fg)">'+kq.length+' bệnh mẫu</b> cho '+esc(benhState.cay)+'. '
+      +(kq[0].diem>0 ? 'Bệnh khớp tên ảnh / bộ phận bạn chọn được xếp lên trước. ' : 'Chưa có dấu hiệu nào để xếp bệnh nào lên trước. ')
+      +'<b>Hãy tự so vết bệnh với từng ảnh mẫu</b> (bấm ảnh để phóng to). App chưa nhìn được nội dung ảnh.</p>';
     for(var i=0;i<kq.length;i++){
       var item=kq[i],b=item.benh;
       kqHtml+='<div class="disease-compare-card">'
@@ -5260,9 +5291,8 @@ function pBenh(){
         +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
         +'<div><span style="font-size:1.05rem;font-weight:800;color:var(--fg)">'+esc(b.ten)+'</span>'
         +'<span style="font-size:.75rem;color:var(--muted-fg);font-style:italic;display:block">'+esc(b.sci)+'</span></div>'
-        +'<span class="mono" style="font-size:.9rem;font-weight:800;color:var(--primary);background:var(--accent);padding:3px 8px;border-radius:8px">'+item.score+'% tương đồng</span>'
+        +'<span style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end">'+(item.lyDo.length ? item.lyDo.map(function(x){return tag(esc(x),'ok')}).join('') : tag('Cùng cây','mut'))+'</span>'
         +'</div>'
-        +'<div class="match-bar-bg"><div class="match-bar-fg" style="width:'+item.score+'%"></div></div>'
         +'<div style="margin-top:10px;font-size:.82rem;line-height:1.5;color:var(--fg);background:var(--bg);padding:8px 12px;border-radius:8px">'
         +'<b>Triệu chứng đối chiếu:</b> '+esc(b.trieuChung)+'</div>'
         +'<div style="margin-top:8px;font-size:.78rem;color:var(--muted-fg)">'
@@ -5303,17 +5333,7 @@ function pBenh(){
           }
         }
       }
-      if(!thuocList.length&&D&&dhIds.length){
-        for(var i=0;i<D.thuoc.length;i++){
-          var tObj=D.thuoc[i];
-          for(var j=0;j<tObj.p.length;j++){
-            if(dhIds.indexOf(tObj.p[j][0])>=0){
-              thuocList.push(tObj);
-              break;
-            }
-          }
-        }
-      }
+      // Không lấy thuốc đăng ký cho CÂY KHÁC thay vào: không đăng ký = chưa được phép dùng.
       if(typeof coAnhThat === "function"){
         thuocList.sort(function(a, b){
           var aR = coAnhThat(a.t) ? 1 : 0;
@@ -5338,12 +5358,12 @@ function pBenh(){
         + (bChon.id === 'lua_bac_la' || bChon.id === 'cam_loet'
            ? '<b style="color:#b91c1c">Đây là bệnh do VI KHUẨN (Xanthomonas). CẤM DÙNG thuốc trừ nấm (Hexaconazole, Difenoconazole) vì vô tác dụng! Bắt buộc dùng thuốc trừ khuẩn: Kasugamycin, Oxolinic acid, Bismerthiazol hoặc gốc Đồng.</b>'
            : 'Bệnh do nấm / sâu hại. Tuân thủ nguyên tắc 4 đúng, luân phiên gốc thuốc (FRAC/IRAC) sau mỗi 2 đợt xịt để tránh lờn thuốc.')
-        + '<br>• <b>QUY ĐỔI PHA BÌNH DÂN DÃ:</b> Bình 16L dùng 20-25ml (1 nắp đầy); Bình 25L dùng 30-35ml; Phuy 200L dùng 1 chai 250ml.'
+        + '<br>• <b>LIỀU PHA:</b> mỗi thuốc một liều khác nhau — đọc trên nhãn chai/gói, không pha theo ước lượng.'
         + '</div>'
         + '</div>'
-        +'<span class="tag tag-ok" style="font-size:.8rem;padding:4px 10px">Chuẩn Thông tư 75/2025</span>'
+        +'<span class="tag tag-ok" style="font-size:.8rem;padding:4px 10px">Thuốc đăng ký theo Thông tư 75/2025</span>'
         +'</div>'
-        +'<p style="margin:0 0 16px;font-size:.84rem;color:var(--muted-fg)">Tra cứu tự động từ <b style="color:var(--fg)">5.929 thuốc Thông tư 75/2025</b>. Tìm thấy <b class="mono" style="color:var(--primary);font-size:.95rem">'+thuocList.length+' sản phẩm</b> đăng ký hợp lệ:</p>';
+        +'<p style="margin:0 0 16px;font-size:.84rem;color:var(--muted-fg)">Tra cứu tự động từ <b style="color:var(--fg)">5.914 thuốc Thông tư 75/2025</b>. Tìm thấy <b class="mono" style="color:var(--primary);font-size:.95rem">'+thuocList.length+' sản phẩm</b> đăng ký hợp lệ:</p>';
 
       if(!thuocList.length){
         thuocHtml+='<div style="border:1px dashed var(--border);border-radius:10px;padding:16px;font-size:.85rem;color:var(--muted-fg)">'
@@ -5491,7 +5511,7 @@ function pMap(){
 
 function initBandoMap(){
   var el=document.getElementById('bandoLeafMap');if(!el)return;
-  if(bandoMap){try{bandoMap.remove()}catch(e){}bandoMap=null}
+  if(bandoMap){goBanDoAnToan(bandoMap);bandoMap=null}
   var farmC = getFarmCenter();
   var defLat = farmC.lat, defLng = farmC.lng;
 
@@ -10594,11 +10614,11 @@ document.addEventListener("click",function(ev){
     var cropVal=selCrop?selCrop.value:"tudong";
 
     benhState.isScanning=true;
-    benhState.scanStepText="Đang trích xuất hình thái vết bệnh & phân tích cấu trúc gân lá...";
+    benhState.scanStepText="Đang lọc bệnh mẫu theo cây và bộ phận...";
     ve();
 
     setTimeout(function(){
-      benhState.scanStepText="Đang nhận diện loài cây trồng & đối chiếu với 14 bộ dữ liệu BVTV...";
+      benhState.scanStepText="Đang đối chiếu tên ảnh với tên bệnh...";
       ve();
 
       setTimeout(function(){
@@ -10629,10 +10649,9 @@ document.addEventListener("click",function(ev){
         if(cropVal === "tudong"){
           // Tự động nhận diện cây và bệnh
           benhState.cay = aiDet.cayId;
-          benhState.boPhan = "la";
           benhState.aiMismatch = null;
           benhState.overrideMismatch = false;
-          chayChuanDoanAI(aiDet.benhChinh);
+          chayChuanDoanAI();
           showToast("Tên file ảnh gợi ý: Cây " + aiDet.tenCay + ". Hãy đối chiếu ảnh mẫu bên dưới.", "success");
         } else {
           var cUserClean = boDau(cropVal);
@@ -10653,7 +10672,7 @@ document.addEventListener("click",function(ev){
             benhState.aiMismatch = null;
             benhState.cay = cropVal;
             if(boDau(cropVal) === boDau(aiDet.cayId)){
-              chayChuanDoanAI(aiDet.benhChinh);
+              chayChuanDoanAI();
             } else {
               chayChuanDoanAI();
             }
@@ -10677,7 +10696,6 @@ document.addEventListener("click",function(ev){
     var targetBenh = aiDet.benhChinh;
 
     benhState.cay = targetCay;
-    benhState.boPhan = "la";
     benhState.aiMismatch = null;
     benhState.overrideMismatch = false;
     benhState.loaiTru = {};
@@ -10685,7 +10703,7 @@ document.addEventListener("click",function(ev){
     var selCrop = document.getElementById("selCayKhiUpload");
     if(selCrop) selCrop.value = targetCay;
 
-    chayChuanDoanAI(targetBenh);
+    chayChuanDoanAI();
     ve();
     showToast("✅ Đã chuyển sang đúng Cây " + targetCay.toUpperCase() + " và chẩn đoán chính xác " + (aiDet ? aiDet.tenBenh : "bệnh"), "success");
     var s4 = document.getElementById("ketQuaStep4");
@@ -11050,6 +11068,7 @@ document.addEventListener("click", function(ev){
   }
 
   var btnPopDx = ev.target.closest("#btnPopoverDangXuat, #btnDangXuatTaiKhoan");
+  if(btnPopDx){ try{ toggleUserPopover(false); }catch(e2){} moManChao(1); return; }
   if(btnPopDx){
     toggleUserPopover(false);
     hienModal("modalLoginSwitcher");
@@ -11306,7 +11325,7 @@ document.addEventListener("click", function(ev){
 
   // 23. Sửa Nhanh MSVT
   if(ev.target.closest("#btnChinhSuaMsvt")){
-    var newMsvt = prompt("Nhập mã số vùng trồng của nông hộ bạn (theo giấy cấp thực tế):", USER_PROFILE.msvt || "VN-ĐNO-0482-2026");
+    var newMsvt = prompt("Nhập mã số vùng trồng của nông hộ bạn (theo giấy cấp thực tế):", USER_PROFILE.msvt || "");
     if(newMsvt && newMsvt.trim()){
       USER_PROFILE.msvt = newMsvt.trim();
       saveUserProfile(USER_PROFILE, false);
@@ -11397,7 +11416,130 @@ try {
   }
 } catch(e){}
 
+/* ======================= NGƯỜI DÙNG MỚI =======================
+   App chưa có tài khoản / máy chủ: sổ nằm trong localStorage của máy này.
+   KEY_NGUON_DL: "mau" = đang xem nông trại mẫu, "cua_toi" = sổ thật của người dùng.
+   Lần đầu mở (chưa có gì) -> màn chào cho chọn. */
+var KEY_NGUON_DL = "so_ruong_nguon_du_lieu";
+function nguonDuLieu(){ try{ return localStorage.getItem(KEY_NGUON_DL); }catch(e){ return null; } }
+function datNguonDuLieu(v){ try{ localStorage.setItem(KEY_NGUON_DL, v); }catch(e){} }
+
+var CAY_GOI_Y = ["lúa","cà phê","hồ tiêu","sầu riêng","cao su","điều","chè","bắp","khoai lang","sắn","đậu phộng","đậu nành","rau màu","cà chua","ớt","dưa hấu","cam","bưởi","chanh","xoài","thanh long","bơ","mít","chuối","nhãn","vải"];
+
+function veDaiMau(){
+  var el = document.getElementById("daiMau");
+  if(!el) return;
+  if(nguonDuLieu() !== "mau"){ el.innerHTML = ""; return; }
+  el.innerHTML = '<div style="margin:0 0 14px;padding:12px 16px;border-radius:12px;background:#eff6ff;border:1.5px solid #93c5fd;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">'
+    + '<div style="font-size:.88rem;color:#1e3a8a;line-height:1.45"><b>👀 Bạn đang xem nông trại mẫu.</b> Lô đất, nhật ký, tên chủ hộ đều là số liệu ví dụ, không phải của bạn.</div>'
+    + '<button type="button" class="btn btn-p" onclick="moManChao(2)" style="font-weight:700;white-space:nowrap">📒 Bắt đầu sổ của tôi</button></div>';
+}
+window.veDaiMau = veDaiMau;
+
+function moManChao(buoc){
+  var cu = document.getElementById("manChao");
+  if(cu) cu.remove();
+  var coSo = (THUA.length > 0 || so.length > 0);
+  var h = '<div id="manChao" style="position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto">'
+    + '<div style="background:var(--card,#fff);color:var(--fg,#111);border-radius:18px;max-width:460px;width:100%;padding:22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:100%;overflow:auto">';
+  if(buoc === 1){
+    h += '<div style="font-size:1.35rem;font-weight:800;color:var(--primary,#15803d)">🌾 Chào bạn đến với Sổ Ruộng</div>'
+      + '<p style="font-size:.92rem;line-height:1.55;margin:10px 0 16px">Sổ ghi việc đồng áng, nhắc <b>ngày cách ly thuốc</b> trước khi thu hoạch, tra thuốc theo danh mục nhà nước.<br><span style="color:var(--muted-fg,#64748b);font-size:.84rem">Chưa cần tài khoản — sổ lưu ngay trên máy này.</span></p>'
+      + '<button type="button" class="btn btn-p" onclick="moManChao(2)" style="width:100%;padding:14px;font-size:1rem;font-weight:800;margin-bottom:10px">📒 Bắt đầu sổ của tôi</button>'
+      + '<button type="button" class="btn" onclick="xemNongTraiMau()" style="width:100%;padding:12px;font-size:.92rem;font-weight:700">👀 Xem thử nông trại mẫu</button>';
+    if(nguonDuLieu()) h += '<button type="button" class="btn" onclick="dongManChao()" style="width:100%;padding:10px;font-size:.84rem;margin-top:10px;border:none;color:var(--muted-fg,#64748b)">Đóng, giữ sổ hiện tại</button>';
+  } else {
+    var tinhOpts = '';
+    for(var i = 0; i < DS_TINH_THANH_THOI_TIET.length; i++) tinhOpts += '<option value="' + i + '">' + esc(DS_TINH_THANH_THOI_TIET[i].ten) + '</option>';
+    var cayOpts = '';
+    for(var c = 0; c < CAY_GOI_Y.length; c++) cayOpts += '<option value="' + esc(CAY_GOI_Y[c]) + '">';
+    var o = 'style="width:100%;margin-top:4px;padding:10px;font-size:.95rem;border-radius:10px;border:1px solid var(--border,#d1d5db);box-sizing:border-box"';
+    var l = 'style="display:block;font-size:.84rem;font-weight:700;margin-top:12px"';
+    h += '<div style="font-size:1.2rem;font-weight:800;color:var(--primary,#15803d)">📒 Sổ của tôi</div>'
+      + '<p style="font-size:.84rem;color:var(--muted-fg,#64748b);margin:6px 0 0">Chỉ cần vài thông tin, sửa lại được sau.</p>'
+      + '<label ' + l + '>Tên của bạn<input id="mcTen" type="text" placeholder="vd: Nguyễn Văn A" ' + o + '></label>'
+      + '<label ' + l + '>Vùng / tỉnh (để lấy thời tiết)<select id="mcTinh" ' + o + '>' + tinhOpts + '</select></label>'
+      + '<div style="margin-top:14px;padding-top:10px;border-top:1px dashed var(--border,#d1d5db);font-size:.84rem;font-weight:800">Lô đầu tiên</div>'
+      + '<label ' + l + '>Tên lô<input id="mcLo" type="text" placeholder="vd: Ruộng sau nhà, Vườn cà phê dốc" ' + o + '></label>'
+      + '<label ' + l + '>Cây trồng<input id="mcCay" type="text" list="mcCayDs" placeholder="vd: lúa, cà phê, sầu riêng" ' + o + '><datalist id="mcCayDs">' + cayOpts + '</datalist></label>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + '<label ' + l + '>Giống (nếu biết)<input id="mcGiong" type="text" placeholder="vd: ST25, Ri6" ' + o + '></label>'
+      + '<label ' + l + '>Diện tích (sào)<input id="mcDt" type="number" min="0" step="0.1" placeholder="vd: 5" ' + o + '></label>'
+      + '</div>';
+    if(coSo && nguonDuLieu() === "cua_toi"){
+      h += '<div style="margin-top:14px;padding:10px 12px;border-radius:10px;background:#fef2f2;border:1px solid #fecaca;font-size:.8rem;color:#991b1b;line-height:1.45">Sổ hiện có trên máy này sẽ bị <b>xoá</b>. '
+        + '<button type="button" class="btn" onclick="xuatDuLieuJSON()" style="font-size:.78rem;padding:4px 10px;margin-top:6px">⬇️ Tải file sao lưu trước</button></div>';
+    }
+    h += '<button type="button" class="btn btn-p" onclick="batDauSoMoi()" style="width:100%;padding:14px;font-size:1rem;font-weight:800;margin-top:16px">Tạo sổ</button>'
+      + '<button type="button" class="btn" onclick="moManChao(1)" style="width:100%;padding:10px;font-size:.84rem;margin-top:8px;border:none;color:var(--muted-fg,#64748b)">← Quay lại</button>';
+  }
+  h += '</div></div>';
+  document.body.insertAdjacentHTML("beforeend", h);
+}
+window.moManChao = moManChao;
+
+function dongManChao(){ var m = document.getElementById("manChao"); if(m) m.remove(); }
+window.dongManChao = dongManChao;
+
+function xemNongTraiMau(){
+  if(nguonDuLieu() === "cua_toi" && (THUA.length || so.length)){
+    if(!confirm("Chuyển sang nông trại mẫu sẽ xoá sổ hiện tại trên máy này. Tiếp tục?")) return;
+    try{ ["so-ruong-v3", THUA_KEY, "sr-polygons", "sr_user_profile"].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
+    datNguonDuLieu("mau");
+    location.reload();
+    return;
+  }
+  datNguonDuLieu("mau");
+  dongManChao();
+  veDaiMau();
+}
+window.xemNongTraiMau = xemNongTraiMau;
+
+function batDauSoMoi(){
+  var gt = function(id){ var x = document.getElementById(id); return x ? x.value.trim() : ""; };
+  var ten = gt("mcTen"), tenLo = gt("mcLo"), cay = gt("mcCay").toLowerCase(), giong = gt("mcGiong");
+  var dt = parseFloat(gt("mcDt")) || 0, tinh = DS_TINH_THANH_THOI_TIET[parseInt(gt("mcTinh"), 10) || 0];
+  if(!tenLo || !cay){ showToast("Nhập tên lô và cây trồng để bắt đầu", "warning"); return; }
+  if(nguonDuLieu() === "cua_toi" && (THUA.length || so.length) && !confirm("Xoá sổ hiện tại trên máy này và tạo sổ mới?")) return;
+
+  THUA = [{id: "lo" + Date.now(), ten: tenLo, cay: cay, giong: giong, dt: dt, dat: "", gd: "", ngaycay: 0}];
+  luuThua();
+  so = []; luu();
+  POLYS = []; savePoly();
+  var tenHo = ten || "Chủ hộ";
+  var chuCai = tenHo.split(/\s+/).filter(Boolean);
+  var p = JSON.parse(JSON.stringify(DEFAULT_USER_PROFILE));
+  Object.assign(p, {
+    hoTen: tenHo, biDanh: tenHo, vaiTro: "Chủ hộ",
+    avatar: ((chuCai[0] || "S")[0] + (chuCai.length > 1 ? chuCai[chuCai.length - 1][0] : "")).toUpperCase(),
+    sdt: "", email: "", maNongHo: "", tenTrangTrai: "", htx: "",
+    diaChi: (tinh ? tinh.ten.split("(")[0].replace(/^.*—\s*/, "").trim() : ""),
+    msvt: "", chungNhan: "", ngayCapChungNhan: "", hanChungNhan: "", coQuanCap: "",
+    thanhVien: [{id: "tv1", ten: tenHo, vaiTro: "Chủ hộ", sdt: "", phuTrach: "", laAdmin: true}],
+    thietBi: []
+  });
+  saveUserProfile(p, false);
+  thuaCur = THUA[0].id;
+  benhState.cay = cay;
+  datNguonDuLieu("cua_toi");
+  dongManChao();
+  if(tinh) try{ capNhatThoiTietLive(tinh.lat, tinh.lon, tinh.ten); }catch(e){}
+  cur = "tongquan";
+  veNav(); ve(); veDaiMau();
+  showToast("📒 Đã tạo sổ. Bấm các nút ghi nhanh mỗi khi làm việc ngoài đồng.", "success");
+}
+window.batDauSoMoi = batDauSoMoi;
+
+function kiemTraLanDau(){
+  if(nguonDuLieu()) { veDaiMau(); return; }
+  var coDL = false;
+  try{ coDL = !!(localStorage.getItem("so-ruong-v3") || localStorage.getItem(THUA_KEY)); }catch(e){}
+  if(coDL){ datNguonDuLieu("mau"); veDaiMau(); return; }   // máy đã dùng thử trước đây: toàn số liệu mẫu
+  moManChao(1);
+}
+
 veNav();ve();
+try{ kiemTraLanDau(); }catch(e){}
 
 // Tự động đồng bộ thời tiết live thời gian thực từ Open-Meteo & NCHMF
 try {
@@ -11413,6 +11555,7 @@ fetch("du-lieu-app.json")
   .then(function(j){D=j;veNav();ve()})
   .catch(function(e){
     console.warn("Chưa nạp được du-lieu-app.json:",e);
+    try{ showToast("Không tải được danh mục thuốc — kiểm tra mạng rồi mở lại app. Tra thuốc và cảnh báo thuốc cấm tạm thời chưa dùng được.", "error"); }catch(e2){}
   });
 
 })();
