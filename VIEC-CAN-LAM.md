@@ -27,7 +27,8 @@ tay gửi Zalo. Một HTX gật đầu là có ngay vài chục hộ dùng.
 
 | Chức năng | Trạng thái |
 |---|---|
-| Đồng hồ đếm ngược ngày được gặt | Xong. PHI do người dùng nhập từ nhãn |
+| Đồng hồ đếm ngược ngày được gặt | Xong. PHI do người dùng nhập từ nhãn. Từ 24/09: cà phê/tiêu/sầu riêng chỉ cảnh báo khi chồng mùa thu hoạch; cao su nhắc ngày vào cạo |
+| Nút "🌸 Cây ra hoa" → ước tính mùa thu hoạch | Xong 24/09. Số ngày từ ra hoa tới chín **cần thẩm định** |
 | Lịch cách ly theo thửa (biểu đồ) | Xong |
 | Tra bệnh: cây → dịch hại → thuốc → ghi sổ | Xong, **dữ liệu thật** 5.914 thuốc / 345 cây / 488 dịch hại |
 | Chặn hoạt chất cấm | Xong, 33 hoạt chất theo Phụ lục II |
@@ -186,6 +187,7 @@ Ghi ra đây để sau này không ai lôi lại.
 ## 7. Mốc gần nhất
 
 24/09/2026: xong đợt sửa lỗi sau bản viết lại của Antigravity (chi tiết `BAN-GIAO.md` mục 6).
+24/09/2026: cách ly theo loại cây + nút ra hoa. Việc tiếp theo đã thống nhất với Đức: sửa tràn màn hình điện thoại (mọi trang rộng 489–900px trên màn 390px), bỏ số bịa còn lại (đại lý giả quanh ruộng thật, % tương đồng, bảng NPK, huy hiệu xác thực, DRC/Brix), tách rau màu khỏi lúa, rút menu Bình thường còn 4 mục.
 
 Mục 2.1 đã xong phần danh mục. Việc đáng làm tiếp, theo thứ tự:
 

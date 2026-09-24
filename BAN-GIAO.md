@@ -330,6 +330,9 @@ nhắc đọc PHI trên nhãn, hiện ở cả hai chế độ.
   "chính hãng" — và mọi thay đổi trong `du-lieu-app.json` (so với `git show`).
 - **16. Nhánh theo loại cây là chỗ lỗi an toàn trốn.** Cứ thấy
   `if(cType === ...)` là phải hỏi: nhánh này có còn hiện ngày cách ly không?
+- **18. Nút chết không làm máy kiểm tra báo lỗi.** Bấm thử tự động chỉ bắt
+  lỗi ném ra; nút không có code xử lý thì im lặng. Thêm nút mới phải bấm thử
+  và kiểm **kết quả** (form mở, dòng nhật ký xuất hiện), không chỉ "không lỗi".
 - **17. Heredoc bash trên Windows làm hỏng chữ "ì, á"** khi đưa vào Python →
   chạy `PYTHONUTF8=1 python - <<'PY'` hoặc ghi script ra file.
 
@@ -349,6 +352,41 @@ Một file `index.html`, JS thuần, không build. Nạp `du-lieu-app.json` lúc
 Bốn lô mẫu: lúa, cà phê, cao su, sầu riêng Ri6. Hai chế độ giao diện: Bình thường (mặc định) và Chuyên nghiệp.
 
 Lưu dữ liệu: `localStorage`. Chưa có tài khoản, chưa có máy chủ.
+
+### Cách ly theo loại cây (thêm 24/09/2026)
+
+Mọi chỗ hiện cách ly gọi **một hàm `danhGiaCachLy(th)`** — đừng tự tính lại
+bằng `tt()` ở chỗ mới.
+
+| Kiểu | Cây | Cảnh báo khi nào |
+|---|---|---|
+| `lientuc` | lúa, rau màu, chè, cây ăn trái chưa có bảng | Còn ngày cách ly là cảnh báo (như cũ) |
+| `theomua` | cà phê, hồ tiêu, sầu riêng | Chỉ khi ngày hết cách ly **chồng vào** khoảng thu hoạch |
+| `caosu` | cao su | Không đếm thu hoạch (mủ không phải thực phẩm); nhắc ngày vào vườn cạo |
+
+Khoảng thu hoạch lấy theo thứ tự: ngày người dùng tự đặt (`THUA[].thuHoachTu`)
+→ ngày ghi "🌸 Ra hoa" (`so[].loai === "Ra hoa"`) cộng bảng `HOA_DEN_CHIN`
+→ mùa thường gặp `MUA_THUONG_GAP`. **Thiếu cả ba thì cảnh báo như `lientuc`**
+— thiếu thông tin thì nghiêng về an toàn.
+
+Nguồn số ngày từ ra hoa tới chín (tra 24/09/2026, **toàn trang doanh nghiệp /
+nhà vườn, chưa phải tài liệu khuyến nông chính thức — cần thẩm định**):
+
+| Cây | Số ngày | Nguồn |
+|---|---|---|
+| Cà phê vối | 270–330 (9–11 tháng) | simexcodl.com.vn/vong-doi-cua-cay-ca-phe |
+| Cà phê chè | 210–270 (7–9 tháng) | như trên |
+| Hồ tiêu | 240–300 (8–10 tháng) | rttc.hcmuaf.edu.vn/rttc-8142-1/vn/-cay-tieu.html |
+| Sầu riêng Ri6 | 95–115 | thegioicaygiong.com, nghiepnong.com |
+| Sầu riêng Monthong | 120–135 | như trên |
+| Mùa cà phê vối | tháng 10–12 (Tây Nguyên) | simexcodl.com.vn/mua-thu-hoach-ca-phe-vao-thang-nao |
+| Mùa hồ tiêu | tháng 2–3 | rttc.hcmuaf.edu.vn |
+
+Cà phê chè chưa có nguồn cho mùa thu hoạch → không có mặc định, cần ghi ra hoa.
+
+**Nút ghi nhanh / nút trên thẻ lô** đều gọi `moFormGhiNhanh(thuaId, MAU_GHI_NHANH[x])`
+— mở form nhật ký điền sẵn, người dùng tự nhập vật tư. Trước 24/09: 4 nút ghi
+nhanh không có code xử lý; nút trên thẻ ghi thẳng số viết sẵn vào nhật ký.
 
 ### Quyết định thiết kế cố ý
 
