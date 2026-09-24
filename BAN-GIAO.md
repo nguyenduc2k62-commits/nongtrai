@@ -1,6 +1,6 @@
 # Bàn giao — dự án Sổ Ruộng
 
-Viết ngày 22/09/2026, để một phiên làm việc mới đọc và tiếp tục được ngay mà
+Viết ngày 22/09/2026, cập nhật 24/09/2026 (mục 6: đợt sửa lỗi). Để một phiên làm việc mới đọc và tiếp tục được ngay mà
 không cần hỏi lại.
 
 ---
@@ -290,20 +290,63 @@ từng bản, gộp vào một trang HTML so sánh. Anh chọn bằng mắt nhan
 > **Bài học:** đừng `git add -A` khi không biết chắc từ lần commit trước tới
 > giờ còn ai đụng vào thư mục. Dùng `git status` rồi add từng đường dẫn.
 
+### Đợt sửa lỗi 24/09/2026 (sau 27 commit của Antigravity ngày 23/09)
+
+Kiểm bằng cách bấm tự động toàn bộ ~295 nút trên 9 trang, ở cả hai chế độ
+giao diện, rồi chụp màn hình soát bằng mắt. Sau khi sửa: **0 lỗi**.
+
+**Lỗi làm sập trang:** Tổng quan trắng ở chế độ Bình thường (`dmy()` nhận
+timestamp số); "nhật ký gần nhất" lấy 4 bài *cũ nhất*; hàm `ring`, `dongModal`
+khai báo hai lần; Sao lưu gọi biến `GIA_THI_TRUONG` không tồn tại; Mô phỏng đọc
+trường `npkLyTuong` không có; bản đồ `flyTo` trên map cũ đã bị gỡ khỏi trang
+→ Leaflet ném `Invalid LatLng (NaN, NaN)` (giờ chặn bằng `banDoDungDuoc()`).
+
+**Lỗi sai thông tin thuốc — nặng nhất:**
+- Tổng quan chỉ đếm cách ly cho cây lương thực → lô cà phê/sầu riêng/cao su
+  vừa xịt vẫn hiện **"An toàn thu hoạch"**, thẻ lô ghi cứng "đã qua thời kỳ
+  phân giải an toàn", "dư lượng 0 ppm, đủ chuẩn xuất khẩu". Giờ mọi lô đều
+  tính theo `tt()`; bỏ hết câu "0 ppm" (app không đo được dư lượng).
+- "AI Vision" chỉ đọc **tên file**; không khớp thì luôn trả "Cà phê – Rỉ sắt,
+  96% tin cậy" và báo đỏ "sai loại cây" khi người dùng chọn Lúa. Giờ trả `null`,
+  bảo người dùng tự chọn cây; bỏ % bịa; đổi nhãn thành "Đoán theo tên file ảnh".
+- Danh mục bị sửa tay "Ababetter 5EC" → "3.6 EC" (Thông tư ghi 5EC), và một
+  đoạn code **tự sửa nhật ký người dùng** sang tên mới mỗi lần mở app. Đã dựng
+  lại `du-lieu-app.json` từ pipeline, bỏ đoạn tự sửa.
+- Ảnh thuốc khớp theo mẩu chữ: "Anvilando" nhận ảnh Anvil, "Amistar 250SC"
+  nhận ảnh Amistar Top, "BM super COC" nhận ảnh Curenox. Giờ khớp theo **phần
+  đầu tên**. Đã soát 23 ảnh bằng mắt: 20 đúng nhãn, bỏ `ababetter.jpg` (chai
+  3.6EC, không tìm được ảnh 5EC) và `regent.jpg` (không có trong danh mục).
+- 35 ký tự font Symbol trong PDF (α, β, Ω, ®) bị đọc thành U+F0xx, hiện ô
+  vuông ("Tervigo 020SC"). Sửa trong `dung-du-lieu-app.py` (`sua_font_symbol`).
+
+**Nội dung gây hiểu nhầm:** nút "Làm mới giá" cộng số ngẫu nhiên rồi báo "đồng
+bộ trực tiếp từ 5 sàn" → bỏ; tiêu đề giá "Realtime 30p-1h" → "Giá tham khảo nhập
+sẵn"; băng cảnh báo bị thay bằng quảng cáo ("AI 100%", "Realtime") → trả lại lời
+nhắc đọc PHI trên nhãn, hiện ở cả hai chế độ.
+
+**Bẫy rút ra:**
+- **15. Công cụ khác sẽ bịa cho đẹp.** Mỗi lần có người/công cụ khác sửa
+  `index.html`, soát riêng mọi chữ "AI", "%", "realtime", "trực tiếp", "0 ppm",
+  "chính hãng" — và mọi thay đổi trong `du-lieu-app.json` (so với `git show`).
+- **16. Nhánh theo loại cây là chỗ lỗi an toàn trốn.** Cứ thấy
+  `if(cType === ...)` là phải hỏi: nhánh này có còn hiện ngày cách ly không?
+- **17. Heredoc bash trên Windows làm hỏng chữ "ì, á"** khi đưa vào Python →
+  chạy `PYTHONUTF8=1 python - <<'PY'` hoặc ghi script ra file.
+
 Một file `index.html`, JS thuần, không build. Nạp `du-lieu-app.json` lúc chạy.
 
 | Trang | Trạng thái |
 |---|---|
 | **Tổng quan** | Danh sách "cần chú ý" xếp theo mức gấp, mỗi thửa một đồng hồ riêng, khối "giao hàng được chưa", biểu đồ lịch cách ly |
 | **Thửa ruộng** | Bảng việc theo từng thửa |
-| **Tra bệnh** | 4 bước: cây → dịch hại → thuốc → ghi sổ. **Dữ liệu thật.** Chặn hoạt chất cấm, hiện ngưỡng MRL, nhập PHI từ nhãn |
+| **Tra bệnh** | 4 bước: cây → dịch hại → thuốc → ghi sổ. **Dữ liệu thật.** Chặn hoạt chất cấm, hiện ngưỡng MRL, nhập PHI từ nhãn. Có tải ảnh, nhưng chỉ *đoán theo tên file* — chưa nhìn được ảnh |
 | **Nhật ký** | Bảng đầy đủ, xuất hồ sơ (mã QR còn là ô trống) |
-| **Pha thuốc** | Tìm trong 5.914 thuốc thật, 4 quy tắc tương kỵ |
+| **Pha thuốc** | Tìm trong 5.914 thuốc thật, 4 quy tắc tương kỵ. 20 thuốc có ảnh bao bì đã soát (ghi là ảnh minh hoạ) |
 | **Điểm bán** | Sơ đồ vẽ tay, chưa phải bản đồ thật |
-| **Giá thị trường** | Dữ liệu mẫu |
+| **Giá thị trường** | Dữ liệu mẫu nhập sẵn, trang ghi rõ "chưa tự cập nhật" |
 | **Mô phỏng** | Cellular automata trên canvas — đồ trình diễn |
 
-Ba thửa mẫu: Đồng Bưng (lúa), Ruộng Trên (lúa), Vườn Cà phê (cà phê).
+Bốn lô mẫu: lúa, cà phê, cao su, sầu riêng Ri6. Hai chế độ giao diện: Bình thường (mặc định) và Chuyên nghiệp.
 
 Lưu dữ liệu: `localStorage`. Chưa có tài khoản, chưa có máy chủ.
 

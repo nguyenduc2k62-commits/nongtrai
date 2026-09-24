@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sổ Ruộng — nhật ký canh tác & quản lý lô đất</title>
-<meta name="description" content="Quản lý lô đất, nhật ký canh tác, AI tra bệnh, giá thị trường realtime, pha thuốc và mô phỏng sinh thái đồng ruộng.">
+<meta name="description" content="Quản lý lô đất, nhật ký canh tác, đếm ngày cách ly thuốc, tra bệnh, tra thuốc BVTV theo danh mục nhà nước, pha thuốc và mô phỏng đồng ruộng.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -622,7 +622,7 @@ body.mode-binhthuong .nav-g{
               <span>💎 Chuyên nghiệp</span>
             </button>
           </div>
-          <button type="button" data-go="benh" class="btn btn-p">🔍 Tra bệnh AI</button>
+          <button type="button" data-go="benh" class="btn btn-p">🔍 Tra bệnh</button>
           <button type="button" data-go="pha" class="btn">🧪 Pha thuốc</button>
           <button type="button" id="btnHeaderProfile" class="btn" style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:10px" title="Hồ sơ nông hộ & Cài đặt tài khoản">
             <span class="sb-avatar" style="width:24px;height:24px;font-size:.7rem;box-shadow:none" id="headerAvatarText">ND</span>
@@ -635,7 +635,7 @@ body.mode-binhthuong .nav-g{
     <div class="content">
       <div class="warn-banner" id="topWarnBanner">
         <svg style="width:1.2em;height:1.2em;flex-shrink:0;color:var(--wait)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <p style="margin:0" id="topWarnBannerText"><b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu thật 100%, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Hệ sinh thái đồng ruộng mô phỏng hạt sinh học.</p>
+        <p style="margin:0" id="topWarnBannerText"><b>Thời gian cách ly (PHI) không có sẵn trong app</b> — đọc trên nhãn từng thuốc rồi tự nhập. Gợi ý bệnh, pha thuốc và giá chỉ để tham khảo; thuốc cấm và tên thuốc lấy từ Thông tư 75/2025 &amp; 28/2026.</p>
       </div>
       <main id="page"></main>
     </div>
@@ -719,9 +719,9 @@ var PHI=(function(){try{return JSON.parse(localStorage.getItem(PHI_KEY))||{}}cat
 function luuPhi(){try{localStorage.setItem(PHI_KEY,JSON.stringify(PHI))}catch(e){}}
 
 var KEY="so-ruong-v3";
-var so=(function(){try{var r=localStorage.getItem(KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v)){for(var i=0;i<v.length;i++){if(v[i].thuoc==="Ababetter 5EC"){v[i].thuoc="Ababetter 3.6 EC";v[i].lieu="Abamectin 36g/l · Lúa"}}return v}}}catch(e){}
+var so=(function(){try{var r=localStorage.getItem(KEY);if(r){var v=JSON.parse(r);if(Array.isArray(v))return v}}catch(e){}
   return [
-    {id:"s1", thua:"thua1", ngay:Date.now()-864e5*4, viec:"Xịt trừ sâu cuốn lá", thuoc:"Ababetter 3.6 EC", lieu:"Abamectin 36g/l · Lúa", phi:7},
+    {id:"s1", thua:"thua1", ngay:Date.now()-864e5*4, viec:"Xịt trừ sâu cuốn lá", thuoc:"Ababetter 5EC", lieu:"Abamectin 50g/l · Lúa", phi:7},
     {id:"s2", thua:"thua2", ngay:Date.now()-864e5*12, viec:"Tưới trừ tuyến trùng rễ", thuoc:"Tervigo 020SC", lieu:"Abamectin · Cà phê", phi:14}
   ];
 })();
@@ -732,8 +732,17 @@ function sod(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
 function addD(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
 function dif(a,b){return Math.round((sod(b)-sod(a))/864e5)}
 function p2(n){return n<10?"0"+n:""+n}
-function dmy(d){return p2(d.getDate())+"/"+p2(d.getMonth()+1)+"/"+d.getFullYear()}
-function dm(d){return p2(d.getDate())+"/"+p2(d.getMonth()+1)}
+/* Nhật ký lưu ngày dạng SỐ (timestamp), nhưng nhiều chỗ gọi dmy(r.ngay) quên
+   bọc new Date(). Nhận cả số, chuỗi lẫn Date để một chỗ quên không làm sập
+   cả trang — trang Tổng quan ở chế độ Bình thường (mặc định) từng trắng
+   trơn vì đúng lỗi này. Ngày hỏng thì trả "—" thay vì ném lỗi. */
+function laDate(d){
+  if(d instanceof Date)return d;
+  var x=new Date(d);
+  return isNaN(x.getTime())?null:x;
+}
+function dmy(d){d=laDate(d);return d?p2(d.getDate())+"/"+p2(d.getMonth()+1)+"/"+d.getFullYear():"—"}
+function dm(d){d=laDate(d);return d?p2(d.getDate())+"/"+p2(d.getMonth()+1):"—"}
 function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function vnd(n){return Number(n||0).toLocaleString("vi-VN")}
 function byId(a,id){for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
@@ -824,11 +833,11 @@ window.dongModal = dongModal;
 var PAGES=[
   {id:"tongquan", ten:"Tổng quan", sub:"Trung tâm điều hành nông trại · Vận hành đa cây trồng theo niên vụ & chu kỳ sinh học", g:1},
   {id:"thua", ten:"Lô đất", sub:"Bản đồ vệ tinh · Định vị GPS · Vẽ phân khu canh tác", g:1},
-  {id:"benh", ten:"Tra bệnh AI", sub:"AI Vision Scanner · Đối chiếu ảnh mẫu · Kê đơn Thông tư 75", g:1},
+  {id:"benh", ten:"Tra bệnh", sub:"Chọn triệu chứng · Đối chiếu ảnh mẫu · Thuốc theo Thông tư 75", g:1},
   {id:"so", ten:"Nhật ký canh tác", sub:"Toàn bộ việc đã làm · Lịch cách ly · Xuất mã QR hồ sơ", g:1},
   {id:"pha", ten:"Pha thuốc", sub:"Hình ảnh bình thuốc · Tương thích Cây & Đất · Dẫn chứng khoa học", g:2},
   {id:"bando", ten:"Điểm bán quanh vùng", sub:"Bản đồ đại lý VTNN · SĐT · Facebook · Google Maps", g:2},
-  {id:"gia", ten:"Giá thị trường", sub:"Realtime 30p-1h · 100% Nông sản · Đối soát web uy tín", g:2},
+  {id:"gia", ten:"Giá thị trường", sub:"Giá tham khảo nhập sẵn · Hỏi lại giá thật trước khi bán", g:2},
   {id:"mophong", ten:"Hệ sinh thái đồng ruộng", sub:"Mô phỏng sinh thái học đất & rễ cây (Cellular Automata) · Sinh trưởng thực vật", g:3},
   {id:"taikhoan", ten:"Hồ sơ & Tài khoản", sub:"Thông tin nông hộ · Sổ theo dõi mã vùng trồng · Quản lý nhân sự & Dữ liệu", g:2}
 ];
@@ -1071,7 +1080,7 @@ function xuatDuLieuJSON(){
     thua: THUA,
     polys: POLYS,
     nhatKy: so,
-    giaThiTruong: GIA_THI_TRUONG
+    giaThiTruong: typeof DANH_SACH_CAY_GIA !== "undefined" ? DANH_SACH_CAY_GIA : null
   };
   var str = JSON.stringify(backupData, null, 2);
   var blob = new Blob([str], { type: "application/json" });
@@ -1855,9 +1864,9 @@ function setUiMode(mode){
   var bannerText = document.getElementById("topWarnBannerText");
   if(bannerText){
     if(uiMode === "binhthuong"){
-      bannerText.innerHTML = "<b>🌾 Sổ Ruộng Nhà Nông.</b> Quản lý mùa vụ đơn giản, dễ nhớ: xem thời tiết hôm nay, bấm 1 chạm ghi tưới bón xịt thuốc, và tra nhanh bệnh cây trồng.";
+      bannerText.innerHTML = "<b>Nhớ đọc nhãn thuốc:</b> số ngày cách ly phải lấy trên chai/gói thuốc rồi nhập vào. Gợi ý bệnh và giá chỉ để tham khảo.";
     } else {
-      bannerText.innerHTML = "<b>Ứng dụng Sổ Ruộng Thông Minh.</b> Dữ liệu thuốc BVTV thật từ Thông tư 75/2025 & sửa đổi 28/2026. Hỗ trợ đầy đủ: Vẽ ranh giới lô đất & GPS, Chẩn đoán bệnh AI + đối chiếu ảnh mẫu thật 100%, Điểm bán vật tư đồng bộ, Giá thị trường Realtime đối soát đa nguồn, Pha thuốc tương thích Cây & Đất có dẫn chứng khoa học, và Hệ sinh thái đồng ruộng mô phỏng hạt sinh học.";
+      bannerText.innerHTML = "<b>Thời gian cách ly (PHI) không có sẵn trong app</b> — đọc trên nhãn từng thuốc rồi tự nhập. Gợi ý bệnh, pha thuốc và giá chỉ để tham khảo; thuốc cấm và tên thuốc lấy từ Thông tư 75/2025 &amp; 28/2026.";
     }
   }
 
@@ -2401,6 +2410,10 @@ function renderDanhSachThuaBinhThuong(){
         ? '<span style="color:#d97706;font-weight:700">⏳ Đang cách ly thuốc: Còn ' + s.con + ' ngày nữa mới được gặt</span>'
         : '<span style="color:#15803d;font-weight:700">🌾 Đã an toàn gặt lúa! (Hết thời gian cách ly thuốc)</span>';
     }
+    // Cây nào đang trong thời gian cách ly cũng phải thấy cảnh báo này trước tiên
+    if(w && cType !== "luongthuc"){
+      trangThaiNhanh = '<div style="color:#d97706;font-weight:700;margin-bottom:4px">⏳ Đang cách ly thuốc: còn ' + s.con + ' ngày, thu hoạch từ ngày ' + dmy(s.het) + '</div>' + trangThaiNhanh;
+    }
 
     cards += '<div class="card" style="padding:18px;border-radius:14px;background:#ffffff;border:1.5px solid #bbf7d0;display:flex;flex-direction:column;justify-content:space-between;gap:12px">'
       + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'
@@ -2438,7 +2451,11 @@ function renderNhatKyGanNhatBinhThuong(){
     return '<div class="card" style="padding:18px;text-align:center;color:var(--muted-fg)">Chưa có nhật ký nào được ghi. Bà con bấm nút bên trên để ghi chép nhanh!</div>';
   }
   var rows = "";
-  var list = so.slice(-4).reverse();
+  // Lấy 4 việc MỚI NHẤT theo ngày. Bản cũ dùng slice(-4).reverse() trong khi
+  // nhật ký thêm mới bằng unshift (mới nhất ở đầu) — nên thực tế lấy ra 4
+  // việc CŨ NHẤT mà gọi là "gần nhất". Sắp theo ngày cho chắc, khỏi phụ
+  // thuộc thứ tự lưu.
+  var list = so.slice().sort(function(a,b){return (b.ngay||0)-(a.ngay||0)}).slice(0,4);
   for(var i=0; i<list.length; i++){
     var r = list[i];
     var th = byId(THUA, r.thua);
@@ -2471,11 +2488,9 @@ function pTong(){
     dt += THUA[i].dt;
     var cType = phanLoaiCayTrong(THUA[i].cay);
     cropTypesCount[cType] = (cropTypesCount[cType] || 0) + 1;
-    if(cType === "luongthuc"){
-      if(tt(THUA[i].id).con > 0) cho++; else ok++;
-    } else {
-      ok++;
-    }
+    // Mọi loại cây đều phải tính ngày cách ly. Trước đây chỉ cây lương thực
+    // được kiểm tra, nên lô cà phê vừa xịt thuốc vẫn bị đếm là "an toàn thu hoạch".
+    if(tt(THUA[i].id).con > 0) cho++; else ok++;
   }
 
   var isBt = (typeof uiMode !== "undefined" && uiMode === "binhthuong");
@@ -2570,6 +2585,9 @@ function pTong(){
     var w = s.con > 0;
 
     cards += '<div class="card" style="padding:20px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease" data-chothua="' + th.id + '">';
+    if(w && cType !== "luongthuc"){
+      cards += '<div style="margin-bottom:12px;padding:8px 12px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#b45309;font-size:.8rem;font-weight:700">⏳ Đang cách ly thuốc: còn ' + s.con + ' ngày · thu hoạch từ ngày ' + dmy(s.het) + '</div>';
+    }
 
     if(cType === "caosu"){
       var isTapDay = (i % 2 === 0);
@@ -2620,7 +2638,7 @@ function pTong(){
         + '<div style="display:flex;justify-content:space-between"><span>🌱 <b>Giai đoạn niên vụ:</b></span><b style="color:#047857">Nuôi nhân chắc hạt & Phân cành</b></div>'
         + '<div style="display:flex;justify-content:space-between"><span>💧 <b>Chu kỳ tưới mùa khô:</b></span><span>Đã tưới đợt 2 (Độ ẩm 62%)</span></div>'
         + '<div style="display:flex;justify-content:space-between"><span>🍒 <b>Dự kiến thu hoạch rộ:</b></span><b>Tháng 11/2026 (Hái chọn chín >90%)</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Dư lượng & An toàn:</b></span><span style="color:#10b981">Đã qua thời kỳ phân giải an toàn</span></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Cách ly thuốc:</b></span>' + (w ? '<span style="color:var(--wait)">Còn ' + s.con + ' ngày cách ly (từ ' + dmy(s.het) + ')</span>' : '<span style="color:#10b981">Đã qua thời gian cách ly ghi trên nhãn</span>') + '</div>'
         + '</div>'
         + '</div>'
 
@@ -2651,7 +2669,7 @@ function pTong(){
         + '<div style="display:flex;justify-content:space-between"><span>🍈 <b>Giai đoạn trái:</b></span><b style="color:#b45309">Nuôi trái non 65 ngày (Trái chạy gai)</b></div>'
         + '<div style="display:flex;justify-content:space-between"><span>🌿 <b>Tình trạng cơi đọt:</b></span><span>Cơi đọt 3 đã già lá lụa chống rụng trái</span></div>'
         + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Trọng lượng bình quân:</b></span><b>2.8 - 3.2 kg / trái (Dáng tròn đều)</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Kiểm soát dư lượng (MRL):</b></span><span style="color:#10b981">Dư lượng 0 ppm (Đủ chuẩn xuất khẩu)</span></div>'
+        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Cách ly thuốc:</b></span>' + (w ? '<span style="color:var(--wait)">Còn ' + s.con + ' ngày cách ly (từ ' + dmy(s.het) + ')</span>' : '<span style="color:#10b981">Đã qua thời gian cách ly ghi trên nhãn</span>') + '</div>'
         + '</div>'
         + '</div>'
 
@@ -2681,7 +2699,7 @@ function pTong(){
         + '<div style="display:flex;justify-content:space-between"><span>🌾 <b>Giai đoạn sinh trưởng:</b></span><b>' + esc(th.gd || "Làm đòng trổ bông") + '</b></div>'
         + '<div style="display:flex;justify-content:space-between"><span>💧 <b>Mực nước mặt ruộng:</b></span><span>Duy trì 3-5cm nước phù sa</span></div>'
         + (w ? '<div style="display:flex;justify-content:space-between;color:var(--wait)"><span>⏱️ <b>Thời điểm gặt an toàn:</b></span><b>Từ ngày ' + dmy(s.het) + '</b></div>'
-             : '<div style="display:flex;justify-content:space-between;color:#10b981"><span>✅ <b>Dư lượng BVTV:</b></span><b>0 ppm (Đã qua thời gian cách ly)</b></div>')
+             : '<div style="display:flex;justify-content:space-between;color:#10b981"><span>✅ <b>Cách ly thuốc:</b></span><b>Đã qua thời gian ghi trên nhãn</b></div>')
         + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Năng suất ước tính:</b></span><span>6.5 - 7.0 Tấn lúa tươi / ha</span></div>'
         + '</div>'
         + '</div>'
@@ -2691,7 +2709,7 @@ function pTong(){
         + '<button type="button" class="btn" data-go="benh" style="font-size:.74rem;padding:3px 9px">🛡️ Kê đơn phòng sâu bệnh</button>'
         + '</div>'
         + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
-        + '<span style="color:' + (w ? 'var(--wait)' : '#10b981') + ';font-weight:700">' + (w ? '⚠️ Đang trong thời gian phân giải thuốc an toàn' : '✓ Sẵn sàng thu hoạch xuất xưởng') + '</span>'
+        + '<span style="color:' + (w ? 'var(--wait)' : '#10b981') + ';font-weight:700">' + (w ? '⚠️ Đang trong thời gian cách ly thuốc' : '✓ Sẵn sàng thu hoạch xuất xưởng') + '</span>'
         + '<span style="color:var(--primary);font-weight:700">Xem chi tiết ruộng →</span>'
         + '</div>';
     }
@@ -2740,15 +2758,6 @@ function pTong(){
   return h;
 }
 
-function ring(days, max, r, sw){
-  var circ = 2 * Math.PI * r, pct = max > 0 ? Math.min(days / max, 1) : 0, off = circ * (1 - pct);
-  var col = days > 0 ? "#d97706" : "#16a34a";
-  return '<svg width="' + (2*r+sw+4) + '" height="' + (2*r+sw+4) + '" viewBox="0 0 ' + (2*r+sw+4) + ' ' + (2*r+sw+4) + '">'
-    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="var(--muted)" stroke-width="' + sw + '"/>'
-    + '<circle cx="' + (r+sw/2+2) + '" cy="' + (r+sw/2+2) + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" stroke-linecap="round"/>'
-    + '<text x="' + (r+sw/2+2) + '" y="' + (r+sw/2+6) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + col + '">' + days + '</text>'
-    + '</svg>';
-}
 window.ring = ring;
 
 function ringGauge(topLabel, centerVal, r, color){
@@ -2783,6 +2792,15 @@ function chLichDaCay(){
     // Plot Title
     s += '<text x="' + (pL - 12) + '" y="' + (cy + 4) + '" text-anchor="end" font-size="11.5" font-weight="700" fill="var(--fg)">' + esc(th.ten) + '</text>';
     s += '<line x1="' + pL + '" y1="' + cy + '" x2="' + (W - pR) + '" y2="' + cy + '" stroke="var(--border)" stroke-width="1"/>';
+
+    // Lô nào đang cách ly thì thanh cách ly phải hiện, bất kể loại cây
+    var stPhi = tt(th.id);
+    if(stPhi.con > 0 && stPhi.ng && cType !== "luongthuc"){
+      var px1 = X(sod(new Date(stPhi.ng.ngay))), px2 = X(stPhi.het);
+      s += '<rect x="' + px1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + Math.max(6, px2 - px1).toFixed(1) + '" height="14" rx="4" fill="#d97706"/>';
+      s += '<text x="' + (px2 + 8).toFixed(1) + '" y="' + (cy + 4) + '" font-size="10" font-weight="700" fill="#d97706">còn ' + stPhi.con + ' ngày cách ly (' + dm(stPhi.het) + ')</text>';
+      continue;
+    }
 
     if(cType === "caosu"){
       // Rubber timeline: Tapping cycles (Cạo mủ xen kẽ D3)
@@ -2928,8 +2946,22 @@ function dongBoDienTichThua(thuaId){
 }
 window.dongBoDienTichThua = dongBoDienTichThua;
 
+// Bản đồ chỉ di chuyển được khi khung của nó còn trên trang và có kích thước.
+// Trang vẽ lại (đổi tab, bấm thẻ lô) sẽ gỡ khung cũ nhưng mapInst vẫn trỏ tới
+// bản đồ cũ; gọi flyTo lúc đó làm Leaflet ném "Invalid LatLng (NaN, NaN)".
+function banDoDungDuoc(m){
+  if(!m) return false;
+  try{
+    var c = m.getContainer();
+    if(!c || !document.body.contains(c)) return false;
+    m.invalidateSize(false);
+    var s = m.getSize();
+    return s.x > 0 && s.y > 0;
+  }catch(e){ return false; }
+}
+
 function chonVaBayToiLoiDat(thuaId){
-  if(!mapInst) return;
+  if(!banDoDungDuoc(mapInst)) return;
   var thObj = byId(THUA, thuaId);
   var plotPolys = getPolysOfThua(thuaId);
 
@@ -3791,7 +3823,7 @@ function changeFarmPreset(presetId){
   for(var i = 0; i < FARM_PRESETS.length; i++){
     if(FARM_PRESETS[i].id === presetId){ found = FARM_PRESETS[i]; break; }
   }
-  if(found && mapInst){
+  if(found && banDoDungDuoc(mapInst)){
     mapInst.flyTo([found.lat, found.lng], found.zoom, { animate: true, duration: 1.2 });
     setFarmCenter(found.lat, found.lng, found.ten);
   }
@@ -4180,7 +4212,7 @@ window.onThemThuaSelectChange = onThemThuaSelectChange;
 window.pickCropForThemThua = pickCropForThemThua;
 window.xacNhanThemThuaMoi = xacNhanThemThuaMoi;
 
-function dongModal(id){ var el=document.getElementById(id); if(el) el.style.display="none"; }
+/* dongModal đã khai báo ở phần tiện ích phía trên — bản trùng ở đây đã bỏ. */
 window.dongModal=dongModal;
 
 function thucHienXoaThua(){
@@ -4673,7 +4705,6 @@ function nhanDienLoaiCayTuAnh(imgSrc, fileName){
       tenCay: bestMatch.ten,
       icon: bestMatch.icon,
       tenKhoaHoc: bestMatch.tenKhoaHoc,
-      doTinCay: Math.min(99, 88 + Math.min(10, Math.round(bestScore / 6))),
       benhChinh: bestMatch.benhChinh,
       tenBenh: bestMatch.tenBenh,
       sciBenh: bestMatch.sciBenh,
@@ -4682,20 +4713,9 @@ function nhanDienLoaiCayTuAnh(imgSrc, fileName){
     };
   }
 
-  // Fallback: Default signature detection for coffee leaf rust
-  return {
-    matched: true,
-    cayId: "cà phê",
-    tenCay: "Cà phê",
-    icon: "☕",
-    tenKhoaHoc: "Coffea canephora (Robusta)",
-    doTinCay: 96,
-    benhChinh: "caphe_ri_sat",
-    tenBenh: "Bệnh Rỉ sắt cà phê",
-    sciBenh: "Hemileia vastatrix",
-    dacDiemLa: "Phiến lá hình bầu dục thon nhọn hai đầu, mép lượn sóng nhẹ, gân đối xứng, bề mặt lá xanh bóng đậm. Khác hoàn toàn với lá sầu riêng (mặt dưới lá sầu riêng luôn có lớp vảy lông tơ màu vàng đồng ánh kim lấp lánh).",
-    dauHieuBenh: "Các ổ nấm bột phấn màu vàng cam / rỉ sắt phân bố ở mặt dưới lá là triệu chứng đặc hữu 100% của nấm Hemileia vastatrix gây ra Bệnh Rỉ Sắt Cà Phê."
-  };
+  // Tên file không chứa tên cây nào -> không đoán. Trước đây nhánh này luôn
+  // trả "Cà phê – Rỉ sắt, 96% tin cậy" cho mọi ảnh, kể cả ảnh lá lúa tên IMG_1234.jpg.
+  return null;
 }
 
 function napFileAnhBenh(f){
@@ -4929,8 +4949,8 @@ function pBenh(){
             var aiDet = benhState.detectedPlant || nhanDienLoaiCayTuAnh(benhState.capturedImg, benhState.capturedName);
             if(!aiDet) return '';
             return '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.12);border:1.5px solid #10b981;border-radius:20px;padding:4px 14px;font-size:.76rem;color:#065f46">'
-              + '<span>🤖 <b>AI Vision nhận diện lá:</b></span>'
-              + '<span style="font-weight:700;color:#047857">' + aiDet.icon + ' Cây ' + esc(aiDet.tenCay) + ' (' + aiDet.doTinCay + '% tin cậy)</span>'
+              + '<span>📄 <b>Tên file ảnh gợi ý:</b></span>'
+              + '<span style="font-weight:700;color:#047857">' + aiDet.icon + ' Cây ' + esc(aiDet.tenCay) + '</span>'
               + '<span style="color:#059669">· Triệu chứng: ' + esc(aiDet.tenBenh) + '</span>'
               + '</div>';
           })()
@@ -4939,7 +4959,7 @@ function pBenh(){
         + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;font-size:.85rem">'
         + '<span style="font-weight:600;color:var(--muted-fg)">Cây trồng:</span>'
         + '<select id="selCayKhiUpload" style="padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid var(--border);background:var(--bg)">'
-        + '<option value="tudong">🤖 Tự động nhận diện (AI Vision)</option>';
+        + '<option value="tudong">📄 Đoán theo tên file ảnh</option>';
       for(var g = 0; g < DANH_MUC_CAY_BENH.length; g++){
         var grp = DANH_MUC_CAY_BENH[g];
         h += '<optgroup label="' + esc(grp.nhom) + '">';
@@ -5021,7 +5041,7 @@ function pBenh(){
   if(!benhState.ketQuaAI)chayChuanDoanAI();
 
   var kq=benhState.ketQuaAI;
-  var kqHtml='<div id="ketQuaStep4" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:12px">Bước 4: Kết quả gợi ý AI & Đối chiếu ảnh mẫu thực tế</div>';
+  var kqHtml='<div id="ketQuaStep4" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-fg);margin-bottom:12px">Bước 4: Kết quả gợi ý & Đối chiếu ảnh mẫu thực tế</div>';
 
   // 1. CẢNH BÁO PHÁT HIỆN SAI LỆCH LOÀI CÂY TRỒNG (Ảnh lá Cà phê nhưng chọn Cây Sầu riêng)
   if(benhState.aiMismatch && !benhState.overrideMismatch){
@@ -5032,23 +5052,22 @@ function pBenh(){
       + '<span style="font-size:2.2rem;line-height:1">⚠️</span>'
       + '<div style="flex:1">'
       + '<div style="font-size:1.05rem;font-weight:800;color:#991b1b;display:flex;align-items:center;flex-wrap:wrap;gap:8px">'
-      + '<span>CẢNH BÁO AI VISION: PHÁT HIỆN SAI LOẠI CÂY TRỒNG!</span>'
-      + '<span style="font-size:.72rem;background:#ef4444;color:#fff;padding:2px 8px;border-radius:12px;font-weight:700">' + misDet.doTinCay + '% TIN CẬY</span>'
+      + '<span>Kiểm tra lại loại cây trồng</span>'
       + '</div>'
       + '<div style="font-size:.9rem;color:#7f1d1d;margin-top:6px;line-height:1.55">'
-      + 'Hệ thống AI quét quang học phát hiện hình ảnh bạn tải lên là <b>Lá Cây ' + esc(misDet.tenCay) + '</b> chứ <b>KHÔNG PHẢI Cây ' + esc(userCropName).toUpperCase() + '</b> như bạn đang chọn ở mục trên!'
+      + 'Tên file ảnh (<b>' + esc(benhState.capturedName || '') + '</b>) gợi ý đây là <b>Cây ' + esc(misDet.tenCay) + '</b>, khác với cây bạn chọn (<b>' + esc(userCropName) + '</b>). App chưa tự nhìn được nội dung ảnh, nên hãy tự xem lại.'
       + '</div>'
       + '<div style="margin-top:12px;background:#ffffff;border:1.5px solid #fecaca;border-radius:10px;padding:14px;font-size:.84rem;color:#374151;line-height:1.6">'
-      + '<div style="font-weight:800;color:#991b1b;margin-bottom:6px">🔬 Căn cứ đối chiếu hình thái sinh học thực vật từ ảnh:</div>'
-      + '<div>• <b>Đặc điểm hình thái phiến lá Cà phê:</b> ' + esc(misDet.dacDiemLa) + '</div>'
-      + '<div style="margin-top:6px">• <b>Triệu chứng vết bệnh thực tế:</b> ' + esc(misDet.dauHieuBenh) + '</div>'
+      + '<div style="font-weight:800;color:#991b1b;margin-bottom:6px">🔬 Đặc điểm để tự đối chiếu với ảnh của bạn:</div>'
+      + '<div>• <b>Lá Cây ' + esc(misDet.tenCay) + ':</b> ' + esc(misDet.dacDiemLa) + '</div>'
+      + '<div style="margin-top:6px">• <b>Triệu chứng ' + esc(misDet.tenBenh) + ':</b> ' + esc(misDet.dauHieuBenh) + '</div>'
       + '</div>'
       + '<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">'
       + '<button type="button" id="btnChuyenDungCayAi" class="btn btn-p" style="background:#059669;border-color:#059669;font-weight:800;font-size:.92rem;padding:10px 24px;border-radius:10px;box-shadow:0 3px 12px rgba(5,150,105,.35);cursor:pointer">'
-      + '👉 Chuyển ngay sang Cây ' + esc(misDet.tenCay) + ' & Xem ' + esc(misDet.tenBenh) + ' (Khuyên dùng)'
+      + '👉 Chuyển ngay sang Cây ' + esc(misDet.tenCay) + ' & Xem ' + esc(misDet.tenBenh)
       + '</button>'
       + '<button type="button" id="btnGiuNguyenCay" class="btn" style="font-size:.82rem;color:var(--muted-fg);cursor:pointer">'
-      + 'Vẫn muốn xem theo Cây ' + esc(userCropName) + ' (Độ chính xác sẽ thấp)'
+      + 'Giữ Cây ' + esc(userCropName) + ' (tôi chắc chắn)'
       + '</button>'
       + '</div>'
       + '</div></div></div>';
@@ -5121,7 +5140,7 @@ function pBenh(){
         +'</div></div></div>';
     }
   }
-  h+=sec("Chẩn đoán AI & Ảnh mẫu đối chiếu",card('<div style="padding:20px">'+kqHtml+'</div>'));
+  h+=sec("Bệnh gợi ý & Ảnh mẫu đối chiếu",card('<div style="padding:20px">'+kqHtml+'</div>'));
 
   /* BƯỚC 5: KÊ ĐƠN THUỐC ĐẶC TRỊ & GHI VÀO SỔ */
   if(benhState.benhChon){
@@ -5243,7 +5262,7 @@ var DAI_LY=[
   {id:1, ten:"Đại lý VTNN Ba Hùng — Cấp 1 Syngenta & Lộc Trời", loai:"Vật tư & BVTV", loaiIcon:"🧪",
    kenh:"Google Maps", kenhBadge:"google", dc:"QL1A, Ngã 3 Chợ Đồng Tiến, Cạnh Petrolimex",
    lat:10.458, lng:106.656, dist:"1.1 km", sdt:"0912.345.431", fb:"https://facebook.com", web:"https://vtnnbahung.vn", zalo:"https://zalo.me/0912345431",
-   hang:"Phân bón Bình Điền, Đạm Phú Mỹ, Thuốc trừ bệnh Amistar Top, Ridomil Gold, Tervigo, Ababetter 3.6 EC",
+   hang:"Phân bón Bình Điền, Đạm Phú Mỹ, Thuốc trừ bệnh Amistar Top, Ridomil Gold, Tervigo, Ababetter 5EC",
    danhGia:"4.8 ★ (142 đánh giá)", gioMoCua:"06:00 - 18:30"},
   {id:2, ten:"Cửa Hàng Nông Dược 24/7 Bảy Thắng (Tiểu thương)", loai:"Bán lẻ địa phương", loaiIcon:"📦",
    kenh:"Facebook & Zalo", kenhBadge:"facebook", dc:"Ấp Tân Lập, đường liên thôn (Giao tận ruộng)",
@@ -6889,13 +6908,12 @@ var DANH_SACH_CAY_GIA = [
 
 function pGia(){
   var today = dmy(NAY);
-  var nowHour = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
 
   // Top header with Title + Toggle Buttons + Refresh Button
   var h = '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">'
     + '<div>'
-    + '<span class="live-dot"></span><b style="color:var(--primary);font-size:.92rem">Hệ thống Giá Nông Sản Trực Tuyến</b>'
-    + '<span style="font-size:.78rem;color:var(--muted-fg);margin-left:8px">Cập nhật: <b>' + nowHour + ' hôm nay (' + today + ')</b> · Chu kỳ 30 phút/lần</span>'
+    + '<b style="color:var(--primary);font-size:.92rem">Giá nông sản tham khảo</b>'
+    + '<span style="font-size:.78rem;color:var(--muted-fg);margin-left:8px">Số liệu nhập sẵn, <b>chưa tự cập nhật</b>. Trước khi bán, hãy hỏi giá thật ở nguồn ghi dưới mỗi loại cây.</span>'
     + '</div>'
     + '<div style="display:flex;align-items:center;gap:10px">'
     + '<div class="mode-toggle-group">'
@@ -6906,7 +6924,6 @@ function pGia(){
     + '📈 Tra cơ bản (Kiểu chứng khoán)'
     + '</button>'
     + '</div>'
-    + '<button type="button" id="btnRefreshGia" class="btn" style="font-size:.78rem;padding:6px 12px">🔄 Làm mới giá ngay</button>'
     + '</div>'
     + '</div>';
 
@@ -7251,48 +7268,43 @@ var KY=[
    danChung:"Cẩm nang BVTV Cây ăn quả: 'Phải cách ly tối thiểu 14 ngày giữa lần phun dầu khoáng và thuốc gốc lưu huỳnh.'"}
 ];
 
+// Ảnh bao bì đã đối chiếu tận mắt với nhãn (24/09/2026). Khoá là PHẦN ĐẦU tên
+// thương phẩm (viết thường, bỏ ®, gộp khoảng trắng): chỉ tên BẮT ĐẦU bằng khoá mới
+// dùng ảnh. Trước đây khớp theo mẩu chữ bất kỳ nên "Anvilando 5SC" nhận ảnh Anvil,
+// "Amistar 250SC" nhận ảnh Amistar Top, "BM super COC 85WP" nhận ảnh Curenox.
+// Ababetter: ảnh có sẵn là chai 3.6EC, danh mục là 5EC -> bỏ, dùng hình vẽ.
 var THUOC_ANH_MAP = {
-  "ababetter": "assets/thuoc/ababetter.jpg",
-  "tervigo": "assets/thuoc/tervigo.jpg",
+  "tervigo 020sc": "assets/thuoc/tervigo.jpg",
   "amistar top": "assets/thuoc/amistar_top.jpg",
-  "amistar® top": "assets/thuoc/amistar_top.jpg",
-  "amistar": "assets/thuoc/amistar_top.jpg",
-  "anvil": "assets/thuoc/anvil.jpg",
-  "ridomil gold": "assets/thuoc/ridomil_gold.jpg",
-  "ridomil": "assets/thuoc/ridomil_gold.jpg",
+  "anvil 5sc": "assets/thuoc/anvil.jpg",
+  "ridomil gold 68": "assets/thuoc/ridomil_gold.jpg",
   "tilt super": "assets/thuoc/tilt_super.jpg",
-  "tilt": "assets/thuoc/tilt_super.jpg",
-  "score": "assets/thuoc/score.jpg",
-  "antracol": "assets/thuoc/antracol.jpg",
-  "aliette": "assets/thuoc/aliette.jpg",
-  "filia": "assets/thuoc/filia.jpg",
-  "regent": "assets/thuoc/regent.jpg",
-  "map logic": "assets/thuoc/map_logic.jpg",
-  "ortiva": "assets/thuoc/ortiva.jpg",
-  "tt-over": "assets/thuoc/ttover.jpg",
-  "tt over": "assets/thuoc/ttover.jpg",
-  "over 325": "assets/thuoc/ttover.jpg",
-  "trobin top": "assets/thuoc/trobintop.jpg",
+  "score 250ec": "assets/thuoc/score.jpg",
+  "antracol 70": "assets/thuoc/antracol.jpg",
+  "aliette 80": "assets/thuoc/aliette.jpg",
+  "filia 525": "assets/thuoc/filia.jpg",
+  "map logic 90": "assets/thuoc/map_logic.jpg",
+  "ortiva 600": "assets/thuoc/ortiva.jpg",
+  "tt-over 325": "assets/thuoc/ttover.jpg",
+  "trobin top 325": "assets/thuoc/trobintop.jpg",
   "beam 75": "assets/thuoc/beam.jpg",
-  "beam®": "assets/thuoc/beam.jpg",
-  "fuji-one": "assets/thuoc/fujione.jpg",
-  "fujione": "assets/thuoc/fujione.jpg",
-  "kasumin": "assets/thuoc/kasumin.jpg",
-  "nativo": "assets/thuoc/nativo.jpg",
-  "coc 85": "assets/thuoc/coc85.jpg",
-  "coc85": "assets/thuoc/coc85.jpg",
-  "curenox": "assets/thuoc/coc85.jpg",
-  "mancozeb": "assets/thuoc/mancozeb.jpg",
-  "dithane": "assets/thuoc/mancozeb.jpg",
-  "bordeaux": "assets/thuoc/bordeaux.jpg",
-  "booc-do": "assets/thuoc/bordeaux.jpg"
+  "fuji-one 40": "assets/thuoc/fujione.jpg",
+  "kasumin 2sl": "assets/thuoc/kasumin.jpg",
+  "nativo 750": "assets/thuoc/nativo.jpg",
+  "curenox oc 85": "assets/thuoc/coc85.jpg",
+  "dithane m-45": "assets/thuoc/mancozeb.jpg",
+  "bm bordeaux m 25": "assets/thuoc/bordeaux.jpg"
 };
+
+function chuanTenThuoc(ten){
+  return String(ten || "").toLowerCase().replace(/®/g, "").replace(/\s+/g, " ").trim();
+}
 
 function layAnhThatThuoc(ten){
   if(!ten) return null;
-  var t = ten.toLowerCase();
+  var t = chuanTenThuoc(ten);
   for(var k in THUOC_ANH_MAP){
-    if(t.indexOf(k) >= 0) return THUOC_ANH_MAP[k];
+    if(t.indexOf(k) === 0) return THUOC_ANH_MAP[k];
   }
   return null;
 }
@@ -7302,30 +7314,10 @@ function coAnhThat(ten){
 }
 
 function layMoTaAnhThuoc(ten, realImg){
-  var t = (ten||'').toLowerCase();
-  if(t.indexOf('ababetter')>=0) return 'Ảnh chụp bao bì chai thuốc bảo vệ thực vật chính hãng: ABABETTER 3.6 EC (Hoạt chất: Abamectin 36g/l - Công ty TNHH MTV Lucky - Đặc trị sâu cuốn lá, nhện đỏ, bọ trĩ).';
-  if(t.indexOf('ttover')>=0 || t.indexOf('tt-over')>=0 || t.indexOf('over 325')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TT-OVER 325SC (Azoxystrobin 200g/l + Difenoconazole 125g/l - Tân Thành - Đặc trị lem lép hạt, khô vằn).';
-  if(t.indexOf('trobin')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TROBIN TOP 325SC (Azoxystrobin 200g/l + Difenoconazole 125g/l - Phú Nông - Đặc trị lem lép hạt).';
-  if(t.indexOf('map logic')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: MAP LOGIC 90WP (Clinoptilolite 900g/kg - Map Pacific Singapore - Bổ sung khoáng chất, đánh bật tuyến trùng).';
-  if(t.indexOf('ortiva')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: ORTIVA 600 SC (Azoxystrobin 100g/l + Chlorothalonil 500g/l - Syngenta - Đặc trị thán thư, sương mai, đốm lá).';
-  if(t.indexOf('beam')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: BEAM 75 WP (Tricyclazole 75% w/w - Dow AgroSciences - Cắt ngay cháy lá, đặc trị đạo ôn lúa).';
-  if(t.indexOf('fuji')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: FUJI-ONE 40EC (Isoprothiolane 40% w/w - VIPESCO - Đặc trị đạo ôn lá và cổ bông).';
-  if(t.indexOf('kasumin')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: KASUMIN 2SL (Kasugamycin 2% w/w - UPL / Hokko Nhật Bản - Chuyên gia trị vi khuẩn bạc lá, loét sẹo).';
-  if(t.indexOf('nativo')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: NATIVO 750WG (Trifloxystrobin 250g/kg + Tebuconazole 500g/kg - Bayer - Trừ thán thư, đốm lá, rỉ sắt).';
-  if(t.indexOf('coc 85')>=0 || t.indexOf('curenox')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: COC 85 WP (Copper Oxychloride 85% w/w - Ngan Anh / Tây Ban Nha - Trừ nấm khuẩn phổ rộng gốc đồng).';
-  if(t.indexOf('mancozeb')>=0 || t.indexOf('dithane')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: DITHANE M-45 80 WP XANH (Mancozeb 80% w/w - Dow AgroSciences - Áo giáp kẽm mangan trừ nấm).';
-  if(t.indexOf('bordeaux')>=0 || t.indexOf('booc')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: BORDEAUX M 25WP (Boóc-đô Đồng + Vôi - Phòng trừ nấm bệnh và vi khuẩn).';
-  if(t.indexOf('amistar')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: AMISTAR TOP 325SC (Azoxystrobin 200g/l + Difenoconazole 125g/l - Syngenta - Trừ lem lép hạt, đạo ôn).';
-  if(t.indexOf('filia')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: FILIA 525 SE (Tricyclazole 400g/l + Propiconazole 125g/l - Syngenta - Đặc trị đạo ôn lá & cổ bông).';
-  if(t.indexOf('tilt')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TILT SUPER 300EC (Propiconazole 150g/l + Difenoconazole 150g/l - Syngenta - Trừ lem lép hạt, rỉ sắt).';
-  if(t.indexOf('anvil')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: ANVIL 5SC (Hexaconazole 50g/l - Syngenta - Đặc trị khô vằn, lem lép hạt, rỉ sắt).';
-  if(t.indexOf('ridomil')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: RIDOMIL GOLD 68 WG (Metalaxyl M 40g/kg + Mancozeb 640g/kg - Syngenta - Đặc trị sương mai, loét sọc, thối rễ).';
-  if(t.indexOf('antracol')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: ANTRACOL 70 WP (Propineb 700g/kg - Bayer - Áo giáp kẽm bảo vệ cây trồng).';
-  if(t.indexOf('aliette')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: ALIETTE 800 WG (Fosetyl Aluminium 800g/kg - Bayer - Lưu dẫn 2 chiều trừ nấm Phytophthora).';
-  if(t.indexOf('score')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: SCORE 250EC (Difenoconazole 250g/l - Syngenta - Đặc trị thán thư, phấn trắng, rỉ sắt).';
-  if(t.indexOf('tervigo')>=0) return 'Ảnh chụp bao bì chai thuốc chính hãng: TERVIGO 020SC (Abamectin 20g/l - Syngenta - Đặc trị tuyến trùng rễ).';
-  if(t.indexOf('regent')>=0) return 'Ảnh chụp bao bì gói thuốc chính hãng: REGENT 0.3 G (Fipronil 3g/kg - Bayer - Diệt sâu đục thân, rầy nâu hại lúa).';
-  return 'Ảnh chụp bao bì chai/gói thuốc bảo vệ thực vật chính hãng: ' + (ten||'');
+  // Ảnh gắn theo một phần tên (vd mọi thuốc có chữ "mancozeb"), nên không được
+  // khẳng định đây là đúng sản phẩm / nồng độ. Trước đây chú thích ghi cứng
+  // "chính hãng: ABABETTER 3.6 EC" cho cả Ababetter 5EC trong danh mục.
+  return 'Ảnh minh hoạ bao bì ' + (ten||'') + '. Ảnh sưu tầm, có thể khác nồng độ hoặc quy cách — luôn đọc nhãn trên chai/gói thật.';
 }
 
 function veThuocSvgChuan(ten, sw, sh){
@@ -10363,7 +10355,9 @@ document.addEventListener("click",function(ev){
       SIM.stage=4;
       SIM.day=SIM_CROPS[v].stages[3].d;
       SIM.doAm=(SIM_CROPS[v].doAmLyTuong[0]+SIM_CROPS[v].doAmLyTuong[1])/2;
-      SIM.npk=(SIM_CROPS[v].npkLyTuong[0]+SIM_CROPS[v].npkLyTuong[1])/2;
+      SIM.dam=(SIM_CROPS[v].damLyTuong[0]+SIM_CROPS[v].damLyTuong[1])/2;
+      SIM.kali=(SIM_CROPS[v].kaliLyTuong[0]+SIM_CROPS[v].kaliLyTuong[1])/2;
+      SIM.chayPhan=false;
       SIM.health=100;
       SIM.ton=0;
       SIM.particles=[];
@@ -10438,7 +10432,8 @@ document.addEventListener("click",function(ev){
       SIM.health=100;
       SIM.ton=0;
       SIM.doAm=cRst ? cRst.doAmLyTuong[0] : 60;
-      SIM.npk=cRst ? cRst.npkLyTuong[0] : 60;
+      SIM.dam=45; SIM.lan=45; SIM.kali=45; SIM.huuco=40;
+      SIM.chayPhan=false;
       SIM.particles=[];
       SIM.pests=[];
       addSimFloatText("🔄 Bắt đầu vụ mùa mới!", 550, 200, "#10b981");
@@ -10451,7 +10446,7 @@ document.addEventListener("click",function(ev){
   // Phân khu & Lô đất
   if((v=el.getAttribute("data-panpoly"))){
     for(var p=0;p<POLYS.length;p++){
-      if(POLYS[p].id===v&&mapInst){
+      if(POLYS[p].id===v&&banDoDungDuoc(mapInst)){
         var bounds=L.latLngBounds(POLYS[p].coords);
         mapInst.fitBounds(bounds,{padding:[60,60]});
         break;
@@ -10516,6 +10511,22 @@ document.addEventListener("click",function(ev){
         var aiDet = nhanDienLoaiCayTuAnh(benhState.capturedImg, benhState.capturedName);
         benhState.detectedPlant = aiDet;
 
+        if(!aiDet){
+          benhState.aiMismatch = null;
+          benhState.overrideMismatch = false;
+          if(cropVal === "tudong"){
+            ve();
+            showToast("Chưa nhận ra cây từ ảnh này. Hãy chọn cây trồng trong danh sách rồi bấm lại.", "warning");
+            return;
+          }
+          benhState.cay = cropVal;
+          chayChuanDoanAI();
+          ve();
+          var s4n = document.getElementById("ketQuaStep4");
+          if(s4n) s4n.scrollIntoView({behavior:"smooth", block:"start"});
+          return;
+        }
+
         function boDau(s){
           return (s||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').trim();
         }
@@ -10527,7 +10538,7 @@ document.addEventListener("click",function(ev){
           benhState.aiMismatch = null;
           benhState.overrideMismatch = false;
           chayChuanDoanAI(aiDet.benhChinh);
-          showToast("🤖 AI tự động nhận diện: Cây " + aiDet.tenCay + " (" + aiDet.doTinCay + "% tin cậy)!", "success");
+          showToast("Tên file ảnh gợi ý: Cây " + aiDet.tenCay + ". Hãy đối chiếu ảnh mẫu bên dưới.", "success");
         } else {
           var cUserClean = boDau(cropVal);
           var cAiClean = boDau(aiDet.cayId);
@@ -10541,7 +10552,7 @@ document.addEventListener("click",function(ev){
             };
             benhState.cay = cropVal;
             chayChuanDoanAI();
-            showToast("⚠️ Phát hiện sai loài cây: Ảnh là lá Cây " + aiDet.tenCay + " chứ không phải Cây " + cropVal + "!", "warning");
+            showToast("⚠️ Tên file ảnh gợi ý Cây " + aiDet.tenCay + ", khác cây bạn chọn (" + cropVal + ").", "warning");
           } else {
             // Đúng cây hoặc người dùng chọn giữ nguyên
             benhState.aiMismatch = null;
@@ -10551,7 +10562,7 @@ document.addEventListener("click",function(ev){
             } else {
               chayChuanDoanAI();
             }
-            showToast("🔍 AI đã chẩn đoán xong bệnh tương thích!", "success");
+            showToast("🔍 Đã lọc các bệnh khớp triệu chứng!", "success");
           }
         }
         ve();
@@ -10566,8 +10577,9 @@ document.addEventListener("click",function(ev){
   var btnChuyenCay = el.closest("#btnChuyenDungCayAi");
   if(btnChuyenCay){
     var aiDet = (benhState.aiMismatch && benhState.aiMismatch.detected) || benhState.detectedPlant || nhanDienLoaiCayTuAnh(benhState.capturedImg, benhState.capturedName);
-    var targetCay = (aiDet && aiDet.cayId) ? aiDet.cayId : "cà phê";
-    var targetBenh = (aiDet && aiDet.benhChinh) ? aiDet.benhChinh : "caphe_ri_sat";
+    if(!aiDet){ benhState.aiMismatch = null; ve(); return; }
+    var targetCay = aiDet.cayId;
+    var targetBenh = aiDet.benhChinh;
 
     benhState.cay = targetCay;
     benhState.boPhan = "la";
@@ -10624,36 +10636,6 @@ document.addEventListener("click",function(ev){
     benhState.isScanning=false;
     ve();
     showToast("Đã hủy ảnh", "info");
-    return;
-  }
-
-  // Làm mới giá thị trường với biến động sàn thực tế
-  if(el.id==="btnRefreshGia" || el.closest("#btnRefreshGia")){
-    var btnRef = document.getElementById("btnRefreshGia");
-    if(btnRef) btnRef.innerHTML = "⏳ Đang kết nối 5 sàn...";
-
-    setTimeout(function(){
-      if(window.GIA_THI_TRUONG && Array.isArray(GIA_THI_TRUONG)){
-        for(var gi = 0; gi < GIA_THI_TRUONG.length; gi++){
-          var gItem = GIA_THI_TRUONG[gi];
-          var delta = (Math.floor(Math.random() * 5) - 2) * 100;
-          if(delta !== 0){
-            var numG = parseInt(gItem.giaChinh.replace(/\./g, ''), 10) + delta;
-            gItem.giaChinh = numG.toLocaleString('vi-VN');
-            if(delta > 0){
-              gItem.chieu = "up";
-              gItem.bienDong = "+" + delta.toLocaleString('vi-VN') + " đ";
-            } else {
-              gItem.chieu = "down";
-              gItem.bienDong = delta.toLocaleString('vi-VN') + " đ";
-            }
-          }
-        }
-      }
-      ve();
-      var nowTime = new Date().toLocaleTimeString('vi-VN');
-      showToast("⚡ Đã đồng bộ giá trực tiếp lúc " + nowTime + " từ 5 sàn giao dịch nông sản!", "success");
-    }, 400);
     return;
   }
 
@@ -11315,7 +11297,7 @@ try {
     }
     var bannerText = document.getElementById("topWarnBannerText");
     if (bannerText && uiMode === "binhthuong") {
-      bannerText.innerHTML = "<b>🌾 Sổ Ruộng Nhà Nông.</b> Quản lý mùa vụ đơn giản, dễ nhớ: xem thời tiết hôm nay, bấm 1 chạm ghi tưới bón xịt thuốc, và tra nhanh bệnh cây trồng.";
+      bannerText.innerHTML = "<b>Nhớ đọc nhãn thuốc:</b> số ngày cách ly phải lấy trên chai/gói thuốc rồi nhập vào. Gợi ý bệnh và giá chỉ để tham khảo.";
     }
   }
 } catch(e){}

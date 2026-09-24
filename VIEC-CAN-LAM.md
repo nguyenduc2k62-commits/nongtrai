@@ -1,6 +1,6 @@
 # Sổ Ruộng — việc cần làm và chức năng
 
-Cập nhật 22/09/2026. Xem thêm `BAN-GIAO.md` để nắm nguồn dữ liệu và các bẫy đã gặp.
+Cập nhật 24/09/2026. Xem thêm `BAN-GIAO.md` để nắm nguồn dữ liệu và các bẫy đã gặp.
 
 ---
 
@@ -29,17 +29,18 @@ tay gửi Zalo. Một HTX gật đầu là có ngay vài chục hộ dùng.
 |---|---|
 | Đồng hồ đếm ngược ngày được gặt | Xong. PHI do người dùng nhập từ nhãn |
 | Lịch cách ly theo thửa (biểu đồ) | Xong |
-| Tra bệnh: cây → dịch hại → thuốc → ghi sổ | Xong, **dữ liệu thật** 5.914 thuốc / 367 cây |
+| Tra bệnh: cây → dịch hại → thuốc → ghi sổ | Xong, **dữ liệu thật** 5.914 thuốc / 345 cây / 488 dịch hại |
 | Chặn hoạt chất cấm | Xong, 33 hoạt chất theo Phụ lục II |
 | Hiện ngưỡng dư lượng MRL | Xong. Không có ngưỡng thì báo "chưa có", không đoán |
 | Cảnh báo tương kỵ khi pha chung bình | Xong, tìm trong 5.914 thuốc thật, 4 quy tắc |
 | Nhật ký canh tác + xuất hồ sơ | Xong, mã QR còn là ô trống |
-| Đa cây trồng | Xong. 3 thửa mẫu: 2 lúa + 1 cà phê |
-| Ảnh bệnh đối chiếu | **Chưa có** — sơ đồ vẽ tay đã bỏ vì 546 dịch hại |
+| Đa cây trồng | Xong. 4 lô mẫu: lúa, cà phê, cao su, sầu riêng. Mọi lô đều đếm cách ly |
+| Ảnh bệnh đối chiếu | Vài ảnh mẫu; tải ảnh lên chỉ *đoán theo tên file*, chưa nhận diện ảnh thật |
 | Bản đồ điểm bán | Sơ đồ vẽ tay, chưa phải bản đồ thật |
-| Giá thị trường | Dữ liệu mẫu |
+| Giá thị trường | Dữ liệu mẫu nhập sẵn, ghi rõ trên trang |
 | Mô phỏng đồng ruộng (cellular automata) | Xong, là đồ trình diễn |
-| Nền sáng/tối, nhớ lựa chọn | Xong |
+| Hai chế độ giao diện Bình thường / Chuyên nghiệp | Xong |
+| Ảnh bao bì thuốc | 20 thuốc, đã soát khớp nhãn 24/09 |
 
 Lưu dữ liệu: `localStorage` của trình duyệt. Mất khi đổi máy hoặc xoá dữ liệu
 trang. Chưa có tài khoản, chưa có máy chủ.
@@ -143,9 +144,11 @@ thầy, và câu "bộ ảnh đã qua thẩm định của ThS. X" có giá tr�
 
 ## 4. Việc kỹ thuật
 
-- [ ] Tailwind Play CDN → Tailwind CLI build ra CSS tĩnh. Play in cảnh báo ra
-      console và không dành cho bản chạy thật.
-- [ ] Tách `index.html` (hiện ~1.100 dòng) thành nhiều file khi có bước build.
+- [ ] `esc()` chưa thoát dấu `'` — tên lô có `'` sẽ làm hỏng nút `onclick`.
+- [ ] Nạp `du-lieu-app.json` lỗi thì chỉ `console.warn`, người dùng không được báo.
+- [ ] `du-lieu/csv/*.csv` và `danh-muc-thuoc*.json` vẫn còn ký tự font Symbol
+      (U+F0xx) — mới sửa ở bước dựng `du-lieu-app.json`.
+- [ ] Tách `index.html` (hiện ~11.400 dòng) thành nhiều file khi có bước build.
 - [ ] Đưa 4 trang còn lại (Tra bệnh, Pha thuốc, Bản đồ, Giá) vào thẻ trắng cho
       đồng bộ với Tổng quan và Nhật ký.
 - [ ] Kiểm ở 375px / 768px / 1024px / 1440px.
@@ -164,7 +167,7 @@ Ghi ra đây để sau này không ai lôi lại.
 - **Tự động phán bệnh bằng AI rồi kết luận thay người dùng.** App đưa ứng viên,
   người dùng tự đối chiếu và tự chọn. Sai thì cũng là họ chọn — và họ tin hơn
   vì chính mắt họ so.
-- **Mở rộng sang nhiều loại cây trước khi một loại chạy tốt.** Làm lúa trước.
+- ~~Mở rộng sang nhiều loại cây trước khi một loại chạy tốt.~~ Đức đã bác, đi đa cây — xem `BAN-GIAO.md` mục 8.
 
 ---
 
@@ -181,6 +184,8 @@ Ghi ra đây để sau này không ai lôi lại.
 ---
 
 ## 7. Mốc gần nhất
+
+24/09/2026: xong đợt sửa lỗi sau bản viết lại của Antigravity (chi tiết `BAN-GIAO.md` mục 6).
 
 Mục 2.1 đã xong phần danh mục. Việc đáng làm tiếp, theo thứ tự:
 

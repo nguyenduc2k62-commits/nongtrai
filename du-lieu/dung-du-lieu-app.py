@@ -62,6 +62,21 @@ class Bang:
         return self.chi[s]
 
 
+# PDF dùng font Symbol cho vài ký tự; PyMuPDF trả về mã vùng riêng U+F0xx
+# (hiện thành ô vuông). Đổi về ký tự thật.
+SYMBOL_FONT = {"": "α", "": "β", "": "Ω", "": "®", "": "®"}
+
+def sua_font_symbol(o):
+    if isinstance(o, str):
+        for k, v in SYMBOL_FONT.items():
+            o = o.replace(k, v)
+        return o
+    if isinstance(o, list):
+        return [sua_font_symbol(x) for x in o]
+    if isinstance(o, dict):
+        return {k: sua_font_symbol(v) for k, v in o.items()}
+    return o
+
 def main():
     thuoc = json.load(io.open("danh-muc-thuoc-2026.json", encoding="utf-8"))["thuoc"]
     cam = json.load(io.open("danh-muc-cam.json", encoding="utf-8"))["hoat_chat"]
@@ -122,6 +137,7 @@ def main():
     }
 
     p = os.path.join("..", "du-lieu-app.json")
+    out = sua_font_symbol(out)
     json.dump(out, io.open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     n = os.path.getsize(p)
     nz = len(gzip.compress(io.open(p, "rb").read()))
