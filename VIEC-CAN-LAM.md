@@ -186,6 +186,7 @@ Ghi ra đây để sau này không ai lôi lại.
 ## 7. Mốc gần nhất
 
 24/09/2026: xong đợt sửa lỗi sau bản viết lại của Antigravity (chi tiết `BAN-GIAO.md` mục 6).
+25/09/2026: AI xem ảnh bệnh chạy thật (Gemini qua Cloudflare Worker, Singapore). Cần: giới hạn lượt theo IP trước khi mở rộng; thử nhiều ảnh thật ngoài ruộng để đo độ đúng.
 24/09/2026: cách ly theo loại cây + nút ra hoa. Việc tiếp theo đã thống nhất với Đức: sửa tràn màn hình điện thoại (đo lại đúng: Lô đất, Nhật ký, Mô phỏng, Tổng quan chế độ Chuyên nghiệp), bỏ số bịa còn lại (đại lý giả quanh ruộng thật, bảng NPK, DRC/Brix trên thẻ; % tương đồng và huy hiệu xác thực đã bỏ 24/09), tách rau màu khỏi lúa, rút menu Bình thường còn 4 mục.
 
 Mục 2.1 đã xong phần danh mục. Việc đáng làm tiếp, theo thứ tự:

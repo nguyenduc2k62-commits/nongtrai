@@ -353,6 +353,33 @@ Bốn lô mẫu: lúa, cà phê, cao su, sầu riêng Ri6. Hai chế độ giao 
 
 Lưu dữ liệu: `localStorage`. Chưa có tài khoản, chưa có máy chủ.
 
+### AI xem ảnh bệnh (thêm 25/09/2026)
+
+App gửi ảnh (thu nhỏ ≤1024px) + tên cây + danh mục dịch hại của cây đó tới máy
+chủ trung gian **`https://so-ruong-ai.nguyenduc2k62.workers.dev/chan-doan`**
+(Cloudflare Worker, mã ở `ai-worker/worker.js`). Worker giữ khoá Gemini (Secret
+`GEMINI_API_KEY` trên Cloudflare — **không bao giờ để khoá trong repo**), gọi
+Gemini, trả 2–3 khả năng + lý do nhìn thấy + mức chắc (chữ, không %). App đặt
+khả năng cạnh ảnh mẫu và số thuốc đăng ký; người dùng tự xác nhận. AI không kê thuốc.
+
+Những bẫy đã gặp khi dựng:
+- **Tên mô hình Gemini bị Google ngừng** (404 với `gemini-2.5-flash`). Worker để
+  `gemini-flash-latest`, gặp 404 thì tự hỏi danh sách mô hình và chọn bản flash
+  cao nhất. Muốn cố định thì đặt biến `GEMINI_MODEL`.
+- **"User location is not supported" (400)**: người dùng ở VN bị Cloudflare cho
+  chạy ở Hồng Kông, Gemini chặn HK. Đã đặt *Settings → Runtime → Placement →
+  Region → GCP asia-southeast1* (Singapore). Đừng đổi về Default.
+- **503 quá tải** ở gói miễn phí: Worker thử lại 1 lần rồi đổi mô hình flash khác.
+- Khoá dạng mới bắt đầu `AQ.` (không phải `AIza`) — dùng được với header `x-goog-api-key`.
+- Chỉ trang GitHub Pages và localhost:8000 được gọi Worker (biến `CHO_PHEP_ORIGIN`).
+  Công cụ ngoài trình duyệt vẫn giả được Origin → khi có nhiều người dùng cần
+  giới hạn lượt theo IP.
+- Gói miễn phí: Google có thể dùng ảnh gửi lên để cải thiện sản phẩm — app hỏi
+  đồng ý trước lần gửi đầu (`so_ruong_dong_y_ai`).
+
+Tắt AI: để `AI_MAY_CHU = ""` trong `index.html`. Thử Worker khác mà không sửa code:
+`localStorage.setItem("so_ruong_ai_url", "https://...")`.
+
 ### Người dùng mới & Tra bệnh (thêm 24/09/2026, tối)
 
 **Chưa có tài khoản.** Sổ nằm trong `localStorage` của máy. Khoá

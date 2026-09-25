@@ -4867,6 +4867,7 @@ function napFileAnhBenh(f){
     benhState.capturedImg=e.target.result;
     benhState.capturedName=f.name||"Ảnh bệnh từ thiết bị";
     benhState.detectedPlant=nhanDienLoaiCayTuAnh(e.target.result, f.name);
+    benhState.aiKetQua=null;
     benhState.aiMismatch=null;
     benhState.overrideMismatch=false;
     if(benhState.detectedPlant && benhState.detectedPlant.cayId){
@@ -4930,6 +4931,133 @@ function tuKhoaTraBenh(){
   return {chuoi: " " + tu.join(" ") + " ", tu: tu};
 }
 
+/* ======================= AI XEM ẢNH (Gemini qua máy chủ trung gian) =======================
+   Địa chỉ máy chủ trung gian (Cloudflare Worker, xem ai-worker/). Địa chỉ này KHÔNG bí
+   mật — khoá Gemini nằm ở máy chủ. Để trống = tắt AI, app tra thủ công như cũ.
+   Thử nghiệm: localStorage.setItem("so_ruong_ai_url", "https://....workers.dev") */
+var AI_MAY_CHU = "https://so-ruong-ai.nguyenduc2k62.workers.dev";
+function aiDiaChi(){
+  var u = "";
+  try{ u = localStorage.getItem("so_ruong_ai_url") || ""; }catch(e){}
+  return (u || AI_MAY_CHU || "").replace(/\/+$/, "");
+}
+function aiDuocBat(){ return !!aiDiaChi() && navigator.onLine !== false; }
+
+function aiDongY(){
+  try{ if(localStorage.getItem("so_ruong_dong_y_ai") === "1") return true; }catch(e){}
+  var ok = confirm("Ảnh của bạn sẽ được gửi cho Google Gemini để AI xem và gợi ý bệnh.\n\n"
+    + "Gói miễn phí: Google có thể dùng dữ liệu gửi lên để cải thiện sản phẩm. Đừng chụp mặt người hay giấy tờ.\n\n"
+    + "Đồng ý gửi ảnh?");
+  if(ok){ try{ localStorage.setItem("so_ruong_dong_y_ai", "1"); }catch(e){} }
+  return ok;
+}
+
+// Thu nhỏ ảnh còn cạnh dài ≤ 1024px, JPEG — nhẹ cho mạng 3G và đủ nét để nhìn vết bệnh
+function thuNhoAnh(src, toiDa){
+  toiDa = toiDa || 1024;
+  return new Promise(function(ok, loi){
+    var im = new Image();
+    im.onload = function(){
+      var s = Math.min(1, toiDa / Math.max(im.naturalWidth, im.naturalHeight));
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(im.naturalWidth * s));
+      c.height = Math.max(1, Math.round(im.naturalHeight * s));
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      ok(c.toDataURL("image/jpeg", 0.82));
+    };
+    im.onerror = function(){ loi(new Error("Không đọc được ảnh")); };
+    im.src = src;
+  });
+}
+
+function timCayTheoTen(ten){
+  var t = boDauTB(ten);
+  if(!t) return null;
+  for(var g = 0; g < DANH_MUC_CAY_BENH.length; g++){
+    var cs = DANH_MUC_CAY_BENH[g].cays;
+    for(var i = 0; i < cs.length; i++){
+      var a = boDauTB(cs[i].ten), b = boDauTB(cs[i].id);
+      if(t === a || t === b || t.indexOf(b) >= 0 || (a && t.indexOf(a) >= 0)) return cs[i].id;
+    }
+  }
+  return null;
+}
+
+function hoiAIXemAnh(cropVal){
+  var cay = (cropVal && cropVal !== "tudong") ? cropVal : "";
+  var ungVien = [];
+  if(cay && D){ var ci = cayId(cay); if(ci >= 0) ungVien = dichHaiCuaCay(ci).slice(0, 250).map(function(x){ return x.ten; }); }
+  var bo = benhState.boPhan ? (TEN_BO_PHAN_TB[benhState.boPhan] || "") : "";
+  var ctl = ("AbortController" in window) ? new AbortController() : null;
+  var hen = setTimeout(function(){ if(ctl) ctl.abort(); }, 30000);
+  return thuNhoAnh(benhState.capturedImg).then(function(anh){
+    return fetch(aiDiaChi() + "/chan-doan", {
+      method: "POST", headers: {"content-type": "application/json"},
+      body: JSON.stringify({anh: anh, cay: cay, boPhan: bo, ungVien: ungVien}),
+      signal: ctl ? ctl.signal : undefined
+    });
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(j){
+      if(!r.ok) throw new Error(j.loi || ("Máy chủ AI báo lỗi " + r.status));
+      return j;
+    });
+  }).then(function(j){
+    clearTimeout(hen);
+    j.cayId = timCayTheoTen(j.cayNhinThay);
+    j.cayHoi = cay;
+    return j;
+  }, function(e){
+    clearTimeout(hen);
+    throw (e && e.name === "AbortError") ? new Error("AI trả lời quá lâu (mạng yếu?)") : e;
+  });
+}
+
+var TEN_MUC_CHAC = {cao: "khá chắc", vua: "có thể", thap: "chưa chắc"};
+
+function veKetQuaAI(){
+  var k = benhState.aiKetQua;
+  if(!k) return "";
+  if(k.loi){
+    return '<div style="margin-bottom:14px;padding:10px 14px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;font-size:.84rem;color:#9a3412">'
+      + '🤖 AI chưa xem được ảnh: ' + esc(k.loi) + '. Đang dùng cách tra thủ công bên dưới.</div>';
+  }
+  var ciK = cayId(benhState.cay);
+  var h = '<div style="margin-bottom:16px;padding:14px 16px;border-radius:14px;background:#f5f3ff;border:1.5px solid #c4b5fd">'
+    + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;align-items:center">'
+    + '<b style="color:#5b21b6;font-size:.95rem">🤖 AI xem ảnh gợi ý</b>'
+    + '<span style="font-size:.72rem;color:#6d28d9">Gemini · có thể sai — hãy so với ảnh mẫu</span></div>';
+  if(k.laCay === false) h += '<div style="margin-top:8px;font-size:.86rem;color:#b91c1c">AI không thấy cây trồng trong ảnh này.</div>';
+  if(k.cayNhinThay) h += '<div style="margin-top:6px;font-size:.84rem">Cây AI nhìn thấy: <b>' + esc(k.cayNhinThay) + '</b>'
+    + (k.cayHoi && k.cayId && boDauTB(k.cayId) !== boDauTB(k.cayHoi) ? ' <span style="color:#b91c1c">(khác cây bạn chọn: ' + esc(k.cayHoi) + ')</span>' : '') + '</div>';
+  if(k.moTaTrieuChung) h += '<div style="margin-top:4px;font-size:.84rem;line-height:1.5">Dấu hiệu thấy trong ảnh: ' + esc(k.moTaTrieuChung) + '</div>';
+  if(k.canhBao) h += '<div style="margin-top:4px;font-size:.8rem;color:#b45309">⚠️ ' + esc(k.canhBao) + '</div>';
+  var ds = k.ungVien || [];
+  if(!ds.length) h += '<div style="margin-top:8px;font-size:.84rem;color:var(--muted-fg)">AI không đưa ra được khả năng nào đủ rõ.</div>';
+  for(var i = 0; i < ds.length; i++){
+    var u = ds[i], dmTen = u.khopDanhMuc || "", soThuoc = -1;
+    // AI chưa được gửi danh mục (lúc gửi chưa biết cây) -> tự khớp tên AI với danh mục của cây
+    if(!dmTen && D && ciK >= 0){
+      var tAI = " " + boDauTB(u.ten).replace(/[^a-z0-9]+/g, " ") + " ", dsK = dichHaiCuaCay(ciK), dai = 0;
+      for(var q = 0; q < dsK.length; q++){
+        var tq = boDauTB(dsK[q].ten).replace(/[^a-z0-9]+/g, " ").trim();
+        if(tq.length >= 4 && tq.length > dai && tAI.indexOf(" " + tq + " ") >= 0){ dmTen = dsK[q].ten; dai = tq.length; }
+      }
+    }
+    if(dmTen && D && ciK >= 0){
+      var id = D.bang.dich_hai.indexOf(dmTen);
+      if(id >= 0) soThuoc = thuocCho(ciK, id).length;
+    }
+    h += '<div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #ddd6fe">'
+      + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px"><b>' + (i + 1) + '. ' + esc(u.ten) + '</b>'
+      + tag(TEN_MUC_CHAC[u.mucChac] || "chưa chắc", u.mucChac === "cao" ? "ok" : (u.mucChac === "vua" ? "wait" : "mut")) + '</div>'
+      + (u.lyDo ? '<div style="font-size:.8rem;color:var(--muted-fg);margin-top:3px;line-height:1.45">Vì: ' + esc(u.lyDo) + '</div>' : '')
+      + (soThuoc >= 0 ? '<div style="font-size:.78rem;margin-top:4px">📋 Danh mục Thông tư: <b>' + soThuoc + ' thuốc</b> đăng ký trừ “' + esc(dmTen) + '” trên ' + esc(benhState.cay) + '</div>'
+        : '<div style="font-size:.76rem;margin-top:4px;color:var(--muted-fg)">Chưa khớp được với tên trong danh mục thuốc.</div>')
+      + '</div>';
+  }
+  return h + '</div>';
+}
+
 function chayChuanDoanAI(forceBenhId){
   var tk = tuKhoaTraBenh();
   var cLowerClean = boDauTB(benhState.cay || "lúa");
@@ -4965,6 +5093,18 @@ function chayChuanDoanAI(forceBenhId){
     }
     if(khop.length){ diem += khop.length * 10; if(!lyDo.length) lyDo.push("Khớp " + khop.length + " chữ trong tên / mô tả"); }
     if(bp && b.boPhan === bp){ diem += 20; lyDo.push("Đúng bộ phận: " + (TEN_BO_PHAN_TB[bp] || bp)); }
+    var aiK = benhState.aiKetQua;
+    if(aiK && aiK.ungVien && dh){
+      for(var ai = 0; ai < aiK.ungVien.length; ai++){
+        var uv = aiK.ungVien[ai], tuv = " " + boDauTB((uv.ten || "") + " " + (uv.khopDanhMuc || "")).replace(/[^a-z0-9]+/g, " ") + " ";
+        if(tuv.indexOf(" " + dh + " ") >= 0){
+          diem += ({cao: 90, vua: 70, thap: 45})[uv.mucChac] || 45;
+          lyDo.unshift("AI xem ảnh: " + (TEN_MUC_CHAC[uv.mucChac] || "chưa chắc"));
+          khop.push("__ai");
+          break;
+        }
+      }
+    }
     ds.push({benh: b, diem: diem, lyDo: lyDo, thuTu: i, khopTen: !!(khop.length || (forceBenhId && b.id === forceBenhId) || (dh && tk.chuoi.indexOf(" " + dh + " ") >= 0))});
   }
   ds.sort(function(a, c){ return (c.diem - a.diem) || (a.thuTu - c.thuTu); });
@@ -5137,9 +5277,9 @@ function pBenh(){
             return '';
           })()
         + '<button type="button" id="btnChuanDoanNgay" class="btn btn-p" style="font-size:1.02rem;font-weight:800;padding:12px 32px;border-radius:10px;box-shadow:0 4px 18px rgba(16,185,129,.35);display:inline-flex;align-items:center;gap:10px;cursor:pointer">'
-        + (benhState.isScanning ? '⏳ Đang lọc bệnh...' : '🔍 Tìm bệnh mẫu để so')
+        + (benhState.isScanning ? '⏳ ' + esc(benhState.scanStepText || 'Đang xử lý...') : (aiDuocBat() ? '🤖 Cho AI xem ảnh & tìm bệnh' : '🔍 Tìm bệnh mẫu để so'))
         + '</button>'
-        + '<div style="font-size:.76rem;color:var(--muted-fg)">App lọc bệnh mẫu theo cây, bộ phận và tên ảnh — bạn tự so vết bệnh với ảnh mẫu</div>'
+        + '<div style="font-size:.76rem;color:var(--muted-fg)">' + (aiDuocBat() ? 'AI xem ảnh và gợi ý 2–3 khả năng kèm lý do — bạn so lại với ảnh mẫu rồi mới xem thuốc' : 'App lọc bệnh mẫu theo cây, bộ phận và tên ảnh — bạn tự so vết bệnh với ảnh mẫu') + '</div>'
         + '</div>'
         + '</div>'
         + '<input type="file" id="fileUploadBenh" accept="image/*" style="display:none">'
@@ -5229,12 +5369,14 @@ function pBenh(){
   }
 
   if(!kq||!kq.length){
+    kqHtml+=veKetQuaAI();
     kqHtml+='<div style="border:1px dashed var(--border);border-radius:12px;padding:24px;text-align:center;color:var(--muted-fg)">'
       +(benhState.loaiTru && Object.keys(benhState.loaiTru).length
         ? 'Bạn đã loại trừ hết các bệnh mẫu của cây này. '
         : 'App chưa có ảnh mẫu bệnh nào cho <b>'+esc(benhState.cay||'')+'</b>. Hãy dùng <b>Tra danh mục thường</b> để tìm thuốc theo tên bệnh. ')
       +'<button type="button" id="btnResetLoaiTru" class="btn" style="margin-top:8px">Khôi phục gợi ý ban đầu</button></div>';
   }else{
+    kqHtml += veKetQuaAI();
     // Bệnh trong danh mục thuốc mà tên file nhắc tới
     if(benhState.dhTheoTen && benhState.dhTheoTen.length){
       var ciDm = cayId(benhState.cay);
@@ -10613,6 +10755,34 @@ document.addEventListener("click",function(ev){
     var selCrop=document.getElementById("selCayKhiUpload");
     var cropVal=selCrop?selCrop.value:"tudong";
 
+    // Có máy chủ AI: gửi ảnh cho AI xem trước, xong rồi chạy tiếp luồng cũ.
+    if(!benhState.daHoiAI){
+      benhState.aiKetQua = null;
+      if(aiDuocBat() && aiDongY()){
+        benhState.isScanning = true;
+        benhState.scanStepText = "🤖 Đang gửi ảnh cho AI xem...";
+        ve();
+        hoiAIXemAnh(cropVal).then(function(kq){
+          benhState.aiKetQua = kq;
+          if(cropVal === "tudong" && kq.cayId) benhState.cay = kq.cayId;
+        }, function(e){
+          benhState.aiKetQua = {loi: (e && e.message) || "lỗi không rõ"};
+        }).then(function(){
+          benhState.isScanning = false;
+          benhState.daHoiAI = true;
+          ve();
+          var sc = document.getElementById("selCayKhiUpload");
+          if(sc && cropVal === "tudong" && benhState.aiKetQua && benhState.aiKetQua.cayId) sc.value = benhState.aiKetQua.cayId;
+          var nut = document.getElementById("btnChuanDoanNgay");
+          if(nut) nut.click(); else benhState.daHoiAI = false;
+        });
+        return;
+      }
+    }
+    benhState.daHoiAI = false;
+    // AI đã nhận ra cây thì không cần đoán cây theo tên file nữa
+    if(cropVal === "tudong" && benhState.aiKetQua && benhState.aiKetQua.cayId) cropVal = benhState.aiKetQua.cayId;
+
     benhState.isScanning=true;
     benhState.scanStepText="Đang lọc bệnh mẫu theo cây và bộ phận...";
     ve();
@@ -10623,7 +10793,7 @@ document.addEventListener("click",function(ev){
 
       setTimeout(function(){
         benhState.isScanning=false;
-        var aiDet = nhanDienLoaiCayTuAnh(benhState.capturedImg, benhState.capturedName);
+        var aiDet = (benhState.aiKetQua && !benhState.aiKetQua.loi) ? null : nhanDienLoaiCayTuAnh(benhState.capturedImg, benhState.capturedName);
         benhState.detectedPlant = aiDet;
 
         if(!aiDet){
@@ -10736,6 +10906,7 @@ document.addEventListener("click",function(ev){
     benhState.capturedImg = item.img;
     benhState.capturedName = item.fn;
     benhState.detectedPlant = nhanDienLoaiCayTuAnh(item.img, item.fn);
+    benhState.aiKetQua = null;
     benhState.aiMismatch = null;
     benhState.overrideMismatch = false;
     ve();
