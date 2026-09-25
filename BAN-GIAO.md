@@ -377,6 +377,11 @@ Những bẫy đã gặp khi dựng:
 - Gói miễn phí: Google có thể dùng ảnh gửi lên để cải thiện sản phẩm — app hỏi
   đồng ý trước lần gửi đầu (`so_ruong_dong_y_ai`).
 
+**Cập nhật Worker:** sửa `ai-worker/worker.js` rồi chạy `bash ai-worker/deploy.sh`.
+Script đọc API token Cloudflare trong `ai-worker/.cf-token` (bị .gitignore chặn),
+cấu hình ở `ai-worker/wrangler.toml` (giữ Placement Singapore). Không dùng
+`wrangler login`: trên Windows nó văng lỗi libuv và chỉ chờ 2 phút.
+
 Tắt AI: để `AI_MAY_CHU = ""` trong `index.html`. Thử Worker khác mà không sửa code:
 `localStorage.setItem("so_ruong_ai_url", "https://...")`.
 

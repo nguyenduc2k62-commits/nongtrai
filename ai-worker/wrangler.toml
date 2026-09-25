@@ -1,0 +1,19 @@
+# Đưa Worker lên Cloudflare:  bash ai-worker/deploy.sh  (dùng mã trong ai-worker/.cf-token)
+# Placement Singapore và khoá Gemini (Secret trên Cloudflare) được giữ qua mỗi lần deploy.
+# Khoá Gemini KHÔNG nằm ở đây — nó là Secret GEMINI_API_KEY đặt trên Cloudflare,
+# và được giữ nguyên qua mỗi lần deploy.
+name = "so-ruong-ai"
+main = "worker.js"
+compatibility_date = "2026-09-25"
+workers_dev = true
+preview_urls = false
+
+# Giữ các biến đặt trên trang Cloudflare (nếu có), không xoá khi deploy
+keep_vars = true
+
+# Chạy ở Singapore. Để mặc định thì người dùng VN bị chạy qua Hồng Kông,
+# Gemini từ chối ("User location is not supported").
+placement = { mode = "targeted", region = "gcp:asia-southeast1" }
+
+[observability]
+enabled = true

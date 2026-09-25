@@ -1,3 +1,8 @@
 test-*.html
 dbg.html
 index-backup.html
+
+# Mã truy cập Cloudflare để deploy Worker — KHÔNG đưa lên GitHub
+ai-worker/.cf-token
+.wrangler/
+ai-worker/.wrangler/
