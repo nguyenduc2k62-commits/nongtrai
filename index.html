@@ -886,6 +886,44 @@ function datNgayThuHoach(thuaId, val){
 }
 window.datNgayThuHoach = datNgayThuHoach;
 
+/* ======================= THẺ LÔ: DỮ LIỆU THẬT =======================
+   Trước 25/09/2026 thẻ lô hiện chữ/số viết sẵn theo loại cây ("Đã tưới nước đợt 2",
+   "DRC 34%", "Brix 12.5°", "Năng suất 6.5–7 tấn/ha"...) — lô mới tạo chưa làm gì
+   cũng hiện như vậy. Giờ chỉ hiện điều người dùng nhập hoặc app tính được. */
+function viecGanNhat(thuaId){
+  var t = null;
+  for(var i = 0; i < so.length; i++){
+    if(so[i].thua === thuaId && (!t || (so[i].ngay || 0) > (t.ngay || 0))) t = so[i];
+  }
+  return t;
+}
+function iconCuaCay(th){
+  var id = timCayTheoTen(th.cay);
+  if(id){
+    for(var g = 0; g < DANH_MUC_CAY_BENH.length; g++){
+      var cs = DANH_MUC_CAY_BENH[g].cays;
+      for(var i = 0; i < cs.length; i++) if(cs[i].id === id) return cs[i].icon;
+    }
+  }
+  return "🌱";
+}
+function dongDienTich(th){
+  return th.dt > 0 ? '<b>' + th.dt + ' sào</b> (' + Math.round(th.dt * 360).toLocaleString('vi-VN') + ' m²)' : 'chưa nhập diện tích';
+}
+function dongViecGanNhat(th){
+  var v = viecGanNhat(th.id);
+  if(!v) return '<span style="color:var(--muted-fg)">Chưa ghi việc nào. Bấm “Ghi chép ruộng này” mỗi khi làm việc ngoài đồng.</span>';
+  var n = dif(new Date(v.ngay), NAY);
+  return '📝 Việc gần nhất: <b>' + esc(v.viec) + '</b> · ' + dmy(v.ngay) + (n > 0 ? ' (' + n + ' ngày trước)' : ' (hôm nay)');
+}
+// Nút ghi nhanh riêng theo loại cây — đều mở form nhật ký (MAU_GHI_NHANH)
+var NUT_THEO_LOAI_CAY = {
+  caosu:      [["caosu_ghi", "🩸 Ghi cạo mủ"], ["caosu_drc", "🧪 Ghi độ mủ DRC"]],
+  congnghiep: [["caphe_tuoi", "💧 Ghi tưới"], ["caphe_bon", "🌱 Ghi bón phân"]],
+  antrai:     [["antrai_tia", "✂️ Ghi tỉa cành"], ["antrai_brix", "🍯 Ghi độ ngọt"]],
+  luongthuc:  [["lua_rutnuoc", "💧 Ghi tưới / rút nước"]]
+};
+
 /* ======================= UI SNIPPETS ======================= */
 function card(inner,extra){return '<div class="card '+(extra||"")+'">'+inner+"</div>"}
 function sec(lb,body,act){
@@ -1020,7 +1058,7 @@ function veNav(){
     +'<div style="margin-top:6px;display:flex;align-items:baseline;gap:6px"><span class="mono" style="font-size:1.15rem;font-weight:800;color:var(--primary)">'+dtHienThi+'</span></div>'
     +'<div style="font-size:.75rem;color:var(--muted-fg);margin-top:2px">'+THUA.length+' lô đất canh tác</div>'
     +'<div style="margin-top:6px;font-size:.75rem;color:var(--muted-fg)">'
-    +(cho?'<span class="tag tag-wait" style="padding:2px 6px">'+cho+' lô đang chờ cách ly</span>':'<span class="tag tag-ok" style="padding:2px 6px">Tất cả lô đã đạt cách ly</span>')
+    +(cho?'<span class="tag tag-wait" style="padding:2px 6px">'+cho+' lô đang chờ cách ly</span>':'<span class="tag tag-ok" style="padding:2px 6px">Không lô nào chờ cách ly</span>')
     +'</div></div>';
 }
 
@@ -2509,29 +2547,9 @@ function renderDanhSachThuaBinhThuong(){
     var s = cb.s;
     var w = cb.canhBao;
 
-    var iconCay = "🌾";
-    var moTaCay = "";
-    var trangThaiNhanh = "";
-
-    if(cType === "caosu"){
-      iconCay = "🌳";
-      moTaCay = "Vườn cao su lấy mủ · Giống " + esc(th.giong || "RRIV 106");
-      trangThaiNhanh = '<span style="color:#059669;font-weight:700">🩸 Nhịp cạo D3 (3:30 Sáng) · Đang cạo tốt, mủ đạt chuẩn</span>';
-    } else if(cType === "congnghiep"){
-      iconCay = "☕";
-      moTaCay = "Vườn cà phê Robusta · Giống " + esc(th.giong || "TR4");
-      trangThaiNhanh = '<span style="color:#047857;font-weight:700">🌱 Đang nuôi nhân hạt · Đã tưới nước đợt 2</span>';
-    } else if(cType === "antrai"){
-      iconCay = "🍈";
-      moTaCay = "Vườn sầu riêng cơm vàng · Giống " + esc(th.giong || "Ri6");
-      trangThaiNhanh = '<span style="color:#d97706;font-weight:700">🍈 Đang nuôi trái non 65 ngày · Trái đẹp, lá đọt đã già</span>';
-    } else {
-      iconCay = "🌾";
-      moTaCay = "Ruộng lúa nước · Giống " + esc(th.giong || "OM 18");
-      trangThaiNhanh = w
-        ? '<span style="color:#d97706;font-weight:700">⏳ Đang cách ly thuốc: Còn ' + s.con + ' ngày nữa mới được gặt</span>'
-        : '<span style="color:#15803d;font-weight:700">🌾 Đã an toàn gặt lúa! (Hết thời gian cách ly thuốc)</span>';
-    }
+    var iconCay = iconCuaCay(th);
+    var moTaCay = esc(th.cay) + (th.giong ? ' · Giống ' + esc(th.giong) : '');
+    var trangThaiNhanh = (th.gd ? '<div style="margin-bottom:4px">🌱 Giai đoạn: <b>' + esc(th.gd) + '</b></div>' : '') + dongViecGanNhat(th);
     // Cây nào đang trong thời gian cách ly cũng phải thấy cảnh báo này trước tiên
     if(cb.ghiChu){
       trangThaiNhanh = '<div style="color:' + (w ? '#d97706' : '#475569') + ';font-weight:700;margin-bottom:4px">' + (w ? '⏳ ' : 'ℹ️ ') + esc(cb.ghiChu) + '</div>' + trangThaiNhanh;
@@ -2543,11 +2561,11 @@ function renderDanhSachThuaBinhThuong(){
       + '<span style="font-size:2rem">' + iconCay + '</span>'
       + '<div>'
       + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
-      + '<div style="font-size:.82rem;color:var(--muted-fg);margin-top:2px">' + moTaCay + ' · <b>' + th.dt + ' sào</b> (' + Math.round(th.dt*360) + ' m²)</div>'
+      + '<div style="font-size:.82rem;color:var(--muted-fg);margin-top:2px">' + moTaCay + ' · ' + dongDienTich(th) + '</div>'
       + '</div>'
       + '</div>'
       + (w ? '<span class="tag tag-wait" style="font-size:.78rem;padding:4px 10px;font-weight:700">Cách ly ' + s.con + ' ngày</span>'
-           : '<span class="tag tag-ok" style="font-size:.78rem;padding:4px 10px;font-weight:700">An toàn</span>')
+           : '<span class="tag ' + (s.con > 0 ? 'tag-mut' : 'tag-ok') + '" style="font-size:.78rem;padding:4px 10px;font-weight:700">' + (s.con > 0 ? (cb.kieu === 'caosu' ? 'Vào cạo từ ' + dm(s.het) : 'Cách ly ' + s.con + ' ngày') : 'Không chờ cách ly') + '</span>')
       + '</div>'
 
       + '<div style="background:#f8faf8;border:1px solid #e2e8e4;border-radius:10px;padding:10px 14px;font-size:.82rem">'
@@ -2714,130 +2732,35 @@ function pTong(){
         + esc(cb.ghiChu) + '</div>';
     }
 
-    if(cType === "caosu"){
-      var isTapDay = (i % 2 === 0);
-      cards += '<div>'
-        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
-        + '<div style="display:flex;align-items:center;gap:12px">'
-        + ringGauge("DRC", "34%", 40, "#10b981")
-        + '<div>'
-        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
-        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">🌳 Cao su lấy mủ · ' + th.dt + ' sào (' + Math.round(th.dt*360) + ' m²) · ' + esc(th.dat||"Đất đỏ Bazan") + '</div>'
-        + '</div>'
-        + '</div>'
-        + (isTapDay ? tag('🩸 Nhịp cạo D3 (3:30 Sáng)', 'ok') : tag('💤 Nghỉ cạo dưỡng vỏ', 'mut'))
-        + '</div>'
-
-        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
-        + '<div style="display:flex;justify-content:space-between"><span>🩸 <b>Độ mủ cao su (DRC):</b></span><b style="color:#059669">33.8% – 34.5% (Chuẩn A)</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Sản lượng ước tính:</b></span><b>42 - 46 kg mủ nước / ngày</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🧪 <b>Chế độ kích mủ Ethrel:</b></span><span style="color:var(--muted-fg)">Nồng độ 2.5% (Cách 14 ngày/lần)</span></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Tình trạng mặt cạo:</b></span><span style="color:#10b981">Khỏe mạnh, phòng loét sọc cạo tốt</span></div>'
-        + '</div>'
-        + '</div>'
-
-        + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-        + '<button type="button" class="btn btn-p" data-action="caosu_ghi" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">📝 Ghi mủ hôm nay</button>'
-        + '<button type="button" class="btn" data-action="caosu_drc" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">🧪 Tra độ DRC</button>'
-        + '</div>'
-        + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
-        + '<span style="color:#059669;font-weight:700">✓ Đang khai thác mủ chính vụ (Tháng 5 - 12)</span>'
-        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết vườn →</span>'
-        + '</div>';
-
-    } else if(cType === "congnghiep"){
-      var isTieu = th.cay.toLowerCase().indexOf("tiêu") >= 0;
-      cards += '<div>'
-        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
-        + '<div style="display:flex;align-items:center;gap:12px">'
-        + ringGauge(isTieu ? "TIÊU" : "TR4", "85%", 40, "#3b82f6")
-        + '<div>'
-        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
-        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">' + (isTieu ? "🌶️ Hồ tiêu" : "☕ Cà phê Robusta") + ' · ' + th.dt + ' sào · ' + esc(th.dat||"Đất đỏ Bazan") + '</div>'
-        + '</div>'
-        + '</div>'
-        + tag('☕ Niên vụ 2026', 'ok')
-        + '</div>'
-
-        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
-        + '<div style="display:flex;justify-content:space-between"><span>🌱 <b>Giai đoạn niên vụ:</b></span><b style="color:#047857">Nuôi nhân chắc hạt & Phân cành</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>💧 <b>Chu kỳ tưới mùa khô:</b></span><span>Đã tưới đợt 2 (Độ ẩm 62%)</span></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🍒 <b>Dự kiến thu hoạch rộ:</b></span><b>' + esc((cb.khoang ? 'Từ ' + dmy(cb.khoang.tu) + (cb.khoang.nguon === 'mua' ? ' (ước lượng theo mùa)' : '') : 'Chưa biết — bấm "🌸 Cây ra hoa" khi cây ra hoa')) + '</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Cách ly thuốc:</b></span>' + (w ? '<span style="color:var(--wait)">Chưa được hái trước ' + dmy(s.het) + '</span>' : (s.con > 0 ? '<span style="color:#475569">Còn ' + s.con + ' ngày, hết trước mùa thu hoạch</span>' : '<span style="color:#10b981">Đã qua thời gian cách ly ghi trên nhãn</span>')) + '</div>'
-        + '</div>'
-        + '</div>'
-
-        + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-        + '<button type="button" class="btn btn-p" data-action="caphe_tuoi" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">💧 Báo đã tưới đợt 3</button>'
-        + '<button type="button" class="btn" data-action="caphe_bon" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">🌾 Lịch bón nuôi nhân</button>'
-        + '</div>'
-        + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
-        + '<span style="color:#2563eb;font-weight:700">Năng suất mục tiêu: 3.8 - 4.2 Tấn nhân/ha</span>'
-        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết vườn →</span>'
-        + '</div>';
-
-    } else if(cType === "antrai"){
-      var isSauRieng = th.cay.toLowerCase().indexOf("sầu riêng") >= 0;
-      cards += '<div>'
-        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
-        + '<div style="display:flex;align-items:center;gap:12px">'
-        + ringGauge("Brix", "12.5°", 40, "#f59e0b")
-        + '<div>'
-        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
-        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">' + (isSauRieng ? "🍈 Sầu riêng Ri6" : "🍊 Cây ăn trái đắp mô") + ' · ' + th.dt + ' sào · ' + esc(th.dat||"Đất đắp mô") + '</div>'
-        + '</div>'
-        + '</div>'
-        + tag('🌟 Đạt chuẩn MSVT', 'ok')
-        + '</div>'
-
-        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
-        + '<div style="display:flex;justify-content:space-between"><span>🍈 <b>Giai đoạn trái:</b></span><b style="color:#b45309">Nuôi trái non 65 ngày (Trái chạy gai)</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🌿 <b>Tình trạng cơi đọt:</b></span><span>Cơi đọt 3 đã già lá lụa chống rụng trái</span></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Trọng lượng bình quân:</b></span><b>2.8 - 3.2 kg / trái (Dáng tròn đều)</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>🛡️ <b>Cách ly thuốc:</b></span>' + (w ? '<span style="color:var(--wait)">Chưa được hái trước ' + dmy(s.het) + '</span>' : (s.con > 0 ? '<span style="color:#475569">Còn ' + s.con + ' ngày, hết trước mùa thu hoạch</span>' : '<span style="color:#10b981">Đã qua thời gian cách ly ghi trên nhãn</span>')) + '</div>'
-        + '</div>'
-        + '</div>'
-
-        + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-        + '<button type="button" class="btn btn-p" data-action="antrai_tia" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">✂️ Ghi tỉa cành / đọt</button>'
-        + '<button type="button" class="btn" data-action="antrai_brix" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">🍯 Đo độ ngọt Brix</button>'
-        + '</div>'
-        + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
-        + '<span style="color:#d97706;font-weight:700">Dự kiến thu hoạch: ' + esc((cb.khoang ? 'Từ ' + dmy(cb.khoang.tu) + (cb.khoang.nguon === 'mua' ? ' (ước lượng theo mùa)' : '') : 'Chưa biết — bấm "🌸 Cây ra hoa" khi cây ra hoa')) + '</span>'
-        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết vườn →</span>'
-        + '</div>';
-
-    } else {
-      cards += '<div>'
-        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
-        + '<div style="display:flex;align-items:center;gap:12px">'
-        + ring(w ? s.con : 0, w ? Math.max(s.con, 14) : 14, 28, 4)
-        + '<div>'
-        + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + esc(th.ten) + '</div>'
-        + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">🌾 Lúa nước Đồng Bằng · ' + th.dt + ' sào · ' + esc(th.dat||"Đất phù sa") + '</div>'
-        + '</div>'
-        + '</div>'
-        + tag(w ? '⏳ Cách ly ' + s.con + ' ngày' : '🌾 An toàn gặt lúa', w ? 'wait' : 'ok')
-        + '</div>'
-
-        + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.6">'
-        + '<div style="display:flex;justify-content:space-between"><span>🌾 <b>Giai đoạn sinh trưởng:</b></span><b>' + esc(th.gd || "Làm đòng trổ bông") + '</b></div>'
-        + '<div style="display:flex;justify-content:space-between"><span>💧 <b>Mực nước mặt ruộng:</b></span><span>Duy trì 3-5cm nước phù sa</span></div>'
-        + (w ? '<div style="display:flex;justify-content:space-between;color:var(--wait)"><span>⏱️ <b>Thời điểm gặt an toàn:</b></span><b>Từ ngày ' + dmy(s.het) + '</b></div>'
-             : '<div style="display:flex;justify-content:space-between;color:#10b981"><span>✅ <b>Cách ly thuốc:</b></span><b>Đã qua thời gian ghi trên nhãn</b></div>')
-        + '<div style="display:flex;justify-content:space-between"><span>⚖️ <b>Năng suất ước tính:</b></span><span>6.5 - 7.0 Tấn lúa tươi / ha</span></div>'
-        + '</div>'
-        + '</div>'
-
-        + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
-        + '<button type="button" class="btn btn-p" data-action="lua_rutnuoc" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">💧 Báo rút nước ráo ruộng</button>'
-        + '<button type="button" class="btn" data-go="benh" style="font-size:.74rem;padding:3px 9px">🛡️ Kê đơn phòng sâu bệnh</button>'
-        + '</div>'
-        + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.75rem">'
-        + '<span style="color:' + (w ? 'var(--wait)' : '#10b981') + ';font-weight:700">' + (w ? '⚠️ Đang trong thời gian cách ly thuốc' : '✓ Sẵn sàng thu hoạch xuất xưởng') + '</span>'
-        + '<span style="color:var(--primary);font-weight:700">Xem chi tiết ruộng →</span>'
-        + '</div>';
-    }
+    var nutLoai = NUT_THEO_LOAI_CAY[cType] || [];
+    var dongCachLy = cb.kieu === "caosu"
+      ? (s.con > 0 ? '<span style="color:#475569">Vào vườn cạo từ ' + dmy(s.het) + '</span>' : '<span style="color:var(--muted-fg)">Không có thuốc đang chờ</span>')
+      : (w ? '<span style="color:var(--wait)">Chưa được hái trước ' + dmy(s.het) + '</span>'
+           : (s.con > 0 ? '<span style="color:#475569">Còn ' + s.con + ' ngày, hết trước mùa thu hoạch</span>'
+                        : '<span style="color:#10b981">Không có thuốc đang chờ cách ly</span>'));
+    cards += '<div>'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
+      + '<div style="display:flex;align-items:center;gap:12px;min-width:0">'
+      + ring(s.con > 0 ? s.con : 0, s.con > 0 ? Math.max(s.con, 14) : 14, 28, 4)
+      + '<div style="min-width:0">'
+      + '<div style="font-size:1.1rem;font-weight:800;color:var(--fg)">' + iconCuaCay(th) + ' ' + esc(th.ten) + '</div>'
+      + '<div style="font-size:.78rem;color:var(--muted-fg);margin-top:2px">' + esc(th.cay) + (th.giong ? ' · ' + esc(th.giong) : '') + ' · ' + dongDienTich(th) + (th.dat ? ' · ' + esc(th.dat) : '') + '</div>'
+      + '</div></div>'
+      + (w ? tag('⏳ Cách ly ' + s.con + ' ngày', 'wait') : (s.con > 0 ? tag(cb.kieu === 'caosu' ? 'Vào cạo ' + dm(s.het) : 'Cách ly ' + s.con + ' ngày', 'mut') : tag('Không chờ cách ly', 'ok')))
+      + '</div>'
+      + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.78rem;line-height:1.7">'
+      + '<div style="display:flex;justify-content:space-between;gap:10px"><span>🌱 <b>Giai đoạn:</b></span>' + (th.gd ? '<b>' + esc(th.gd) + '</b>' : '<span style="color:var(--muted-fg)">chưa ghi</span>') + '</div>'
+      + '<div style="margin:2px 0">' + dongViecGanNhat(th) + '</div>'
+      + '<div style="display:flex;justify-content:space-between;gap:10px"><span>🛡️ <b>Cách ly thuốc:</b></span>' + dongCachLy + '</div>'
+      + (cb.kieu === "theomua" ? '<div style="display:flex;justify-content:space-between;gap:10px"><span>🌸 <b>Mùa thu hoạch:</b></span>' + '<span>' + esc(cb.khoang ? 'Từ ' + dmy(cb.khoang.tu) + (cb.khoang.nguon === 'mua' ? ' (ước lượng theo mùa)' : '') : 'chưa biết — ghi "Cây ra hoa" để app tính') + '</span>' + '</div>' : '')
+      + '</div>'
+      + '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
+      + nutLoai.map(function(n, k){ return '<button type="button" class="btn' + (k === 0 ? ' btn-p' : '') + '" data-action="' + n[0] + '" data-thua="' + th.id + '" style="font-size:.74rem;padding:3px 9px">' + n[1] + '</button>'; }).join('')
+      + '</div>'
+      + '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);display:flex;justify-content:flex-end;font-size:.75rem">'
+      + '<span style="color:var(--primary);font-weight:700">Xem chi tiết lô →</span>'
+      + '</div>'
+      + '</div>';
 
     cards += '</div>';
   }
@@ -2918,61 +2841,26 @@ function chLichDaCay(){
     s += '<text x="' + (pL - 12) + '" y="' + (cy + 4) + '" text-anchor="end" font-size="11.5" font-weight="700" fill="var(--fg)">' + esc(th.ten) + '</text>';
     s += '<line x1="' + pL + '" y1="' + cy + '" x2="' + (W - pR) + '" y2="' + cy + '" stroke="var(--border)" stroke-width="1"/>';
 
-    // Lô nào đang cách ly thì thanh cách ly phải hiện, bất kể loại cây
+    // Chấm = việc thật đã ghi trong nhật ký (trước 25/09/2026 là lịch mẫu vẽ sẵn
+    // theo loại cây: "D3", "Tưới 3", "Nuôi trái non 65 ngày"...). Thanh = thời gian cách ly.
+    var coViec = false;
+    for(var q = 0; q < so.length; q++){
+      var eq = so[q];
+      if(eq.thua !== th.id) continue;
+      var xq = X(sod(new Date(eq.ngay)));
+      if(xq < pL || xq > W - pR) continue;
+      coViec = true;
+      s += '<circle cx="' + xq.toFixed(1) + '" cy="' + cy + '" r="5" fill="' + (eq.phi ? '#d97706' : (laRaHoa(eq) ? '#db2777' : '#10b981')) + '"><title>' + esc(dmy(eq.ngay) + ' · ' + eq.viec) + '</title></circle>';
+    }
     var cbT = danhGiaCachLy(th), stPhi = cbT.s;
-    if(stPhi.con > 0 && stPhi.ng && cType !== "luongthuc"){
+    if(stPhi.con > 0 && stPhi.ng){
       var px1 = X(sod(new Date(stPhi.ng.ngay))), px2 = X(stPhi.het), mauT = cbT.canhBao ? "#d97706" : "#94a3b8";
       var chuT = cbT.canhBao ? ('còn ' + stPhi.con + ' ngày cách ly (' + dm(stPhi.het) + ')')
         : (cbT.kieu === "caosu" ? ('vào cạo từ ' + dm(stPhi.het)) : ('cách ly tới ' + dm(stPhi.het) + ' · trước mùa thu hoạch'));
-      s += '<rect x="' + px1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + Math.max(6, px2 - px1).toFixed(1) + '" height="14" rx="4" fill="' + mauT + '"/>';
+      s += '<rect x="' + Math.max(pL, px1).toFixed(1) + '" y="' + (cy - 4) + '" width="' + Math.max(6, px2 - Math.max(pL, px1)).toFixed(1) + '" height="8" rx="4" fill="' + mauT + '" opacity=".55"/>';
       s += '<text x="' + (px2 + 8).toFixed(1) + '" y="' + (cy + 4) + '" font-size="10" font-weight="700" fill="' + mauT + '">' + chuT + '</text>';
-      continue;
-    }
-
-    if(cType === "caosu"){
-      // Rubber timeline: Tapping cycles (Cạo mủ xen kẽ D3)
-      for(var td = -12; td <= 18; td += 3){
-        var tapDate = addD(NAY, td);
-        var tx = X(tapDate);
-        s += '<circle cx="' + tx.toFixed(1) + '" cy="' + cy + '" r="5.5" fill="#10b981"/>';
-        s += '<text x="' + tx.toFixed(1) + '" y="' + (cy - 9) + '" text-anchor="middle" font-size="8" font-weight="700" fill="#047857">D3</text>';
-      }
-      s += '<text x="' + (X(addD(NAY, 19))) + '" y="' + (cy + 4) + '" font-size="9.5" font-weight="700" fill="#059669">🩸 Chu kỳ cạo mủ D3</text>';
-
-    } else if(cType === "congnghiep"){
-      // Coffee timeline: Irrigation & Harvest
-      var irriDate1 = addD(NAY, -8), irriDate2 = addD(NAY, 12);
-      var ix1 = X(irriDate1), ix2 = X(irriDate2);
-      s += '<rect x="' + (ix1 - 12).toFixed(1) + '" y="' + (cy - 7) + '" width="24" height="14" rx="4" fill="#3b82f6"/>';
-      s += '<text x="' + ix1.toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">Tưới 2</text>';
-
-      s += '<rect x="' + (ix2 - 12).toFixed(1) + '" y="' + (cy - 7) + '" width="24" height="14" rx="4" fill="#60a5fa" stroke="#2563eb" stroke-dasharray="2 2"/>';
-      s += '<text x="' + ix2.toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="8" font-weight="800" fill="#1e3a8a">Tưới 3</text>';
-      s += '<text x="' + (ix2 + 20).toFixed(1) + '" y="' + (cy + 4) + '" font-size="9.5" font-weight="700" fill="#2563eb">☕ Dự kiến tưới đợt 3</text>';
-
-    } else if(cType === "antrai"){
-      // Fruit tree timeline: Fruit filling & harvest
-      var fx1 = X(addD(NAY, -10)), fx2 = X(addD(NAY, 15));
-      s += '<rect x="' + fx1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + (fx2 - fx1).toFixed(1) + '" height="14" rx="4" fill="#f59e0b" opacity=".85"/>';
-      s += '<text x="' + ((fx1 + fx2)/2).toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">Nuôi trái non 65 ngày · Sửa tướng trái</text>';
-
-    } else {
-      // Rice / Veggies: Quarantine countdown if sprayed
-      var st = tt(th.id);
-      if(st.ng && st.ng.phi){
-        var x1 = X(sod(new Date(st.ng.ngay))), x2 = X(st.het);
-        var con = st.con, c = con > 0 ? "#d97706" : "#16a34a";
-        s += '<rect x="' + x1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + Math.max(6, x2 - x1).toFixed(1) + '" height="14" rx="4" fill="' + c + '"' + (con > 0 ? '' : ' opacity=".45"') + '/>';
-        if(con > 0){
-          s += '<text x="' + (x2 + 8).toFixed(1) + '" y="' + (cy + 4) + '" font-size="10" font-weight="700" fill="#d97706">còn ' + con + ' ngày cách ly (' + dm(st.het) + ')</text>';
-        } else {
-          s += '<text x="' + (x2 + 8).toFixed(1) + '" y="' + (cy + 4) + '" font-size="10" font-weight="700" fill="#16a34a">🌾 Đã an toàn gặt lúa (' + dm(st.het) + ')</text>';
-        }
-      } else {
-        var rx1 = X(addD(NAY, -7)), rx2 = X(addD(NAY, 14));
-        s += '<rect x="' + rx1.toFixed(1) + '" y="' + (cy - 7) + '" width="' + (rx2 - rx1).toFixed(1) + '" height="14" rx="4" fill="#10b981" opacity=".7"/>';
-        s += '<text x="' + ((rx1 + rx2)/2).toFixed(1) + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">🌾 Đang làm đòng trổ bông · An toàn dư lượng</text>';
-      }
+    } else if(!coViec){
+      s += '<text x="' + (pL + 8) + '" y="' + (cy - 7) + '" font-size="9.5" fill="var(--muted-fg)">chưa ghi việc nào trong khoảng này</text>';
     }
   }
 
@@ -2984,10 +2872,10 @@ function chLichDaCay(){
 
   // Legend at bottom
   s += '<g transform="translate(' + pL + ',' + (pT + THUA.length * rh + 32) + ')" font-size="9.5" fill="var(--muted-fg)">';
-  s += '<circle cx="6" cy="4" r="4.5" fill="#10b981"/><text x="16" y="7">Cạo mủ cao su (D3)</text>';
-  s += '<rect x="135" y="0" width="10" height="8" rx="2" fill="#3b82f6"/><text x="151" y="7">Tưới nước mùa khô (Cà phê/Tiêu)</text>';
-  s += '<rect x="330" y="0" width="10" height="8" rx="2" fill="#f59e0b"/><text x="346" y="7">Nuôi trái / Dưỡng cơi đọt (Cây ăn trái)</text>';
-  s += '<rect x="545" y="0" width="10" height="8" rx="2" fill="#d97706"/><text x="561" y="7">Cách ly trước gặt (Lúa/Rau)</text>';
+  s += '<circle cx="6" cy="4" r="4.5" fill="#10b981"/><text x="16" y="7">Việc đã ghi (tưới, bón, thu hoạch…)</text>';
+  s += '<circle cx="226" cy="4" r="4.5" fill="#d97706"/><text x="236" y="7">Lần phun thuốc</text>';
+  s += '<circle cx="336" cy="4" r="4.5" fill="#db2777"/><text x="346" y="7">Ra hoa</text>';
+  s += '<rect x="410" y="0" width="18" height="8" rx="4" fill="#d97706" opacity=".55"/><text x="434" y="7">Thời gian cách ly thuốc</text>';
   s += '</g>';
 
   s += '</svg>';
