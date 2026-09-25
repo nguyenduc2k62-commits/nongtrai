@@ -22,7 +22,8 @@ const MO_HINH_MAC_DINH = "gemini-flash-latest";
 let moHinhDaDo = null; // nhớ trong lúc Worker còn chạy, đỡ phải dò lại
 
 // Lấy danh sách mô hình "flash" xem được ảnh, phiên bản cao nhất đứng đầu.
-async function dsMoHinh(khoa) {
+// coLite = true: thêm bản flash-lite xuống cuối (nhẹ, ít bị quá tải — dùng dự phòng).
+async function dsMoHinh(khoa, coLite) {
   try {
     const r = await fetch(`${GOC_API}/models?pageSize=200`, { headers: { "x-goog-api-key": khoa } });
     if (!r.ok) return null;
@@ -30,9 +31,10 @@ async function dsMoHinh(khoa) {
     const ds = (j.models || [])
       .filter((x) => (x.supportedGenerationMethods || []).includes("generateContent"))
       .map((x) => String(x.name || "").replace(/^models\//, ""))
-      .filter((n) => /flash/.test(n) && !/(image|tts|audio|live|embedding|thinking|exp|preview|lite)/.test(n));
+      .filter((n) => /flash/.test(n) && !/(image|tts|audio|live|embedding|thinking|exp|preview)/.test(n))
+      .filter((n) => coLite || !/lite/.test(n));
     const so = (n) => (n.match(/(\d+(?:\.\d+)?)/) || [0, 0])[1] * 1;
-    ds.sort((a, b) => so(b) - so(a) || a.length - b.length);
+    ds.sort((a, b) => (/lite/.test(a) - /lite/.test(b)) || so(b) - so(a) || a.length - b.length);
     return ds;
   } catch {
     return [];
@@ -186,14 +188,12 @@ export default {
           r = await goi(model);
         }
       }
-      // Quá tải tạm thời (503/500): chờ chút thử lại, rồi thử một mô hình flash khác.
-      if (r.status === 503 || r.status === 500) {
-        await ngu(1200);
-        r = await goi(model);
-      }
+      // Quá tải (503/500): đổi ngay sang một mô hình flash khác, rồi bản flash-lite.
+      // Tối đa 3 lượt gọi cho mỗi lần người dùng bấm — gói miễn phí giới hạn lượt/phút.
       if ((r.status === 503 || r.status === 500) && !env.GEMINI_MODEL) {
-        const ds = (await dsMoHinh(env.GEMINI_API_KEY)).filter((x) => x !== model);
-        for (const ten of ds.slice(0, 2)) {
+        const ds = (await dsMoHinh(env.GEMINI_API_KEY, true)).filter((x) => x !== model);
+        const thu = [ds.find((x) => !/lite/.test(x)), ds.find((x) => /lite/.test(x))].filter(Boolean);
+        for (const ten of thu) {
           const r2 = await goi(ten);
           if (r2.ok || (r2.status !== 503 && r2.status !== 500 && r2.status !== 404)) { r = r2; model = ten; break; }
         }

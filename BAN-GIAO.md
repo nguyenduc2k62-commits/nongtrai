@@ -369,7 +369,7 @@ Những bẫy đã gặp khi dựng:
 - **"User location is not supported" (400)**: người dùng ở VN bị Cloudflare cho
   chạy ở Hồng Kông, Gemini chặn HK. Đã đặt *Settings → Runtime → Placement →
   Region → GCP asia-southeast1* (Singapore). Đừng đổi về Default.
-- **503 quá tải** ở gói miễn phí: Worker thử lại 1 lần rồi đổi mô hình flash khác.
+- **503 quá tải** ở gói miễn phí (gặp 3/5 lần thử ngày 25/09): Worker đổi ngay sang một mô hình flash khác, rồi bản flash-lite; tối đa 3 lượt gọi mỗi lần bấm.
 - Khoá dạng mới bắt đầu `AQ.` (không phải `AIza`) — dùng được với header `x-goog-api-key`.
 - Chỉ trang GitHub Pages và localhost:8000 được gọi Worker (biến `CHO_PHEP_ORIGIN`).
   Công cụ ngoài trình duyệt vẫn giả được Origin → khi có nhiều người dùng cần
